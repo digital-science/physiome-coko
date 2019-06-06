@@ -1,0 +1,12 @@
+_build/
+api/
+logs/
+node_modules/
+uploads/
+.env.*
+.env
+config/local*.*
+now/
+*.zip
+
+/migrations-*/

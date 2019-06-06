@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!--
+        Build time: <%= htmlWebpackPlugin.options.buildTime %>
+    -->
+    <%= htmlWebpackPlugin.options.gaHead %>
+    <meta charset=utf-8>
+    <title>
+        <%= htmlWebpackPlugin.options.title %>
+    </title>
+    <link xmlns="http://www.w3.org/1999/xhtml" rel="shortcut icon" href="/assets/favicon.ico" type="image/x-icon" />
+</head>
+
+<body style="margin: 0;">
+    <%= htmlWebpackPlugin.options.gaBody %>
+    <div id="root"></div>
+    <div id="modal-root"></div>
+</body>
+
+</html>

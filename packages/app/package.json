@@ -1,0 +1,82 @@
+{
+  "name": "ds-awards",
+  "version": "1.0.0",
+  "description": "xpub configured for Awarding Bodies",
+  "license": "MIT",
+  "author": "Digital Science and Research Ltd",
+  "dependencies": {
+    "@pubsweet/component-send-email": "^0.2.8",
+    "babel-core": "^6.26.0",
+    "bluebird": "^3.5.3",
+    "config": "^1.26.2",
+    "dotenv": "^5.0.0",
+    "formik": "^1.4.2",
+    "fs-extra": "^4.0.2",
+    "history": "^4.7.2",
+    "joi": "^10.0.6",
+    "mimetype": "0.0.8",
+    "path-to-regexp": "^3.0.0",
+    "pubsweet-client": "^9.2.2",
+    "pubsweet-server": "^13.4.1",
+    "react": "16.8.6",
+    "react-apollo": "^2.5.5",
+    "react-apollo-hooks": "^0.4.5",
+    "react-dnd": "^7.0.2",
+    "react-dnd-html5-backend": "^7.0.2",
+    "react-dom": "16.8.4",
+    "react-router-dom": "^4.3.0",
+    "recompose": "^0.30.0",
+    "styled-components": "4.1.3",
+    "typeface-noto-sans": "^0.0.54",
+    "typeface-noto-serif": "^0.0.54",
+    "typeface-ubuntu-mono": "^0.0.54",
+    "winston": "^2.4.0",
+    "winston-aws-cloudwatch": "^3.0.0",
+    "xpub-journal": "^0.0.6"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.3",
+    "@babel/plugin-proposal-class-properties": "^7.4.0",
+    "@babel/preset-env": "^7.4.3",
+    "@babel/preset-react": "^7.0.0",
+    "babel-loader": "^8.0.5",
+    "clean-webpack-plugin": "^2.0.1",
+    "copy-webpack-plugin": "^5.0.2",
+    "css-loader": "^2.1.1",
+    "extract-text-webpack-plugin": "^3.0.0",
+    "file-loader": "^3.0.1",
+    "html-webpack-plugin": "^3.2.0",
+    "jest": "24.7.0",
+    "mini-css-extract-plugin": "^0.5.0",
+    "pubsweet": "^4.1.0",
+    "joi-browser": "^10.0.6",
+    "string-replace-loader": "^2.1.1",
+    "style-loader": "^0.19.0",
+    "uglifyjs-webpack-plugin": "^1.1.2",
+    "webpack": "^4.29.6",
+    "webpack-dev-middleware": "^3.6.1",
+    "webpack-hot-middleware": "^2.20.0"
+  },
+  "resolutions" : {
+    "pubsweet-client/graphql" : "14.2.1",
+    "pubsweet-server/graphql" : "14.2.1"
+  },
+  "jest": {
+    "verbose": true,
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ],
+    "testURL": "http://localhost/"
+  },
+  "scripts": {
+    "setupdb": "pubsweet setupdb ./",
+    "start": "pubsweet start",
+    "start:services": "docker-compose up postgres",
+    "server": "pubsweet server",
+    "build": "NODE_ENV=production pubsweet build",
+    "clean": "rm -rf node_modules",
+    "debug": "pgrep -f startup/start.js | xargs kill -sigusr1",
+    "test": "jest",
+    "run-server": "npx pubsweet migrate && node app.js"
+  }
+}

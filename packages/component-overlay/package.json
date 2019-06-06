@@ -1,0 +1,7 @@
+{
+  "name": "component-overlay",
+  "version": "1.0.0",
+  "dependencies": {
+    "react-modal": "^3.8.1"
+  }
+}

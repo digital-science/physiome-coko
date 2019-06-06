@@ -1,0 +1,7 @@
+{
+  "SES": {
+    "accessKey": "AWS_SES_ACCESS_KEY",
+    "secretKey": "AWS_SES_SECRET_KEY",
+    "region": "AWS_SES_REGION"
+  }
+}

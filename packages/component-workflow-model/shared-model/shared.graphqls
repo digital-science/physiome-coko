@@ -1,0 +1,173 @@
+scalar DateTime
+scalar JSON
+
+
+#
+# Common Model
+#
+
+interface Object {
+    id: ID!
+    created: DateTime!
+    updated: DateTime
+    restrictedFields: [String!]
+}
+
+interface WorkflowObject {
+    tasks: [Task]
+}
+
+
+
+
+#
+# Common Workflow Model: Task
+#
+
+type Task {
+    id: ID
+    created: DateTime
+    formKey: String
+    taskDefinitionKey: String
+}
+
+input CompleteTaskInput {
+    taskId: ID!
+    variables: [CompleteTaskVariableInput]
+}
+
+input CompleteTaskVariableInput {
+    key: String
+    value: JSON
+}
+
+#extend type Mutation {
+#    completeTask(input:CompleteTaskInput): Boolean
+#}
+
+
+
+
+#
+# Shared Model: Uploaded File
+#
+
+enum FileStorageType {
+    FileStorageExternalS3
+}
+
+type File {
+    id: ID!
+    created: DateTime!
+    updated: DateTime
+
+    fileName: String
+    fileDisplayName: String
+
+    fileMimeType: String
+    fileByteSize: Int
+
+    storageKey: String
+    storageType: FileStorageType
+
+    order: Int
+}
+
+type FileUploadSignature {
+    ownerType: String
+    ownerId: String
+    fileName: String
+    mimeType: String
+}
+
+input FileUploadSignatureInput {
+    ownerType: String
+    ownerId: String
+    fileName: String
+    mimeType: String
+}
+
+
+input CreateFileUploadSignedUrlInput {
+    signature: FileUploadSignatureInput
+}
+
+type FileUploadSignedUrlResult {
+    signedUrl: String
+    fileId: String
+    signature: FileUploadSignature
+}
+
+input ConfirmFileUploadInput {
+    signedUrl: String
+    fileId: String
+    signature: FileUploadSignatureInput
+    fileByteSize: Int
+}
+
+extend type Query {
+    getFile(id : ID) : File
+}
+
+extend type Mutation {
+    createFileUploadSignedUrl(input:CreateFileUploadSignedUrlInput): FileUploadSignedUrlResult
+    confirmFileUpload(input:ConfirmFileUploadInput) : File
+}
+
+
+
+#
+# Shared Model: Identity
+#
+
+enum IdentityType {
+    ORCiDIdentityType
+}
+
+type Identity {
+    id: ID!
+    created: DateTime!
+    updated: DateTime
+
+    type: IdentityType
+
+    identityId: String
+    displayName: String
+    displayAffiliation: String
+
+    accessToken: String
+    refreshToken: String
+    accessScope: String
+    accessTokenExpire: Int
+
+    groups: JSON
+}
+
+input CreateIdentityInput {
+    type: IdentityType
+
+    identityId: String
+
+    displayName: String
+    displayAffiliation: String
+
+    accessToken: String
+    refreshToken: String
+    accessScope: String
+    accessTokenExpire: Int
+}
+
+input UpdateIdentityInput {
+    id: ID!
+    displayName: String
+    displayAffiliation: String
+}
+
+extend type Query {
+    getIdentity(id: ID) : Identity
+}
+
+extend type Mutation {
+    createIdentity(input:CreateIdentityInput) : ID
+    updateIdentity(input:UpdateIdentityInput) : Boolean
+}

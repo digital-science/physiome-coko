@@ -1,0 +1,52 @@
+.dashboard {
+    max-width: 600px;
+}
+
+.dashboard > div {
+    margin-bottom: 20px;
+}
+
+
+.dashboard ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.dashboard .task-listing {
+    border: 2px solid #b3b3b3;
+    padding: 2px;
+    min-width: 180px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.dashboard .task-listing th {
+    border-bottom: 2px solid #b3b3b3;
+}
+
+.dashboard .awardees-listing {
+    margin-left: 10px;
+}
+
+.dashboard .awardees-listing li {
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.dashboard .awardees-listing li:after {
+    content: '\002C\0020';
+}
+
+.dashboard .awardees-listing li:last-child:after {
+    content: '';
+}
+
+.submission-listing > li {
+
+    background-color: #f0f0f0;
+    border: 1px solid darkgrey;
+
+    padding: 10px;
+    margin-bottom: 10px;
+}

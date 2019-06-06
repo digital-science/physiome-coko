@@ -1,0 +1,9 @@
+[
+  "@pubsweet/component-send-email",
+  "component-authentication",
+  "component-dashboard",
+  "component-model",
+  "component-task-form",
+  "component-workflow-physiome-tasks",
+  "component-workflow-model"
+]

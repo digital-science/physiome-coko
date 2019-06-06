@@ -1,0 +1,285 @@
+enum SubmissionPhase {
+    Pending => "pending",
+    Submitted => "submitted",
+    Checking => "checking",
+    Decision => "decision",
+    Publish => "publish",
+    Reject => "reject",
+    Published => "published",
+    Cancelled => "cancelled"
+}
+
+
+task Submission {
+
+    processKey: "physiome-submission"
+
+    model+input {
+        submitter: Identity <owner-id, join-field:"submitterId">,
+        curator: Identity <join-field:"curatorId">,
+
+        submissionDate: DateTime,
+        publishDate: DateTime,
+
+        phase: SubmissionPhase <state, default:PublishingResult.Pending>,
+
+        title: String,
+        abstract: String,
+        authors: JSON,
+        pmrWorkspace: String,
+
+        allFilesPresent: Boolean,
+        resultsMatch: Boolean,
+        modelAnnotated: Boolean,
+        curationNotes: String,
+
+        articleFiles: [File] <set>,
+
+        figshareArticleId: String
+    }
+
+
+    acl {
+
+        fields "submit" {
+    	    title, abstract, authors, pmrWorkspace, articleFiles
+        }
+
+        fields "curation" {
+    	    title, abstract, authors, pmrWorkspace, articleFiles,
+    	    curator,
+    	    allFilesPresent, resultsMatch, modelAnnotated, curationNotes
+        }
+
+        tasks "owner-submit" {
+    	    "Task_DetailsSubmission"
+        }
+
+        allow <owner> [access:own, list:own]
+        allow <administrator> [access:all, list:all]
+
+        allow <owner> [read] on "submit"
+        allow <owner> [write] on "submit" where (phase == SubmissionPhase.Pending)
+        allow <owner> [task] on "owner-submit"
+
+        allow <administrator> [write, read] on "curation"
+        allow <administrator> [task]
+
+    }
+
+
+    view "details" extend "SideBySideHeroPanels" {
+
+        elements: {
+
+            { Panel, heading:"Article Details", children:{
+
+                { Group, heading:"Submitted Details", children:{
+
+                    { StaticText => title, label:"Title" }
+
+                    { StaticText => abstract, label:"Abstract" }
+
+                    { StaticText => pmrWorkspace, label:"Associated PMR Workspace" }
+
+                    { FilesListing => articleFiles, label:"Article Files" }
+
+                } }
+
+                { Group, heading:"Additional Information", children:{
+
+                    { SubmissionStatusPill => phase, label:"Submission Status" }
+
+                    { StaticText => submissionDate, label:"Submission Date" }
+
+                    { StaticText => publishDate, (phase == SubmissionPhase.Published), label:"Published Date" }
+
+                } }
+
+            } }
+
+
+            { Panel, heading:"Actions", children:{
+
+                { Group, (phase == SubmissionPhase.Checking), heading:"Checks", children:{
+
+                    { InlineTaskForm, form:"checks" }
+
+                } }
+
+                { Group, (phase != SubmissionPhase.Checking), heading:"Checks", children:{
+
+                    { Checkbox => allFilesPresent, label: "All files are present within the model and successfully execute", readOnly:true }
+
+                    { Checkbox => resultsMatch, label: "Results of of the model match the results present in referenced articles", readOnly:true }
+
+                    { Checkbox => modelAnnotated, label: "Model is fully annotated", readOnly:true }
+
+                    { StaticText => curationNotes, label:"Notes" }
+
+                } }
+
+                { Group, (phase == SubmissionPhase.Checking || phase == SubmissionPhase.Decision), heading:"Decisions", children:{
+
+                    { InlineTaskForm, form:"final-decision", tasks:[ "final-decision" ] }
+
+                    { InlineTaskForm, (phase != SubmissionPhase.Decision), form:"reject", tasks:[ "checks" ] }
+
+                } }
+
+
+                { Group, (phase == SubmissionPhase.Published), heading:"Published", children:{
+
+                    { FishareArticleEmbed => figshareArticleId, label:"Figshare Article" }
+
+                } }
+
+            } }
+        }
+    }
+
+
+    form "submission" extend "SideBySideHeroPanels" {
+
+        outcomes: [
+            {
+                "complete" => Complete,
+                state: {
+                    phase: SubmissionPhase.Submitted
+                }
+            },
+
+            { "save-for-later" => Save },
+
+            {
+                "cancel" => Destroy,
+                state: {
+                    phase: SubmissionPhase.Cancelled
+                },
+
+                confirmation:true,
+                message:"Are you sure you want to cancel this submission?"
+            }
+        ]
+
+        options: {
+           heading: "Article Submission"
+        }
+
+        elements: {
+
+            { Panel, heading:"Article Details", children:{
+
+                { TextArea => title, label:"Title" }
+
+                { TextArea => abstract, label:"Abstract" }
+
+                { AuthorsEditor => authors, label:"Authors" }
+
+                { Text => pmrWorkspace, label:"Associated PMR Workspace" }
+
+                { FileUploader => articleFiles, label:"Article Files" }
+
+            } }
+
+            { DecisionPanel, children:{
+
+                { Button, outcome:"save-for-later", label:"Save for Later" }
+
+                { Button, outcome:"cancel", label:"Cancel" }
+
+                { Button, default:true, outcome:"complete", label:"Submit" }
+
+            } }
+        }
+    }
+
+
+    form "claim" {
+
+        outcomes: [
+            {
+                "claim" => Complete,
+                state: {
+                    phase: SubmissionPhase.Checking
+                }
+            }
+        ]
+
+        elements: {
+            { Button, default:true, outcome:"claim", label:"Claim for Curation" }
+        }
+    }
+
+
+    form "checks" {
+
+        outcomes: [
+            {
+                "checked" => Complete,
+                state: {
+                    phase: SubmissionPhase.Decision
+                }
+            }
+        ]
+
+        elements: {
+
+            { Checkbox => allFilesPresent, label: "All files are present within the model and successfully execute" }
+
+            { Checkbox => resultsMatch, label: "Results of of the model match the results present in referenced articles" }
+
+            { Checkbox => modelAnnotated, label: "Model is fully annotated" }
+
+            { TextArea => curationNotes, label:"Notes" }
+
+            { Button, default:true, outcome:"checked", label:"Checks Completed" }
+        }
+    }
+
+
+    form "reject" {
+
+        outcomes: [
+            {
+                "reject" => Complete,
+                state: {
+                    phase: SubmissionPhase.Reject
+                }
+            }
+        ]
+
+        elements: {
+
+            { Button, outcome:"reject", label:"Reject Article" }
+        }
+    }
+
+
+    form "final-decision" {
+
+        outcomes: [
+            {
+                "publish" => Complete,
+                state: {
+                    phase: SubmissionPhase.Publish
+                }
+            },
+            {
+                "reject" => Complete,
+                state: {
+                    phase: SubmissionPhase.Reject
+                }
+            }
+        ]
+
+        elements: {
+
+            { Button, default:true, outcome:"publish", label:"Publish Article" }
+
+            { Button, outcome:"reject", label:"Reject Article" }
+
+        }
+    }
+
+}

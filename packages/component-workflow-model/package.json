@@ -1,0 +1,11 @@
+{
+  "name": "component-workflow-model",
+  "version": "0.0.1",
+  "dependencies": {
+    "aws-sdk": "^2.387.0",
+    "graphql-fields": "^2.0.3",
+    "graphql-type-json": "^0.3.0",
+    "lodash": "^4.17.11",
+    "uuid": "^3.3.2"
+  }
+}
