@@ -1,7 +1,7 @@
 import gql from 'graphql-tag';
 import { useQuery } from 'react-apollo-hooks';
 
-export default (active, opts = {}) => {
+export default (filter, sorting, opts = {}) => {
 
     const queryOptions = {
         suspend: false,
@@ -11,13 +11,14 @@ export default (active, opts = {}) => {
     Object.assign(queryOptions, opts);
     Object.assign(queryOptions, {
         variables: {
-            active
+            filter,
+            sorting
         }
     });
 
     const getAwardSubmissionsQuery = gql`
-query GetSubmissions($active:Boolean) {
-  submissions: submissions(active:$active) {
+query GetSubmissions($filter:SubmissionListingFilterInput, $sorting:SubmissionListingSortingInput) {
+  submissions: submissions(filter:$filter, sorting:$sorting) {
     id
     title
     authors

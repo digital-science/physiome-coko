@@ -13,15 +13,16 @@ enum SubmissionPhase {
 task Submission {
 
     processKey: "physiome-submission"
+    listingAccessor: "submissions"
 
     model+input {
         submitter: Identity <owner-id, join-field:"submitterId">,
         curator: Identity <join-field:"curatorId">,
 
-        submissionDate: DateTime,
-        publishDate: DateTime,
+        submissionDate: DateTime <listing-sortable>,
+        publishDate: DateTime <listing-sortable>,
 
-        phase: SubmissionPhase <state, default:PublishingResult.Pending>,
+        phase: SubmissionPhase <state, listing-filter-multiple, default:SubmissionPhase.Pending>,
 
         title: String,
         abstract: String,
@@ -42,27 +43,37 @@ task Submission {
     acl {
 
         fields "submit" {
-    	    title, abstract, authors, pmrWorkspace, articleFiles
+    	    title, abstract, authors, pmrWorkspace, articleFiles, submissionDate
+        }
+
+        fields "phase" {
+            phase
         }
 
         fields "curation" {
-    	    title, abstract, authors, pmrWorkspace, articleFiles,
+    	    title, abstract, authors, pmrWorkspace, articleFiles, submissionDate,
     	    curator,
-    	    allFilesPresent, resultsMatch, modelAnnotated, curationNotes
+    	    allFilesPresent, resultsMatch, modelAnnotated, curationNotes,
+    	    publishDate, figshareArticleId
         }
 
         tasks "owner-submit" {
     	    "Task_DetailsSubmission"
         }
 
-        allow <owner> [access:own, list:own]
-        allow <administrator> [access:all, list:all]
+        allow <user> [create]
+        allow <owner> [access:own]
+        allow <administrator> [access:all]
 
         allow <owner> [read] on "submit"
+        allow <owner> [read] on "phase"
         allow <owner> [write] on "submit" where (phase == SubmissionPhase.Pending)
         allow <owner> [task] on "owner-submit"
+        allow <owner> [destroy] where (phase == SubmissionPhase.Pending)
 
         allow <administrator> [write, read] on "curation"
+        allow <administrator> [read] on "phase"
+        allow <administrator> [create, destroy]
         allow <administrator> [task]
 
     }

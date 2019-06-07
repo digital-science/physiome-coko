@@ -5,6 +5,7 @@ import moment from 'moment';
 
 import { WorkflowDescriptionContext } from 'client-workflow-model';
 
+import useCompleteInstanceTask from 'component-task-form/client/mutations/completeInstanceTask';
 import useCreateTaskMutation from './../mutations/createTask';
 import useDestroySubmissionMutation from './../mutations/destroySubmission';
 import useClaimSubmissionMutation from './../mutations/claimSubmission';
@@ -13,19 +14,13 @@ import useGetSubmissions from './../queries/getSubmissions';
 import PopoverTrigger from 'component-task-form/client/components/popover';
 
 //import AwardIconImage from 'ds-awards-theme/static/award.svg';
-import PublishAwardIconImage from './../static/publish-award.svg';
+//import PublishAwardIconImage from './../static/publish-award.svg';
 //import EditIconImage from './../static/edit.svg';
 import BinIconImage from './../static/bin.svg';
 import Spinner from 'ds-awards-theme/components/spinner';
 import Button, { SmallPlainButton } from 'ds-awards-theme/components/button';
 import SubmissionStatusPill from './submission-status-pill';
-
-
 import { FaUserCheck } from 'react-icons/fa';
-
-
-import useCompleteInstanceTask from 'component-task-form/client/mutations/completeInstanceTask';
-
 
 
 import './dashboard.css';
@@ -152,8 +147,21 @@ function Dashboard(props) {
         });
     }
 
+    const filter = {
+        phase: [
+            "Pending",
+            "Submitted",
+            "Checking",
+            "Decision",
+            "Publish",
+            "Reject",
+            "Published"
+        ],
+    };
+    const sorting = { submissionDate: true };
 
-    const { data, error, loading, refetch } = useGetSubmissions(true);
+
+    const { data, error, loading, refetch } = useGetSubmissions(filter, sorting);
 
     const refreshDashboard = () => {
         return refetch();
@@ -177,7 +185,6 @@ function Dashboard(props) {
                     </tr>
                 </thead>
                 <tbody>
-
                     {loading ? (
                         <tr>
                             <td colSpan={6}>

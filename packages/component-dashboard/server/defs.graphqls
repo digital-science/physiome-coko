@@ -1,9 +1,3 @@
-extend type Query {
-
-    submissions(active:Boolean) : [Submission]
-}
-
-
 extend type Mutation {
 
     claimSubmission(id:ID) : Boolean
