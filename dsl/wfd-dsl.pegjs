@@ -285,11 +285,12 @@ task
       return m;
     }
 
-taskContent = (taskSpecificModel / enum / form / view / taskOptions / acl)*
+taskContent = (taskSpecificModel / enum / form / view / taskOptions / taskListingAccessor / acl)*
 
 // Task options
 taskOptions = ws "processKey" name_separator processKey:string? {return {type:"options", processKey}}
 
+taskListingAccessor = ws "listingAccessor" name_separator listingAccessor:string {return {type:"options", listingAccessor}}
 
 // ---- Enum ------
 enum
@@ -502,7 +503,8 @@ modelElementAccessType
 modelElementOptions = (modelElementExclusions / modelElementJoinToDetails /
 						modelElementDefaultStringValue / modelElementDefaultEnumValue /
                         modelElementJoinDetails / modelElementState / modelElementAccessors /
-                        modelElementInitialOwner)
+                        modelElementInitialOwner / modelElementListingFilterMultiple /
+                        modelElementListingFilter / modelElementListingSortable)
 
 modelElementExclusions
 	= "input:" inputExclusion:("exclude" / "include")
@@ -552,6 +554,24 @@ modelElementState
 	= "state"
     {
     	return {type:"options", state:true};
+    }
+
+modelElementListingFilter
+	= "listing-filter"
+    {
+    	return {type:"options", listingFilter:true};
+    }
+
+modelElementListingFilterMultiple
+	= "listing-filter-multiple"
+    {
+    	return {type:"options", listingFilter:true, listingFilterMultiple:true};
+    }
+
+modelElementListingSortable
+	= "listing-sortable"
+    {
+    	return {type:"options", listingSorting:true};
     }
 
 modelElementDefaultStringValue
@@ -1007,7 +1027,7 @@ aclAccessList "acl access list"
 aclAccessType "acl access type"
 	= ws type:("read" / "write" / "task"
     			/ "access:own" / "access:all"
-                / "list:all" / "list:own") ws
+                / "destroy" / "create") ws
     {
     	let t = type.split(":");
         const r = {type:t[0]};
