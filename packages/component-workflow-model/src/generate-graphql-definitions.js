@@ -1,6 +1,8 @@
 const { generateModelsAndResolvers, commonResolvers } = require('./generate-models-resolvers');
 const { mergeResolvers, filterModelElementsForBasicTypes,
-        filterModelElementsForRelations, filterModelElementsForStates } = require('./utils');
+        filterModelElementsForRelations, filterModelElementsForStates,
+        filterModelElementsForListingFilters, filterModelElementsForListingSortable,
+        listingAccessorNameForTaskDefinition } = require('./utils');
 
 const GraphQLJSON = require('graphql-type-json');
 const path = require('path');
@@ -68,7 +70,6 @@ module.exports = function generateTypeDefsForDefinition(definition) {
 };
 
 
-
 function generateTaskTypeDef(taskDef, enums) {
 
     if(!taskDef.model) {
@@ -78,20 +79,45 @@ function generateTaskTypeDef(taskDef, enums) {
     const relationElements = filterModelElementsForRelations(taskDef.model.elements, enums);
     const accessorElements = relationElements ? relationElements.filter(e => e.accessors && e.accessors.length) : [];
     const stateElements = filterModelElementsForStates(taskDef.model.elements, enums);
+    const listingFilterElements = filterModelElementsForListingFilters(taskDef.model.elements, enums);
+    const listingSortableElements = filterModelElementsForListingSortable(taskDef.model.elements, enums);
 
     const modelTypeName = taskDef.name|| taskDef.model.name;
     const modelInputTypeName = `${modelTypeName}Input`;
     const stateInputTypeName = `${modelTypeName}StateInput`;
 
+    const listingAccessorName = listingAccessorNameForTaskDefinition(taskDef);
+    const listingFilterInputTypeName = `${modelTypeName}ListingFilterInput`;
+    const listingSortingInputTypeName = `${modelTypeName}ListingSortingInput`;
+
     const model = generateTypeDefForModel(taskDef.model, taskDef.name, 'Object & WorkflowObject', baseObjectTypes, enums);
     const input = (taskDef.model.input === true) ? generateTypeDefForModelInput(taskDef.model, taskDef.name, baseObjectInputTypes, enums) : '';
     const stateInput = (stateElements && stateElements.length) ? generateTypeDefForModelStateInput(taskDef.model, stateElements, taskDef.name, enums) : '';
+    const listingFilterInput = (listingFilterElements && listingFilterElements.length) ? generateTypeDefForModelListingFilterInput(listingFilterElements, listingFilterInputTypeName, enums) : '';
+    const listingSortingInput = (listingSortableElements && listingSortableElements.length) ? generateTypeDefForModelListingSortingInput(listingSortableElements, listingSortingInputTypeName, enums) : '';
 
-    const query = `
+    let query = `
 extend type Query {
     get${taskDef.name}(id:ID): ${modelTypeName}
-}
     `;
+
+    if((listingFilterElements && listingFilterElements.length) || (listingSortingInputTypeName && listingSortingInputTypeName.length)) {
+        const f = [];
+        if(listingFilterElements && listingFilterElements.length) {
+            f.push(`filter:${listingFilterInputTypeName}`);
+        }
+        if(listingSortingInputTypeName && listingSortingInputTypeName.length) {
+            f.push(`sorting:${listingSortingInputTypeName}`);
+        }
+
+        query += tab + `${listingAccessorName}(${f.join(", ")}) : [${modelTypeName}]\n`;
+
+    } else {
+
+        query += tab + `${listingAccessorName} : [${modelTypeName}]\n`;
+    }
+
+    query += "\n" + '}';
 
     let mutation = `
 extend type Mutation {
@@ -135,11 +161,11 @@ extend type Mutation {
 
     mutation += "\n" + '}';
 
-    return model + "\n\n" + input + "\n" + stateInput + "\n" + query + "\n" + mutation;
+    return model + "\n\n" + input + "\n" + stateInput + "\n" + listingFilterInput + "\n" + listingSortingInput + "\n" + query + "\n" + mutation;
 }
 
 
-function _generateModelFieldsForElementsList(elements, enums, inputFilter=false) {
+function _generateModelFieldsForElementsList(elements, enums, inputFilter=false, listingFilter=false) {
 
     let filteredElements = inputFilter ? filterModelElementsForBasicTypes(elements, enums) : elements;
 
@@ -149,7 +175,7 @@ function _generateModelFieldsForElementsList(elements, enums, inputFilter=false)
             return null;
         }
 
-        if(e.array) {
+        if(e.array || (listingFilter && e.listingFilterMultiple === true)) {
             if(inputFilter && e.input !== true) {
                 return null;
             }
@@ -200,6 +226,27 @@ function generateTypeDefForModelStateInput(modelDef, stateElements, name, enums)
 
     return `input ${name || modelDef.name}StateInput {
 ${elements.map(v => tab + v).join("\n")}
+}`;
+
+}
+
+
+
+function generateTypeDefForModelListingFilterInput(listingElements, name, enums) {
+
+    const elements = _generateModelFieldsForElementsList(listingElements, enums, false, true);
+
+    return `input ${name} {
+${elements.map(v => tab + v).join("\n")}
+}`;
+
+}
+
+
+function generateTypeDefForModelListingSortingInput(listingSortElements, name, enums) {
+
+    return `input ${name} {
+${listingSortElements.map(f => tab + f.field + " : Boolean").join("\n")}
 }`;
 
 }

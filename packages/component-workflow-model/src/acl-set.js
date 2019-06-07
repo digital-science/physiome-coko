@@ -43,6 +43,7 @@ function AclSet(data, enums) {
     if(data.rules) {
         this.rules = data.rules.map(rule => new AclRule(rule, lookup, resolveEnum));
     }
+
     return this;
 }
 
@@ -95,22 +96,6 @@ AclSet.prototype.applyRules = function applyAclRules(targets, action, object) {
         }
     });
 
-    /*const deniedValues = Object.keys(deniedSet);
-    if(deniedValues && deniedValues.length) {
-        if(actionIsTask) {
-            r.deniedTasks = deniedValues;
-        } else {
-            r.deniedFields = deniedValues;
-        }
-    }
-
-    if(!actionIsTask) {
-        const deniedRestrictions = Object.keys(deniedRestrictionsSet);
-        if(deniedRestrictions && deniedRestrictions.length) {
-            r.deniedRestrictions = deniedRestrictions;
-        }
-    }*/
-
     for(let i = 0; i < allowLength; i++) {
 
         const rule = allowRules[i];
@@ -129,17 +114,22 @@ AclSet.prototype.applyRules = function applyAclRules(targets, action, object) {
         return r;
     }
 
+    // FIXME: when returning matches, we need to return a list of explict denied tasks and fields
+
 
     // We now have matching allow actions, we need to obtain the list of allowed groupings (fields or tasks),
     // and aggregate these (removing any denied matches from above).
 
     const allowedSet = {};
     const allowedRestrictionSet = {};
+    let allowAllEncountered = false;
 
     allowMatches.forEach(match => {
 
         if(match.grouping) {
             match.grouping.values.forEach(v => allowedSet[v] = true);
+        } else {
+            allowAllEncountered = true;
         }
 
         if(match.restrictions) {
@@ -154,15 +144,17 @@ AclSet.prototype.applyRules = function applyAclRules(targets, action, object) {
     r.allow = true;
     r.matchingRules = allowMatches.map(m => m.rule);
 
-    if(actionIsTask) {
-        r.allowedTasks = Object.keys(allowedSet);
-        if(!r.allowedTasks.length) {
-            delete r.allowedTasks;
-        }
-    } else {
-        r.allowedFields = Object.keys(allowedSet);
-        if(!r.allowedFields.length) {
-            delete r.allowedFields;
+    if(!allowAllEncountered) {
+        if(actionIsTask) {
+            r.allowedTasks = Object.keys(allowedSet);
+            if(!r.allowedTasks.length) {
+                delete r.allowedTasks;
+            }
+        } else {
+            r.allowedFields = Object.keys(allowedSet);
+            if(!r.allowedFields.length) {
+                delete r.allowedFields;
+            }
         }
     }
 
@@ -210,6 +202,10 @@ function AclRule(data, lookupGrouping, resolveEnum) {
     return this;
 }
 
+AclRule.prototype.description = function description() {
+
+    return `${this.allow ? "allow" : "deny"} <${this.target}> [${this.actions.map(a => `${a.type}${a.restriction ? ":" + a.restriction : ""}`).join(", ")}] ${this.condition ? " where " + this.condition.description() : ""}`;
+};
 
 AclRule.prototype.doesApply = function doesRuleApply(targets, action, object) {
 
@@ -349,6 +345,47 @@ AclCondition.prototype.evaluate = function conditionEval(data) {
     }
 
     return _evalExpression(this.expression);
+};
+
+
+
+function _printValue(v) {
+    if(v.type === "model") {
+        return v.value
+    }
+    return `'${v.value}'`;
+}
+
+function expressionDescription(expression) {
+
+    if(expression instanceof Array) {
+
+        const joined = expression.map((e, index) => {
+
+            if(index === 0) {
+                return expressionDescription(e);
+            }
+
+            return "" + e.op + " " + expressionDescription(e);
+        });
+
+        return "(" + joined.join(" ") + ")"
+    }
+
+    if(expression.op === "!=" || expression.op === "==" || expression.op === "in") {
+        return _printValue(expression.lhs) + " " + expression.op + " " + _printValue(expression.rhs);
+    }
+
+    if(expression.expression) {
+        return expressionDescription(expression.expression);
+    }
+
+    return "";
+}
+
+
+AclCondition.prototype.description = function() {
+    return expressionDescription(this.expression);
 };
 
 

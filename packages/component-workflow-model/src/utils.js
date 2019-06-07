@@ -48,10 +48,38 @@ exports.filterModelElementsForStates = function _filterModelElementsForStates(el
 };
 
 
+exports.filterModelElementsForListingFilters = function _filterModelElementsForListingFilters(elements, enums) {
+
+    return elements.filter(element => {
+        return (element.listingFilter === true);
+    });
+};
+
+
+exports.filterModelElementsForListingSortable = function _filterModelElementsForListingFilters(elements, enums) {
+
+    return elements.filter(element => {
+        return (element.listingSorting === true);
+    });
+};
+
 
 exports.filterModelElementsForOwnerFields = function _filterModelElementsForOwnerIdFields(elements) {
 
     return elements.filter(element => {
         return (element.holdsOwnerId === true && element.type === "Identity" && element.joinField);
     });
+};
+
+
+
+function lowerCaseFirstLetter(string) {
+    return string.charAt(0).toLowerCase() + string.slice(1);
+}
+
+
+exports.listingAccessorNameForTaskDefinition = function(taskDef) {
+
+    return (taskDef.options && taskDef.options.listingAccessor) ? taskDef.options.listingAccessor : `${lowerCaseFirstLetter(taskDef.name)}s`;
+
 };

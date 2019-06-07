@@ -36,6 +36,10 @@ class WorkflowBaseModel extends DBErrors(BaseModel) {
 
         return object[0];
     }
+
+    static parseEagerRelations(eagerLoadRelations) {
+        return parseEagerRelations(eagerLoadRelations);
+    }
 }
 
 module.exports = WorkflowBaseModel;
