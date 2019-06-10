@@ -95,9 +95,7 @@ const values = {
     },
     workflow: {
         apiUri: process.env.WORKFLOW_API_URI || 'http://127.0.0.1:8080/engine-rest',
-        deploymentName: 'physiome-submission',
-        deploymentFilesSource: './definitions',
-        deploymentFiles: ['physiome-submission.bpmn']
+        deploymentName: 'physiome-submission'
     },
     'workflow-files': {
         secretAccessKey: process.env.AWS_S3_SECRET_KEY,
