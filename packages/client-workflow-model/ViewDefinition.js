@@ -4,6 +4,8 @@ class ViewDefinition {
 
     constructor(definition, enumResolver) {
 
+        this.name = definition.view;
+
         if(definition.extend) {
             this.extends = definition.extend;
         }

@@ -4,6 +4,8 @@ class FormDefinition {
 
     constructor(definition, enumResolver) {
 
+        this.name = definition.form;
+
         if(definition.extend) {
             this.extends = definition.extend;
         }
