@@ -33,7 +33,8 @@ const Button = styled(_Button)`
     text-transform: uppercase;
         
     outline: none;
-        
+    border: none;
+    
     &:hover {
         background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #3781a3), color-stop(1, #349fb4));
         background:-moz-linear-gradient(top, #3781a3 5%, #349fb4 100%);
@@ -50,6 +51,10 @@ const Button = styled(_Button)`
     }
     &:disabled {
       opacity: 0.25;
+    }
+    
+    ::-moz-focus-inner {
+      border: 0;
     }
 `;
 
