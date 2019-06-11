@@ -47,7 +47,7 @@
       <bpmn:incoming>SequenceFlow_10ax8ob</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow_0jwfndw" sourceRef="ServiceTask_InitialSubmissionEmail" targetRef="UserTask_Claim" />
-    <bpmn:userTask id="UserTask_FinalDecision" name="Final Decision" camunda:asyncAfter="true" camunda:formKey="custom:final-decision">
+    <bpmn:userTask id="UserTask_FinalDecision" name="Final Decision" camunda:formKey="custom:final-decision">
       <bpmn:incoming>SequenceFlow_0jju3ab</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0r85aaj</bpmn:outgoing>
     </bpmn:userTask>
