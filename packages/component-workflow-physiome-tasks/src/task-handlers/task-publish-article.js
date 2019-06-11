@@ -12,10 +12,7 @@ module.exports = function _setupPublishArticleTask(client) {
 
     client.subscribe('publish-article', async ({ task, taskService }) => {
 
-        console.log("---------------");
-        console.log(`[External-Task] Publish Article:`);
-        console.log(JSON.stringify(task, null, 4));
-        console.log("---------------");
+        logger.debug(`${LogPrefix} publish article is starting {submission_id: ${task.businessKey}}`);
 
         const instanceId = task.businessKey;
         if(!instanceId) {
@@ -42,6 +39,7 @@ module.exports = function _setupPublishArticleTask(client) {
 
         }).then(() => {
 
+            logger.debug(`${LogPrefix} publishing submission article to figshare has finished, completing external task`);
             return taskService.complete(task);
 
         }).catch(err => {
@@ -91,6 +89,7 @@ function _s3ParametersForPartRange(part) {
 function _publishSubmission(submission) {
 
     // FIXME: replace hard-coded values for published awards (based on full submission data field set)
+
     const title = submission.title;
     const articleData = {
         title: title,
@@ -98,7 +97,7 @@ function _publishSubmission(submission) {
         tags: [
             "Demo Physiome Article"
         ],
-        description: "Example Physiome article automatically published through to figshare."
+        description: submission.abstract || "No article description was provided at the time of submission."
     };
 
 
