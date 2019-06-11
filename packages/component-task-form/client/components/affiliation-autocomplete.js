@@ -36,7 +36,7 @@ function lookupAffiliations(value) {
     const qp = {};
 
     qp.page = "1";
-    qp.qp = "multiMatch";
+    //qp.qp = "multiMatch";
     qp.query = encodeURIComponent(value);
 
     const q = Object.keys(qp).map(k => `${k}=${qp[k]}`).join("&");
@@ -45,7 +45,7 @@ function lookupAffiliations(value) {
     return fetch(url).then(function(response) {
         return response.json();
     }).then(function(r) {
-        return r.items || [];
+        return (r.items || []).slice(0, 14);
     });
 }
 
@@ -67,7 +67,7 @@ function _AffiliationAutocomplete({className, readOnly, value, onChange, current
     const generationRef = useRef(0);
     const displayedGenerationRef = useRef(0);
 
-    const [debouncedItems] = useDebounce(value, 750, (query, setter) => {
+    const [debouncedItems] = useDebounce(value, 250, (query, setter) => {
 
         ++generationRef.current;
         const generation = generationRef.current;
