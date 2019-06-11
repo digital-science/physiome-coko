@@ -8,8 +8,13 @@ const { processInstanceService, processDefinitionService, taskService } = requir
 const { ForbiddenError, UserInputError } = require('apollo-server-express');
 const GraphQLFields = require('graphql-fields');
 
+const config = require("config");
 const _ = require("lodash");
 
+const logger = require('@pubsweet/logger');
+
+
+const DebugAclRules = config.get("logging.debugAclRules") === true;
 
 const AclActions = {
     Access: "access",
@@ -49,6 +54,8 @@ function InstanceResolver(modelClass, taskDefinition, enums) {
     this.stateFields = filterModelElementsForStates(this.modelDef.elements, enums);
     this.listingFilterFields = filterModelElementsForListingFilters(this.modelDef.elements, enums);
     this.listingSortableFields = filterModelElementsForListingSortable(this.modelDef.elements, enums);
+
+    this.logPrefix = `[InstanceResolver/${taskDefinition.name}] `;
 }
 
 
@@ -89,6 +96,8 @@ InstanceResolver.prototype._getInstance = function(instance, aclTargets, topLeve
 
 
 InstanceResolver.prototype.get = async function(input, info, context) {
+
+    logger.debug(`${this.logPrefix} get [id: ${input.id}]`);
 
     const fieldsWithoutTypeName = GraphQLFields(info, {}, { excludedFields: ['__typename'] });
     const topLevelFields = fieldsWithoutTypeName ? Object.keys(fieldsWithoutTypeName) : [];
@@ -140,12 +149,6 @@ InstanceResolver.prototype.list = async function(input, info, context) {
 
     const user = await this.resolveUserForContext(context);
     let allowedRestrictions;
-
-
-    console.log("---- Listing !!! ----");
-    console.dir(input);
-    console.dir(topLevelFields);
-
 
     if(this.acl) {
 
@@ -761,8 +764,13 @@ InstanceResolver.prototype.userToAclTargets = function(user, object) {
 
     // By default, everyone gets the "anonymous" role applied.
 
-    const targets = ["anonymous", "administrator"];  // FIXME: need to resolve this into the correct listing of roles
+    const targets = ["anonymous"];
     let isOwner = false;
+
+    // FIXME: important, all users are currently assigned admin access for testing and development purposes
+    if(user && user.id) {
+        targets.push("administrator");
+    }
 
     if(user && user.id && object) {
 
@@ -840,6 +848,10 @@ function _allowedInputKeysForInstanceInput(model) {
 
 
 function _debugAclMatching(user, userTargets, isOwner, action, match) {
+
+    if(!DebugAclRules) {
+        return;
+    }
 
     console.log(`acl-match: action:(${action}) user(${user ? user.id : "anon"}) acl-targets:(${userTargets.join(", ")}) is-owner:(${isOwner ? "true" : "false"})`);
     if(match) {

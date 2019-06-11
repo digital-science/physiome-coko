@@ -117,6 +117,9 @@ const values = {
     figshare: {
         apiBaseUrl: process.env.FIGSHARE_API_BASE,
         apiToken: process.env.FIGSHARE_API_TOKEN
+    },
+    logging: {
+        debugAclRules: true
     }
 };
 
