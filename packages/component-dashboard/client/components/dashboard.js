@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import moment from 'moment';
@@ -13,9 +13,6 @@ import useGetSubmissions from './../queries/getSubmissions';
 
 import PopoverTrigger from 'component-task-form/client/components/popover';
 
-//import AwardIconImage from 'ds-awards-theme/static/award.svg';
-//import PublishAwardIconImage from './../static/publish-award.svg';
-//import EditIconImage from './../static/edit.svg';
 import BinIconImage from './../static/bin.svg';
 import Spinner from 'ds-awards-theme/components/spinner';
 import Button, { SmallPlainButton } from 'ds-awards-theme/components/button';
@@ -158,7 +155,7 @@ function Dashboard(props) {
             "Published"
         ],
     };
-    const sorting = { submissionDate: true };
+    const sorting = { submissionDate: false };
 
 
     const { data, error, loading, refetch } = useGetSubmissions(filter, sorting);
@@ -166,6 +163,20 @@ function Dashboard(props) {
     const refreshDashboard = () => {
         return refetch();
     };
+
+    // On a set interval, refresh the data fot the dashboard.
+    // FIXME: this is here just until subscription and pushes are implemented.
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            refreshDashboard();
+        }, 3000);
+
+        return () => {
+            clearInterval(timer);
+        };
+    });
+
 
     return (
         <DashboardHolder>
@@ -235,16 +246,6 @@ const SubmissionRow = styled.tr`
     }
 `;
 
-/*
-const EditIcon = styled(({className}) => {
-    return <img alt="edit award" className={className} src={EditIconImage} />;
-})`
-    height: 20px;
-    display: inline;
-    margin-right: 5px;
-`;
-*/
-
 const DeleteIcon = styled(({className, ...rest}) => {
     return <img alt="delete award" className={className} src={BinIconImage} {...rest} />;
 })`
@@ -252,32 +253,6 @@ const DeleteIcon = styled(({className, ...rest}) => {
     display: inline;
     margin-right: 5px;
 `;
-
-/*
-const PublishIcon = styled(({className}) => {
-    return (
-        <div className={className}>
-            <img alt="publish award"  src={PublishAwardIconImage} />
-        </div>
-    );
-})`
-    display: inline-block;
-    margin-right: 5px;
-    position: relative;
-    background: aliceblue;
-    padding: 5px;
-    border-radius: 30px;
-    border: 1px dashed #9dcef9;
-    margin-left: -5px;
-    padding-bottom: 4px;
-    cursor: pointer;
-    
-    > img {
-        height: 20px;
-    }
-    
-`;
-*/
 
 
 const AuthorListing = styled.ol`
@@ -368,36 +343,6 @@ function ActiveSubmissionTableRow({submission, workflowDescription, claimSubmiss
 
     const checksActionIcon = checkTask ? <UserChecksIconHolder to={`/details/${encodeURI(submission.id)}`}><FaUserCheck /></UserChecksIconHolder> : null;
 
-
-    /*const decisionTaskFormParameters = useMemo(() => {
-
-        if(!submission || !decisionTask) {
-            return null;
-        }
-
-        const instanceType = workflowDescription.findInstanceTypeForUrlName('award-submission');
-        const formDefinition = instanceType.formDefinitionForFormName('final-decision');
-
-        return {
-            instanceId: submission.id,
-            instanceType,
-            taskId: decisionTask.id ,
-            formDefinition: formDefinition,
-            workflowDescription: workflowDescription,
-            wasSubmitted: () => {
-                refreshDashboard();
-            }
-        };
-
-    }, [submission, decisionTask]);
-
-
-    const decisionTaskButton = (decisionTask && decisionTaskFormParameters) ? (
-        <InlineTaskFormPopoverTrigger {...decisionTaskFormParameters}>
-            <PublishIcon />
-        </InlineTaskFormPopoverTrigger>
-    ) : null;*/
-
     const deleteSubmission = () => {
         destroySubmission(submission.id, {phase:"Cancelled"}).then(() => {
             refreshDashboard();
@@ -419,15 +364,13 @@ function ActiveSubmissionTableRow({submission, workflowDescription, claimSubmiss
         });
     };
 
-    const title = <LineLimitedText>{submission.title}</LineLimitedText> || <span>No title supplied</span>;
+    const title = submission.title ? <LineLimitedText>{submission.title}</LineLimitedText> : <span>No title supplied</span>;
     let linkedTitle;
 
     if(submissionTask) {
         linkedTitle = <Link to={`/submission/${submission.id}`}>{title}</Link>;
-    } else if(checkTask) {
-        linkedTitle = <Link to={`/details/${submission.id}`}>{title}</Link>;
     } else {
-        linkedTitle = <React.Fragment>{title}</React.Fragment>;
+        linkedTitle = <Link to={`/details/${submission.id}`}>{title}</Link>;
     }
 
     return (
