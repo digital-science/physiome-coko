@@ -239,7 +239,7 @@ InstanceResolver.prototype.list = async function(input, info, context) {
 
         this.listingSortableFields.forEach(f => {
 
-            if(sorting.hasOwnProperty(f.field)) {
+            if(!sorting.hasOwnProperty(f.field)) {
                 return;
             }
 
