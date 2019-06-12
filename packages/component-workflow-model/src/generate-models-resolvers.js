@@ -12,6 +12,11 @@ const AclSet = require('./acl-set');
 
 
 
+function uppercaseCamelToLowercaseDashed(name) {
+    return name.replace(/^(.)/g, (a) => a.toLowerCase()).replace(/([A-Z])/g, (a) => '-' + a.toLowerCase());
+}
+
+
 /**/
 /* Generate Models & Resolvers for each of the top level defined tasks, enums and top level model objects. */
 /**/
@@ -121,6 +126,15 @@ function createModelForTask(task, enums, lookupModel) {
             static get tableName() {
                 return tableName;
             }
+
+            static get urlName() {
+                return tableName;
+            }
+
+            static get fileStorageKey() {
+                return tableName;
+            }
+
 
             static get schema() {
                 return {
