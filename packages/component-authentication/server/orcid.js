@@ -150,21 +150,6 @@ function didAuthenticateWithORCID(req, res) {
         };
 
         const token = authentication.token.create(tokenData);
-
-        let expiresIn = 24 * 3600;
-        if (config.has('pubsweet-server.tokenExpiresIn')) {
-            expiresIn = config.get('pubsweet-server.tokenExpiresIn')
-        }
-
-        const cookieOptions = {
-            maxAge: expiresIn * 1000,
-            httpOnly: true
-            //signed: true // Indicates if the cookie should be signed
-        };
-
-        //res.cookie("auth_token", token, cookieOptions);
-
-        //return res.redirect(redirect || successPath || "/");
         return res.send(RedirectTemplate(redirect || successPath || "/", token));
 
     }).catch(err => {
