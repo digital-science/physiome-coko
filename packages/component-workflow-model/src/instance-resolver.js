@@ -5,7 +5,8 @@ const { filterModelElementsForRelations, filterModelElementsForOwnerFields,
 
 const { processInstanceService, processDefinitionService, taskService } = require('camunda-workflow-service');
 
-const { ForbiddenError, UserInputError } = require('apollo-server-express');
+const { UserInputError } = require('apollo-server-express');
+const { AuthorizationError, NotFoundError } = require('@pubsweet/errors');
 const GraphQLFields = require('graphql-fields');
 
 const config = require("config");
@@ -113,7 +114,7 @@ InstanceResolver.prototype.get = async function(input, info, context) {
     ]);
 
     if(!object) {
-        return new Error("Instance not found.");
+        return new NotFoundError("Instance not found.");
     }
 
     this.addInstancesToContext([object], context);
@@ -125,11 +126,11 @@ InstanceResolver.prototype.get = async function(input, info, context) {
         const accessMatch = this.acl.applyRules(aclTargets, AclActions.Access, object);
         _debugAclMatching(user, aclTargets, isOwner, AclActions.Access, accessMatch);
         if(!accessMatch.allow) {
-            throw new ForbiddenError("You do not have access to this object.");
+            throw new AuthorizationError("You do not have access to this object.");
         }
 
         if(!_restrictionsApplyToUser(accessMatch.allowedRestrictions, isOwner)) {
-            throw new ForbiddenError("You do not have access to this object.");
+            throw new AuthorizationError("You do not have access to this object.");
         }
     }
 
@@ -157,7 +158,7 @@ InstanceResolver.prototype.list = async function(input, info, context) {
         const accessMatch = this.acl.applyRules(aclTargets, AclActions.Access);
         _debugAclMatching(user, aclTargets, null, AclActions.Access, accessMatch);
         if(!accessMatch.allow) {
-            throw new ForbiddenError("You do not have access to this object.");
+            throw new AuthorizationError("You do not have access to this object.");
         }
 
         allowedRestrictions = accessMatch.allowedRestrictions;
@@ -209,7 +210,7 @@ InstanceResolver.prototype.list = async function(input, info, context) {
     if(allowedRestrictions.indexOf("all") === -1) {
 
         if(!user) {
-            throw new ForbiddenError("You must be a valid user ");
+            throw new AuthorizationError("You must be a valid user ");
         }
 
         if(this.ownerFields && this.ownerFields.length) {
@@ -320,18 +321,18 @@ InstanceResolver.prototype.update = async function _update(input, info, context)
         _debugAclMatching(user, aclTargets, isOwner, AclActions.Access, accessMatch);
 
         if(!accessMatch.allow) {
-            throw new ForbiddenError("You do not have access to this object.");
+            throw new AuthorizationError("You do not have access to this object.");
         }
 
         if(!_restrictionsApplyToUser(accessMatch.allowedRestrictions, isOwner)) {
-            throw new ForbiddenError("You do not have access to this object.");
+            throw new AuthorizationError("You do not have access to this object.");
         }
 
         aclWriteMatch = this.acl.applyRules(aclTargets, AclActions.Write, object);
         _debugAclMatching(user, aclTargets, isOwner, AclActions.Write, aclWriteMatch);
 
         if(!aclWriteMatch.allow) {
-            throw new ForbiddenError("You do not have write access to this object.");
+            throw new AuthorizationError("You do not have write access to this object.");
         }
     }
 
@@ -352,7 +353,7 @@ InstanceResolver.prototype.update = async function _update(input, info, context)
     });
 
     if(restrictedFields.length) {
-        throw new ForbiddenError(`You do not have write access on the following fields: ${restrictedFields.join(", ")}`);
+        throw new AuthorizationError(`You do not have write access on the following fields: ${restrictedFields.join(", ")}`);
     }
 
     await object.save();
@@ -379,7 +380,7 @@ InstanceResolver.prototype.create = async function create(context) {
         _debugAclMatching(user, aclTargets, null, AclActions.Create, match);
 
         if(!match.allow) {
-            throw new ForbiddenError("You do not have rights to create a new instance.");
+            throw new AuthorizationError("You do not have rights to create a new instance.");
         }
     }
 
@@ -453,17 +454,17 @@ InstanceResolver.prototype.destroy = async function(input, context) {
         const accessMatch = this.acl.applyRules(aclTargets, AclActions.Access, object);
         _debugAclMatching(user, aclTargets, isOwner, AclActions.Access, accessMatch);
         if(!accessMatch.allow) {
-            throw new ForbiddenError("You do not have access to this object.");
+            throw new AuthorizationError("You do not have access to this object.");
         }
 
         if(!_restrictionsApplyToUser(accessMatch.allowedRestrictions, isOwner)) {
-            throw new ForbiddenError("You do not have access to this object.");
+            throw new AuthorizationError("You do not have access to this object.");
         }
 
         const destroyAclMatch = this.acl.applyRules(aclTargets, AclActions.Destroy, object);
         _debugAclMatching(user, aclTargets, isOwner, AclActions.Destroy, destroyAclMatch);
         if(!destroyAclMatch.allow) {
-            throw new ForbiddenError("You do not have the rights allowed to destroy this object.");
+            throw new AuthorizationError("You do not have the rights allowed to destroy this object.");
         }
     }
 
@@ -562,7 +563,7 @@ InstanceResolver.prototype.getTasks = async function getTasks(instanceID, contex
         tasksAclMatch = this.acl.applyRules(aclTargets, AclActions.Task, object);
         _debugAclMatching(user, aclTargets, isOwner, AclActions.Task, tasksAclMatch);
         if(!tasksAclMatch.allow) {
-            throw new ForbiddenError("You do not have the rights allowed to destroy this object.");
+            throw new AuthorizationError("You do not have the rights allowed to destroy this object.");
         }
     }
 
@@ -630,23 +631,23 @@ InstanceResolver.prototype.completeTask = async function completeTask({id, taskI
         const accessMatch = this.acl.applyRules(aclTargets, AclActions.Access, instance);
         _debugAclMatching(user, aclTargets, isOwner, AclActions.Access, accessMatch);
         if(!accessMatch.allow) {
-            throw new ForbiddenError("You do not have access to this object.");
+            throw new AuthorizationError("You do not have access to this object.");
         }
 
         if(!_restrictionsApplyToUser(accessMatch.allowedRestrictions, isOwner)) {
-            throw new ForbiddenError("You do not have access to this object.");
+            throw new AuthorizationError("You do not have access to this object.");
         }
 
         tasksAclMatch = this.acl.applyRules(aclTargets, AclActions.Task, instance);
         _debugAclMatching(user, aclTargets, isOwner, AclActions.Task, tasksAclMatch);
         if(!tasksAclMatch.allow) {
-            throw new ForbiddenError("You do not have the rights allowed to destroy this object.");
+            throw new AuthorizationError("You do not have the rights allowed to destroy this object.");
         }
     }
 
     const filteredTasks = (tasksAclMatch && tasksAclMatch.allowedTasks) ? tasks.filter(t => tasksAclMatch.allowedTasks.indexOf(t.taskDefinitionKey) !== -1) : tasks;
     if(!filteredTasks.length) {
-        throw new ForbiddenError("You do not have access to the task associated with the instance.");
+        throw new AuthorizationError("You do not have access to the task associated with the instance.");
     }
 
     const allowedKeys = this.stateFields ? this.stateFields.map(e => e.field) : [];
