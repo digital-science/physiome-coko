@@ -232,7 +232,7 @@ function createResolversForTask(task, enums, models) {
     };
 
     mutation[`update${task.name}`] = async function(ctxt, input, context, info) {
-        return instanceResolver.update(input.input, context);
+        return instanceResolver.update(input.input, info, context);
     };
 
     const query = {};

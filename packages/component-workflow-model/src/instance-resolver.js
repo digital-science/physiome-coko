@@ -148,6 +148,8 @@ InstanceResolver.prototype.list = async function(input, info, context) {
         eagerResolves = this.relationFields.filter(f => topLevelFields.indexOf(f) !== -1);
     }
 
+    logger.debug(`${this.logPrefix} list (fields=${topLevelFields.length}, eager=[${eagerResolves ? eagerResolves.join(",") : ""}])`);
+
     const user = await this.resolveUserForContext(context);
     let allowedRestrictions;
 
@@ -390,7 +392,6 @@ InstanceResolver.prototype.create = async function create(context) {
 
     if(user && user.id && this.ownerFields && this.ownerFields.length) {
         this.ownerFields.forEach(e => {
-            console.log(`setting owner id equal to '${user.id}' for field '${e.joinField}'`);
             newInstance[e.joinField] = user.id;
         });
     }
@@ -513,7 +514,7 @@ InstanceResolver.prototype.destroy = async function(input, context) {
 
             if(processInstance && processInstance.id && processInstance.businessKey && processInstance.businessKey.toLowerCase() === input.id.toLowerCase()) {
 
-                console.log(`Deleting process instance ${processInstance.id}`);
+                logger.debug(`${this.logPrefix} deleting process instance [${processInstance.id}] from business process engine.`);
 
                 return new Promise((resolve, reject) => {
 
@@ -550,7 +551,7 @@ InstanceResolver.prototype.getTasks = async function getTasks(instanceID, contex
     ]);
 
     if(!object) {
-        throw new Error("Instance with identifier not found.");
+        throw new NotFoundError("Instance with identifier not found.");
     }
 
     let tasksAclMatch = null;
