@@ -12,10 +12,8 @@ const logger = new winston.Logger({
 
 logger.level = process.env.LOG_LEVEL || 'silly';
 
-if (
-    !!process.env.CLOUDWATCH_GROUP_NAME &&
-    !!process.env.CLOUDWATCH_STREAM_NAME
-) {
+if (!!process.env.CLOUDWATCH_GROUP_NAME && !!process.env.CLOUDWATCH_STREAM_NAME) {
+
     const logConfig = {
         logGroupName: process.env.CLOUDWATCH_GROUP_NAME,
         logStreamName: process.env.CLOUDWATCH_STREAM_NAME,

@@ -98,6 +98,7 @@ const values = {
         deploymentName: 'physiome-submission'
     },
     'workflow-files': {
+        fileIdentifierDomain: "physiome-submission-dev.ds-innovation-experiments.com",
         secretAccessKey: process.env.AWS_S3_SECRET_KEY,
         accessKeyId: process.env.AWS_S3_ACCESS_KEY,
         region: process.env.AWS_S3_REGION,
