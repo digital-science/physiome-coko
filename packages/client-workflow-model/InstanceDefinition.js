@@ -39,6 +39,8 @@ class InstanceDefinition {
 
         this.forms = forms;
         this.views = views;
+
+        this.urlName = uppercaseCamelToLowercaseDashed(this.name);
     }
 
     get urlPath() {
