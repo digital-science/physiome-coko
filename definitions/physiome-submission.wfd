@@ -9,8 +9,22 @@ enum SubmissionPhase {
     Cancelled => "cancelled"
 }
 
+enum SubmissionKind {
+    Original => "original",
+    Retrospective => "retrospective",
+    Review => "review",
+    Letter => "letter"
+}
 
-task Submission {
+mapping "DisplayedSubmissionKind" on SubmissionKind {
+    Original => "Original Article",
+    Retrospective => "Retrospective Article",
+    Review => "Review",
+    Letter => "Letter"
+}
+
+
+instance Submission {
 
     processKey: "physiome-submission"
     listingAccessor: "submissions"
@@ -24,10 +38,14 @@ task Submission {
 
         phase: SubmissionPhase <state, listing-filter-multiple, default:SubmissionPhase.Pending>,
 
+        kind: SubmissionKind <default:SubmissionKind.Original>,
         title: String,
         abstract: String,
+        primaryPapers: JSON,
         authors: JSON,
         pmrWorkspace: String,
+        priceAcknowledged: Boolean,
+        keywords: JSON,
 
         allFilesPresent: Boolean,
         resultsMatch: Boolean,
@@ -35,6 +53,8 @@ task Submission {
         curationNotes: String,
 
         articleFiles: [File] <set>,
+        supplementaryFiles: [File] <set, file-labels>,
+        supplementaryDataFiles: [File] <set>,
 
         figshareArticleId: String
     }
@@ -43,7 +63,8 @@ task Submission {
     acl {
 
         fields "submit" {
-    	    title, abstract, authors, pmrWorkspace, articleFiles, submissionDate
+    	    kind, title, abstract, primaryPapers, authors, pmrWorkspace, priceAcknowledged, keywords, submissionDate,
+    	    articleFiles, supplementaryFiles, supplementaryDataFiles
         }
 
         fields "phase" {
@@ -51,7 +72,8 @@ task Submission {
         }
 
         fields "curation" {
-    	    title, abstract, authors, pmrWorkspace, articleFiles, submissionDate,
+    	    kind, title, abstract, primaryPapers, authors, pmrWorkspace, priceAcknowledged, keywords, submissionDate,
+    	    articleFiles, supplementaryFiles, supplementaryDataFiles,
     	    curator,
     	    allFilesPresent, resultsMatch, modelAnnotated, curationNotes,
     	    publishDate, figshareArticleId
@@ -138,7 +160,6 @@ task Submission {
 
                 } }
 
-
                 { Group, (phase == SubmissionPhase.Published), heading:"Published", children:{
 
                     { FishareArticleEmbed => figshareArticleId, label:"Figshare Article" }
@@ -181,6 +202,8 @@ task Submission {
 
             { Panel, heading:"Article Details", children:{
 
+                { SelectValue => kind, label:"Manuscript Type", options:mapping("DisplayedSubmissionKind") }
+
                 { TextArea => title, label:"Title" }
 
                 { TextArea => abstract, label:"Abstract" }
@@ -189,7 +212,11 @@ task Submission {
 
                 { Text => pmrWorkspace, label:"Associated PMR Workspace" }
 
-                { FileUploader => articleFiles, label:"Article Files" }
+                { FileUploader => articleFiles, label:"Manuscript" }
+
+                { FileUploader => supplementaryFiles, label:"Supplementary Files", fileLabels:true }
+
+                { FileUploader => supplementaryDataFiles, label:"Supplementary Data Files" }
 
             } }
 
@@ -214,11 +241,12 @@ task Submission {
                 state: {
                     phase: SubmissionPhase.Checking
                 }
+                identity => curator
             }
         ]
 
         elements: {
-            { Button, default:true, outcome:"claim", label:"Claim for Curation" }
+            { Button, default:true, outcome:"claim", label:"Assign to me" }
         }
     }
 
