@@ -37,6 +37,11 @@ valueArray "value array"
 
 valueOrValueArray =  valueArray / value
 
+mappingReference "mapping reference"
+	= ws "mapping(" ws mappingName:string ws ")" ws
+    { return {type: "mapping", mapping:mappingName}; }
+
+
 // ----- Numbers -----
 
 number "number"
@@ -154,7 +159,7 @@ targetModelName "target model property name"
 
 
 // ----- Top Level -----
-topLevel = ws content:(task / model / enum)* ws
+topLevel = ws content:(task / model / enum / mapping)* ws
   {
   	    const m = {};
 
@@ -202,6 +207,20 @@ topLevel = ws content:(task / model / enum)* ws
         	m.enums = enumMap;
         }
 
+        const mappings = content.filter(c => c.type === "mapping");
+        if(mappings.length) {
+        	const mappingMap = {};
+
+            mappings.forEach(e => {
+            	delete e.type;
+            	if(e.name) {
+                    mappingMap[e.name] = e;
+                }
+            });
+
+        	m.mappings = mappingMap;
+        }
+
 		return m;
   }
 
@@ -209,7 +228,7 @@ topLevel = ws content:(task / model / enum)* ws
 // ----- Task -----
 
 task
-	= "task" ws taskName:propName ws? begin_object ws? content:taskContent ws? end_object
+	= "instance" ws taskName:propName ws? begin_object ws? content:taskContent ws? end_object
 	{
       var m = {type:"task", name:taskName};
 
@@ -504,7 +523,8 @@ modelElementOptions = (modelElementExclusions / modelElementJoinToDetails /
 						modelElementDefaultStringValue / modelElementDefaultEnumValue /
                         modelElementJoinDetails / modelElementState / modelElementAccessors /
                         modelElementInitialOwner / modelElementListingFilterMultiple /
-                        modelElementListingFilter / modelElementListingSortable)
+                        modelElementListingFilter / modelElementListingSortable /
+                        modelElementFileLabel)
 
 modelElementExclusions
 	= "input:" inputExclusion:("exclude" / "include")
@@ -572,6 +592,12 @@ modelElementListingSortable
 	= "listing-sortable"
     {
     	return {type:"options", listingSorting:true};
+    }
+
+modelElementFileLabel
+	= "file-labels"
+    {
+    	return {type:"options", fileLabels:true};
     }
 
 modelElementDefaultStringValue
@@ -723,6 +749,7 @@ formOutcome
     type:string
     result:(ws "=>" ws result:propName {return result;})?
     state:formOutcomeStateSet?
+    idAssign:formOutcomeIdentityAssignment?
     propList:propertyList?
     end_object
     {
@@ -737,6 +764,9 @@ formOutcome
         }
         if(state) {
         	r.state = state;
+        }
+        if(idAssign) {
+        	r.identityAssignment = idAssign.destination;
         }
         return r;
     }
@@ -777,6 +807,12 @@ formOutcomeStateEnumValue
 	= value:enumRef
     {
     	return {type:"enum", value:value};
+    }
+
+formOutcomeIdentityAssignment
+	= ws "identity" ws "=>" ws dest:propName
+    {
+    	return {type:"identity-assign", destination:dest};
     }
 
 formElements
@@ -849,12 +885,15 @@ formElementChildren
     }
 
 formElementOption
-    = value_separator key:propName name_separator value:valueOrValueArray
+    = value_separator key:propName name_separator value:formElementOptionValue
     {
     	const r = {};
         r[key] = value;
     	return r;
     }
+
+formElementOptionValue
+ 	= mappingReference / valueArray / value
 
 
 
@@ -1045,4 +1084,30 @@ aclCondition "acl condition"
 	= ws "where" ws condition:Condition
     {
     	return condition;
+    }
+
+
+// Mapping
+
+mapping "mapping"
+	= ws "mapping" ws mappingName:string ws "on" ws enumType:propName
+    begin_object
+    head:mappingEntry?
+    tail:("," v:mappingEntry {return v})*
+    end_object
+    {
+    	const mappings = [];
+       	if(head) {
+        	mappings.push(head);
+        	if(tail && tail.length) {
+            	mappings.push.apply(mappings, tail);
+            }
+        }
+    	return {type:"mapping", name:mappingName, enum:enumType, mappings:mappings};
+    }
+
+mappingEntry "mapping entry"
+	= ws name:propName ws "=>" ws value:string ws
+    {
+    	return {enumValue:name, value};
     }
