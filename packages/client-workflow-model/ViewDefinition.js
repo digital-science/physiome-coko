@@ -2,7 +2,7 @@ import FormElement from './FormElement';
 
 class ViewDefinition {
 
-    constructor(definition, enumResolver) {
+    constructor(definition, enumResolver, mappingResolver) {
 
         this.name = definition.view;
 
@@ -11,7 +11,7 @@ class ViewDefinition {
         }
 
         this.options = definition.options || {};
-        this.elements = definition.elements ? definition.elements.map(elementDescription => new FormElement(elementDescription, enumResolver)) : [];
+        this.elements = definition.elements ? definition.elements.map(elementDescription => new FormElement(elementDescription, enumResolver, mappingResolver)) : [];
     }
 }
 

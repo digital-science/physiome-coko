@@ -1,7 +1,7 @@
 
 class Condition {
 
-    constructor(condition, enumResolver) {
+    constructor(condition, enumResolver, mappingResolver) {
 
         const allBindings = [];
 

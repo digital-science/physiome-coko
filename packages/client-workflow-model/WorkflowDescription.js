@@ -1,11 +1,13 @@
 import InstanceDefinition from './InstanceDefinition';
-import EnumDefinition from './EnumDefinition'
+import EnumDefinition from './EnumDefinition';
+import MappingDefinition from './MappingDefinition';
 
 class WorkflowDescription {
 
     constructor(definition) {
 
         const enums = {};
+        const mappings = {};
 
         if(definition.enums) {
             Object.keys(definition.enums).forEach(k => {
@@ -13,22 +15,32 @@ class WorkflowDescription {
             });
         }
 
+        if(definition.mappings) {
+            Object.keys(definition.mappings).forEach(k => {
+                mappings[k] = new MappingDefinition(definition.mappings[k], enums);
+            });
+        }
+
         this.enums = enums;
+        this.mappings = mappings;
 
         const enumResolver = function(enumRef) {
             return resolveEnumFromSet(enums, enumRef);
+        };
+
+        const mappingResolver = function(mappingRef) {
+            return mappings[mappingRef];
         };
 
         const tasks = {};
 
         if(definition.tasks) {
             Object.keys(definition.tasks).forEach(k => {
-                tasks[k] = new InstanceDefinition(definition.tasks[k], k, enumResolver);
+                tasks[k] = new InstanceDefinition(definition.tasks[k], k, enumResolver, mappingResolver);
             });
         }
 
         this.instanceTypes = tasks;
-
     }
 
     findInstanceType(taskId) {

@@ -13,7 +13,7 @@ function uppercaseCamelToLowercaseDashed(name) {
 
 class InstanceDefinition {
 
-    constructor(taskDef, defaultName, enumResolver) {
+    constructor(taskDef, defaultName, enumResolver, mappingResolver) {
 
         this.name = taskDef.name || defaultName;
         this.model = taskDef.model;
@@ -26,14 +26,14 @@ class InstanceDefinition {
         const forms = {};
         if(taskDef.forms) {
             taskDef.forms.forEach(f => {
-                forms[f.form.toLowerCase()] = new FormDefinition(f, enumResolver);
+                forms[f.form.toLowerCase()] = new FormDefinition(f, enumResolver, mappingResolver);
             });
         }
 
         const views = {};
         if(taskDef.views) {
             taskDef.views.forEach(v => {
-                views[v.view.toLowerCase()] = new ViewDefinition(v, enumResolver);
+                views[v.view.toLowerCase()] = new ViewDefinition(v, enumResolver, mappingResolver);
             });
         }
 

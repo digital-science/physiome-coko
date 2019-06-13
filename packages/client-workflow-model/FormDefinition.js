@@ -2,7 +2,7 @@ import FormElement from './FormElement';
 
 class FormDefinition {
 
-    constructor(definition, enumResolver) {
+    constructor(definition, enumResolver, mappingResolver) {
 
         this.name = definition.form;
 
@@ -35,7 +35,7 @@ class FormDefinition {
             });
         });
 
-        this.elements = definition.elements ? definition.elements.map(elementDescription => new FormElement(elementDescription, enumResolver)) : [];
+        this.elements = definition.elements ? definition.elements.map(elementDescription => new FormElement(elementDescription, enumResolver, mappingResolver)) : [];
     }
 
     findMatchingOutcome(outcomeType) {
