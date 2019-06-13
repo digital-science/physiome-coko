@@ -4,6 +4,7 @@ import FormFieldText from './fields/form-field-text';
 import FormFieldFileUploader from './fields/form-field-file-uploader';
 import FormFieldButton from './fields/form-field-button';
 import FormFieldCheckbox from './fields/form-field-check-box';
+import FormFieldSelect from './fields/form-field-select';
 
 import FormFieldInlineTask from './fields/form-field-inline-task';
 
@@ -24,6 +25,7 @@ const FormFieldRegistry = {
     'Text' : FormFieldText,
     'Button' : FormFieldButton,
     'Checkbox' : FormFieldCheckbox,
+    'SelectValue' : FormFieldSelect,
 
     'FileUploader': FormFieldFileUploader,
     'AuthorsEditor' : FormFieldAuthors,

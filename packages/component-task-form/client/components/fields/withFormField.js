@@ -8,8 +8,8 @@ const FormFieldHolder = styled.div`
 
 export default function withFormField(f, bindingResolver) {
 
-    const r = function(props) {
-        return <FormFieldHolder className="form-field">{f(props)}</FormFieldHolder>
+    const r = function({className, ...props}) {
+        return <FormFieldHolder className={`form-field ${className}`}>{f(props)}</FormFieldHolder>
     };
 
     if(!bindingResolver) {
