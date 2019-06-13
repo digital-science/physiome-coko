@@ -105,10 +105,6 @@ input ConfirmFileUploadInput {
     fileByteSize: Int
 }
 
-extend type Query {
-    getFile(id : ID) : File
-}
-
 extend type Mutation {
     createFileUploadSignedUrl(input:CreateFileUploadSignedUrlInput): FileUploadSignedUrlResult
     confirmFileUpload(input:ConfirmFileUploadInput) : File

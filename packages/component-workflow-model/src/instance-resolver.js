@@ -60,23 +60,31 @@ function InstanceResolver(modelClass, taskDefinition, enums) {
 }
 
 
+InstanceResolver.prototype.getAllowedReadFields = function(readAcl, includeAdditionalFields=true) {
+
+    const allowedFields = (readAcl && readAcl.allowedFields) ? _.pick(this.allowedReadFields, readAcl.allowedFields) : Object.assign({}, this.allowedReadFields);
+
+    if(includeAdditionalFields) {
+        AdditionalAllowedGetFields.forEach(f => allowedFields[f] = true);
+    }
+
+    return allowedFields;
+};
+
+
 
 InstanceResolver.prototype._getInstance = function(instance, aclTargets, topLevelFields) {
 
-    let aclAllowedFields = null;
+    let aclMatch = null;
 
     if(this.acl) {
-        const aclMatch = this.acl.applyRules(aclTargets, AclActions.Read, instance);
+        aclMatch = this.acl.applyRules(aclTargets, AclActions.Read, instance);
         if(!aclMatch.allow) {
             return {id:instance.id, restrictedFields: topLevelFields.filter(f => f !== 'id')};
         }
-
-        aclAllowedFields = aclMatch.allowedFields;
     }
 
-
-    const allowedFields = aclAllowedFields ? _.pick(this.allowedReadFields, aclAllowedFields) : Object.assign({}, this.allowedReadFields);
-    AdditionalAllowedGetFields.forEach(f => allowedFields[f] = true);
+    const allowedFields = this.getAllowedReadFields(aclMatch, true);
 
     const filteredRequestedAllowedFields = topLevelFields.filter(f => allowedFields.hasOwnProperty(f));
     const r = {id:instance.id};
@@ -870,4 +878,6 @@ function _debugAclMatching(user, userTargets, isOwner, action, match) {
 
 
 
-module.exports = InstanceResolver;
+exports.InstanceResolver = InstanceResolver;
+exports.AclActions = AclActions;
+exports.debugAclMatching = _debugAclMatching;

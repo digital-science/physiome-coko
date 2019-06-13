@@ -7,7 +7,7 @@ const GraphQLFields = require('graphql-fields');
 const logger = require('@pubsweet/logger');
 const _ = require("lodash");
 
-const InstanceResolver = require('./instance-resolver');
+const { InstanceResolver } = require('./instance-resolver');
 const AclSet = require('./acl-set');
 
 
@@ -127,6 +127,14 @@ function createModelForTask(task, enums, lookupModel) {
                 return tableName;
             }
 
+            static get schema() {
+                return {
+                    type:'object',
+                    properties
+                };
+            }
+
+
             static get urlName() {
                 return tableName;
             }
@@ -135,17 +143,27 @@ function createModelForTask(task, enums, lookupModel) {
                 return tableName;
             }
 
-
-            static get schema() {
-                return {
-                    type:'object',
-                    properties
-                };
-            }
-
             static get acl() {
                 return acl;
             }
+
+            static get modelDescription() {
+                return model;
+            }
+
+            static get fileProperties() {
+                return relations.filter(e => e.type === "File");
+            }
+
+
+            static get instanceResolver() {
+                return this._instanceResolver;
+            }
+
+            static set instanceResolver(v) {
+                this._instanceResolver = v;
+            }
+
 
             static get relationMappings() {
 
@@ -181,6 +199,11 @@ function createModelForTask(task, enums, lookupModel) {
                                 },
                                 to: `${destTableName}.id`
                             };
+
+                            // Files can support additional fields on the relations.
+                            if(e.type === "File" && e.fileLabels === true) {
+                                mapping.join.through.extra = ['label'];
+                            }
                         }
 
                     } else {
@@ -206,7 +229,9 @@ function createModelForTask(task, enums, lookupModel) {
         }
     })[name];
 
-    return createClass(task.name, BaseModel);
+    const newModelClass = createClass(task.name, BaseModel);
+    newModelClass.instanceResolver = new InstanceResolver(newModelClass, task, enums);
+    return newModelClass;
 }
 
 
@@ -214,8 +239,6 @@ function createModelForTask(task, enums, lookupModel) {
 function createResolversForTask(task, enums, models) {
 
     const ModelClass = models[task.name];
-    const instanceResolver = new InstanceResolver(ModelClass, task, enums);
-
     const relations = filterModelElementsForRelations(task.model.elements, enums);
 
     const allowCreate = !(task.model.noCreate === true);
@@ -223,39 +246,39 @@ function createResolversForTask(task, enums, models) {
 
     if(allowCreate) {
         mutation[`create${task.name}`] = async function(ctxt, input, context, info) {
-            return instanceResolver.create(context);
+            return ModelClass.instanceResolver.create(context);
         };
     }
 
     mutation[`destroy${task.name}`] =  async function(ctxt, input, context, info) {
-        return instanceResolver.destroy(input, context);
+        return ModelClass.instanceResolver.destroy(input, context);
     };
 
     mutation[`update${task.name}`] = async function(ctxt, input, context, info) {
-        return instanceResolver.update(input.input, info, context);
+        return ModelClass.instanceResolver.update(input.input, info, context);
     };
 
     const query = {};
     query[`get${task.name}`] = async function(ctxt, input, context, info) {
-        return instanceResolver.get(input, info, context);
+        return ModelClass.instanceResolver.get(input, info, context);
     };
 
     const listingAccessorName = listingAccessorNameForTaskDefinition(task);
     query[listingAccessorName] = async function(ctxt, input, context, info) {
-        return instanceResolver.list(input, info, context);
+        return ModelClass.instanceResolver.list(input, info, context);
     };
 
 
     const fieldResolvers = {};
     fieldResolvers.tasks = async function tasksResolver(obj, input, context, info) {
-        return instanceResolver.getTasks(obj.id, context);
+        return ModelClass.instanceResolver.getTasks(obj.id, context);
     };
 
 
     relations.forEach(element => {
         fieldResolvers[element.field] = async (parent, args, context, info) => {
             // FIXME: relation resolutions will need to have ACL applied to it as well
-            return instanceResolver.resolveRelation(element, parent, info, context);
+            return ModelClass.instanceResolver.resolveRelation(element, parent, info, context);
         };
     });
 
@@ -287,7 +310,7 @@ function createResolversForTask(task, enums, models) {
 
     const completeTaskMutationName = `completeTaskFor${task.name}`;
     mutation[completeTaskMutationName] = async function(_, args, context, info) {
-        return instanceResolver.completeTask(args, context);
+        return ModelClass.instanceResolver.completeTask(args, context);
     };
 
     const r = {
