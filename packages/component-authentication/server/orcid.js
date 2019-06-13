@@ -1,6 +1,7 @@
 const OrcidStrategy = require('passport-orcid');
 const config = require("config");
 const authentication = require('@pubsweet/model-user/src/authentication');
+const jwt = require('jsonwebtoken');
 
 const { models } = require('component-workflow-model/model');
 const { UniqueViolationError } = require('component-model');
@@ -144,12 +145,35 @@ function didAuthenticateWithORCID(req, res) {
 
     _findOrCreateUser(profile).then(identity => {
 
+        // Create a file access token (stored as a cookie).
+        const fileAccessTokenData = {
+            id: identity.id,
+            username: identity.displayName,
+            fileAccess: true
+        };
+        let fileTokenExpiresIn = 24 * 3600;
+        if (config.has('pubsweet-server.tokenExpiresIn')) {
+            fileTokenExpiresIn = config.get('pubsweet-server.tokenExpiresIn')
+        }
+
+        const fileToken = jwt.sign(fileAccessTokenData, config.get('pubsweet-server.secret'), { expiresIn:fileTokenExpiresIn });
+
+        const cookieOptions = {
+            maxAge: fileTokenExpiresIn * 1000,
+            httpOnly: true
+            //signed: true // Indicates if the cookie should be signed
+        };
+
+        res.cookie("file_token", fileToken, cookieOptions);
+
+
+        // Access token (stored into local storage via an intermediate page that uses JS to save into local storage).
         const tokenData = {
             id: identity.id,
             username: identity.displayName
         };
-
         const token = authentication.token.create(tokenData);
+
         return res.send(RedirectTemplate(redirect || successPath || "/", token));
 
     }).catch(err => {
@@ -163,8 +187,8 @@ function didAuthenticateWithORCID(req, res) {
 const RedirectTemplate = (redirect, token) => {
 
     return `
-        <html>
-            <body></body>
+        <html lang="en">
+            <body />
             <script>
                 localStorage.setItem("token", "${token}");
                 window.location.href = "${redirect}";
