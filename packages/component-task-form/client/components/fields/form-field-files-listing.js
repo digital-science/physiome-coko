@@ -8,7 +8,10 @@ import Label from 'ds-awards-theme/components/label';
 import humanFormatByteCount from "ds-awards-theme/helpers/humanFormatByteCount";
 
 import { FaFilePdf } from 'react-icons/fa';
+import config from 'config';
 
+
+const BaseUrl = config['pubsweet-client'] ? (config['pubsweet-client'].baseUrl || "/") : "/";
 
 const FileListingHolder = styled.div`    
     > div.inner-holder {
@@ -19,7 +22,7 @@ const FileListingHolder = styled.div`
 `;
 
 
-const SimpleFileListing = styled(({className, files}) => {
+const SimpleFileListing = styled(({className, files, instanceId, instanceType}) => {
 
     if(!files || !files.length) {
         return null;
@@ -30,11 +33,11 @@ const SimpleFileListing = styled(({className, files}) => {
             {files.map(file => {
                 return (
                     <li key={file.id}>
-                        <div>
+                        <a href={`${BaseUrl}/files/download/${instanceType.urlName}/${encodeURI(instanceId)}/${encodeURI(file.id)}/${encodeURI(file.fileName)}`}>
                             <FaFilePdf />
                             <span className="file-name">{file.fileDisplayName}</span>
                             <span className="file-size">{humanFormatByteCount(file.fileByteSize)}</span>
-                        </div>
+                        </a>
                     </li>
                 )
             })}
@@ -56,12 +59,14 @@ const SimpleFileListing = styled(({className, files}) => {
         margin-bottom: 5px;
     }
     
-    > li > div {
+    > li > a {
       display: inline-block;
       padding: 5px 5px;
       background: aliceblue;
       border-radius: 5px;
       border: 1px dashed #9dcef8;
+      color: initial;
+      text-decoration: none;
     }
     
     > li svg {
@@ -95,7 +100,7 @@ function FormFieldFilesListing({ data, binding, instanceId, instanceType, option
     return (
         <FileListingHolder className={"form-field-files"}>
             {options.label ? <Label>{options.label}</Label> : null}
-            {fileListing && fileListing.length ? <SimpleFileListing files={fileListing} /> : null}
+            {fileListing && fileListing.length ? <SimpleFileListing files={fileListing} instanceId={instanceId} instanceType={instanceType} /> : null}
         </FileListingHolder>
     );
 }
