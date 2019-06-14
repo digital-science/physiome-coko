@@ -41,9 +41,6 @@ input CompleteTaskVariableInput {
     value: JSON
 }
 
-#extend type Mutation {
-#    completeTask(input:CompleteTaskInput): Boolean
-#}
 
 
 
@@ -72,6 +69,28 @@ type File {
 
     order: Int
 }
+
+# Note: extended file is used when a file needs to support a type or a label
+
+type ExtendedFile {
+    id: ID!
+    created: DateTime!
+    updated: DateTime
+
+    fileName: String
+    fileDisplayName: String
+
+    fileMimeType: String
+    fileByteSize: Int
+
+    storageKey: String
+    storageType: FileStorageType
+
+    order: Int
+    type: String
+    label: String
+}
+
 
 type FileUploadSignature {
     ownerType: String
@@ -108,6 +127,17 @@ input ConfirmFileUploadInput {
 extend type Mutation {
     createFileUploadSignedUrl(input:CreateFileUploadSignedUrlInput): FileUploadSignedUrlResult
     confirmFileUpload(input:ConfirmFileUploadInput) : File
+}
+
+
+input LinkedFileMetaDataInput {
+    type: String
+    label: String
+}
+
+input LinkedFileInput {
+    id: ID!
+    metaData: LinkedFileMetaDataInput
 }
 
 

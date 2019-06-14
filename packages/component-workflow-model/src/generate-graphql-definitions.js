@@ -54,6 +54,7 @@ module.exports = function generateTypeDefsForDefinition(definition) {
 
     const topLevelModels = {
         File: ModelFile.model,
+        ExtendedFile: ModelFile.model,
         Identity: ModelIdentity.model
     };
 
@@ -146,11 +147,13 @@ extend type Mutation {
 
             if(e.accessors.indexOf("set") !== -1) {
 
+                const linkingType = (e.type === "File") ? "LinkedFileInput" : "ID";
+
                 if(e.array === true) {
-                    return tab + `set${taskDef.name}${niceFieldName}(id:ID, linked:[ID]) : Boolean`;
+                    return tab + `set${taskDef.name}${niceFieldName}(id:ID, linked:[${linkingType}]) : Boolean`;
                 }
 
-                return tab + `set${taskDef.name}${niceFieldName}(id:ID, linked:ID) : Boolean`;
+                return tab + `set${taskDef.name}${niceFieldName}(id:ID, linked:${linkingType}) : Boolean`;
             }
 
             return null;
@@ -175,14 +178,16 @@ function _generateModelFieldsForElementsList(elements, enums, inputFilter=false,
             return null;
         }
 
+        const type = (e.type === "File" && (e.fileLabels === true || e.fileTypes === true)) ? "ExtendedFile" : e.type;
+
         if(e.array || (listingFilter && e.listingFilterMultiple === true)) {
             if(inputFilter && e.input !== true) {
                 return null;
             }
-            return `${e.field}: [${e.type}]`;
+            return `${e.field}: [${type}]`;
         }
 
-        return `${e.field}: ${e.type}`;
+        return `${e.field}: ${type}`;
 
     }).filter(v => !!v);
 }

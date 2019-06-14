@@ -120,6 +120,7 @@ function createModelForTask(task, enums, lookupModel) {
         properties[p.key] = p.value;
     });
 
+
     const createClass = (name, cls) => ({
         [name] : class extends cls {
 
@@ -167,8 +168,14 @@ function createModelForTask(task, enums, lookupModel) {
 
             static get relationMappings() {
 
-                const r = {};
+                if(this._cachedRelationMapping) {
+                    return this._cachedRelationMapping;
+                }
 
+                // Note: relation mapping generation is delayed to ensure that model lookups do not fail (i.e. all model classes
+                // should be defined and available before this method is used).
+
+                const relationMappings = {};
                 relations.forEach(e => {
 
                     const mapping = {};
@@ -201,8 +208,17 @@ function createModelForTask(task, enums, lookupModel) {
                             };
 
                             // Files can support additional fields on the relations.
-                            if(e.type === "File" && e.fileLabels === true) {
-                                mapping.join.through.extra = ['label'];
+                            if(e.type === "File") {
+
+                                mapping.join.through.extra = [];
+
+                                if(e.fileLabels === true) {
+                                    mapping.join.through.extra.push('label');
+                                }
+
+                                if(e.fileTypes === true) {
+                                    mapping.join.through.extra.push('type');
+                                }
                             }
                         }
 
@@ -221,10 +237,11 @@ function createModelForTask(task, enums, lookupModel) {
                         };
                     }
 
-                    r[e.field] = mapping;
+                    relationMappings[e.field] = mapping;
                 });
 
-                return r;
+                this._cachedRelationMapping = relationMappings;
+                return relationMappings;
             }
         }
     })[name];
@@ -300,7 +317,37 @@ function createResolversForTask(task, enums, models) {
                 await object.$relatedQuery(e.field).unrelate();
 
                 if(linked && ((e.array === true && linked.length) || e.array === false)) {
-                    await object.$relatedQuery(e.field).relate(linked);
+
+                    if(e.type === "File") {
+
+                        const linkedWithMetaDataFields = linked.map(l => {
+                            const r = {id:l.id};
+
+                            if (e.fileLabels === true) {
+                                if(l.metaData) {
+                                    r.label = l.metaData.label || null;
+                                } else {
+                                    r.label = null;
+                                }
+                            }
+
+                            if (e.fileTypes === true) {
+                                if(l.metaData) {
+                                    r.type = l.metaData.type || null;
+                                } else {
+                                    r.type = null;
+                                }
+                            }
+
+                            return r;
+                        });
+                        
+                        await object.$relatedQuery(e.field).relate(linkedWithMetaDataFields);
+
+                    } else {
+
+                        await object.$relatedQuery(e.field).relate(linked);
+                    }
                 }
 
                 return true;
