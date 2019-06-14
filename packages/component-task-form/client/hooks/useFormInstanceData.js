@@ -46,7 +46,7 @@ export default function useFormInstanceData({instanceId, taskId, taskName, insta
 
         const modifiedDataSet = formData.getModifiedData();
         if(!modifiedDataSet) {
-            return Promise.resolve();
+            return formData.updateModifiedRelationshipsForInstance(instanceId, instanceType);
         }
 
         const {data} = modifiedDataSet;
@@ -57,9 +57,13 @@ export default function useFormInstanceData({instanceId, taskId, taskName, insta
 
         // FIXME: need to filter updated data based on the allowed input for the data type
 
-        return updateInstance(input).then(() => {
-            formData.updateForSubmittedModifications(modifiedDataSet);
-        });
+        return Promise.all([
+            updateInstance(input).then(() => {
+                formData.updateForSubmittedModifications(modifiedDataSet);
+            }),
+
+            formData.updateModifiedRelationshipsForInstance(instanceId, instanceType)
+        ]);
     }
 
     const submitTaskOutcome = useSubmitTaskOutcome(instanceId, formDefinition, instanceType, _updateInstanceFromFormData, wasSubmitted);

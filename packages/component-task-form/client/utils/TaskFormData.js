@@ -16,6 +16,9 @@ class TaskFormData {
         this._defaultValues = {...initialData};
         this._generation = 0;
         this._submittedGeneration = 0;
+
+        this._relationshipModifier = {};
+        this._relationshipModifierClientKeyId = 1;
     }
 
     getFieldValue(fieldID) {
@@ -119,6 +122,42 @@ class TaskFormData {
     getGeneration() {
         return this._generation;
     }
+
+
+
+    registerRelationshipModifier(callback) {
+
+        const key = this._relationshipModifierClientKeyId++;
+        this._relationshipModifier[key] = callback;
+        return key;
+    }
+
+    unregisterRelationshipModifier(key) {
+
+        delete this._relationshipModifier[key];
+    }
+
+    updateModifiedRelationshipsForInstance(instanceId, instanceType) {
+
+        const formData = this;
+        const p = [];
+
+        Object.values(this._relationshipModifier).forEach(modifier => {
+
+            const t = modifier(instanceId, instanceType, formData);
+            if(t) {
+                p.push(t);
+            }
+        });
+
+        return p.length ? Promise.all(p) : Promise.resolve();
+    }
+
+    relationshipWasModified(relationshipFieldId) {
+        this.emit(`modified`);
+        ++this._generation;
+    }
+
 }
 
 EventEmitter(TaskFormData.prototype);
