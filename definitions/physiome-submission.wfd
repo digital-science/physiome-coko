@@ -24,6 +24,17 @@ mapping "DisplayedSubmissionKind" on SubmissionKind {
 }
 
 
+enum SupplementaryFileTypes {
+    Figure => "figure",
+    DataSet => "data-set"
+}
+
+mapping "DisplayedSupplementaryFileTypes" on SupplementaryFileTypes {
+    Figure => "Figure",
+    DataSet => "Data Set"
+}
+
+
 instance Submission {
 
     processKey: "physiome-submission"
@@ -53,8 +64,7 @@ instance Submission {
         curationNotes: String,
 
         articleFiles: [File] <set>,
-        supplementaryFiles: [File] <set, file-labels>,
-        supplementaryDataFiles: [File] <set>,
+        supplementaryFiles: [File] <set, file-labels, file-types>,
 
         figshareArticleId: String
     }
@@ -214,9 +224,8 @@ instance Submission {
 
                 { FileUploader => articleFiles, label:"Manuscript" }
 
-                { FileUploader => supplementaryFiles, label:"Supplementary Files", fileLabels:true }
-
-                { FileUploader => supplementaryDataFiles, label:"Supplementary Data Files" }
+                { FileUploader => supplementaryFiles, label:"Supplementary Files",
+                    fileLabels:true, fileTypes:mapping("DisplayedSupplementaryFileTypes") }
 
             } }
 
