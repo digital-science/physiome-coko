@@ -3,6 +3,7 @@ class MappingDefinition {
     constructor(definition, enums) {
         this.name = definition.name;
         this.values = {};
+        this.rawValues = {};
 
         const enumDef = enums[definition.enum];
         if(!enumDef) {
@@ -16,6 +17,7 @@ class MappingDefinition {
 
                 if(enumDef.values.hasOwnProperty(v.enumValue)) {
                     this.values[v.enumValue] = v.value;
+                    this.rawValues[enumDef.values[v.enumValue]] = v.value;
                 }
             });
         }
@@ -24,6 +26,12 @@ class MappingDefinition {
     get mapping() {
         return this.values;
     }
+
+
+    get internalValueMapping() {
+        return this.rawValues;
+    }
+
 }
 
 export default MappingDefinition;
