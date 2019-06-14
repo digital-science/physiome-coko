@@ -28,8 +28,6 @@ query {
 
     useEffect(() => {
         const handleLocalStorageChanged = (e) => {
-            console.log("handleLocalStorageChanged");
-            console.dir(e);
             if(r.refetch && e.key === "token") {
                 r.refetch();
             }
@@ -43,7 +41,6 @@ query {
     });
 
     if(r.data) {
-        console.dir(r.data);
         r.currentUser = r.data.currentUser;
     }
     return r;
