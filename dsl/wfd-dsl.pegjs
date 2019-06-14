@@ -524,7 +524,7 @@ modelElementOptions = (modelElementExclusions / modelElementJoinToDetails /
                         modelElementJoinDetails / modelElementState / modelElementAccessors /
                         modelElementInitialOwner / modelElementListingFilterMultiple /
                         modelElementListingFilter / modelElementListingSortable /
-                        modelElementFileLabel)
+                        modelElementFileLabel / modelElementFileType)
 
 modelElementExclusions
 	= "input:" inputExclusion:("exclude" / "include")
@@ -598,6 +598,12 @@ modelElementFileLabel
 	= "file-labels"
     {
     	return {type:"options", fileLabels:true};
+    }
+
+modelElementFileType
+	= "file-types"
+    {
+    	return {type:"options", fileTypes:true};
     }
 
 modelElementDefaultStringValue
