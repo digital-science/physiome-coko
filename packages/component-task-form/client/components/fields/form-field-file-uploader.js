@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import styled from 'styled-components';
 
 import useCreateFileUploadSignedUrlMutation from './../../mutations/createFileUploadSignedUrl';
@@ -29,6 +29,7 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, option
     const createFileUploadSignedUrl = useCreateFileUploadSignedUrlMutation();
     const confirmFileUpload = useConfirmUploadedFileMutation();
     const [fileListing, setFileListing] = useState([]);
+    const [filesModified, setFilesModified] = useState(false);
 
     const formDataWasChanged = function _formDataWasChanged(form, field, v) {
         setFileListing(form.getFieldValue(field) || []);
@@ -42,6 +43,7 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, option
 
         data.on(`field.${binding}`, formDataWasChanged);
         setFileListing(data.getFieldValue(binding) || []);
+        setFilesModified(false);
 
         return function cleanup() {
             data.off(`field.${binding}`, formDataWasChanged);
@@ -49,10 +51,41 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, option
 
     }, [data, binding]);
 
+    const { fileLabels, fileTypes } = options;
+    const fileTypeOptions = useMemo(() => {
+
+        if(!fileTypes) {
+            return null;
+        }
+
+        const mapping = fileTypes.internalValueMapping;
+
+        return Object.keys(mapping).map(k => {
+            return {value:k, display:mapping[k]};
+        });
+
+    }, [fileTypes]);
+
+
+    useEffect(() => {
+
+        if(!data || filesModified !== true) {
+            return;
+        }
+
+        const regId = data.registerRelationshipModifier(function(instanceId, instanceType, formData) {
+            console.log("registered relationship modifier for binding called: " + binding);
+            return updateAssociatedFilesWithInstance(instanceId, fileListing);
+        });
+
+        return () => {
+            data.unregisterRelationshipModifier(regId);
+        };
+
+    }, [data, filesModified, fileListing]);
+
 
     function getSignedUrl(file, callback) {
-
-        console.dir(file);
 
         const signature = {
             ownerType: instanceType.name,
@@ -70,6 +103,30 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, option
         });
     }
 
+    function updateAssociatedFilesWithInstance(instanceId, files) {
+
+        const associatedFiles = files.map(file => {
+
+            const f = {id: file.id};
+
+            if(fileLabels || fileTypes) {
+                f.metaData = {type:null, label:null};
+
+                if(fileTypes) {
+                    f.metaData.type = file.type;
+                }
+
+                if(fileLabels) {
+                    f.metaData.label = file.label;
+                }
+            }
+
+            return f;
+        });
+
+        return setInstanceAssociatedFiles(instanceId, associatedFiles);
+    }
+
     function finishedFileUpload(result) {
 
         console.log("Finish file upload !!!");
@@ -84,8 +141,6 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, option
 
         return confirmFileUpload(confirmFileUploadInput).then(result => {
 
-            console.dir(result);
-
             if(!result) {
                 return;
             }
@@ -94,30 +149,14 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, option
             newFiles.push(result);
 
             setFileListing(newFiles);
-
-            return setInstanceAssociatedFiles(instanceId, newFiles.map(file => file.id)).then(result => {
-
-                console.log("did set associated files");
-                console.dir(result);
-            })
-
-            // Now need to save this as the set of files associated with the instance owner.
-            // !!!!
-
+            return updateAssociatedFilesWithInstance(instanceId, newFiles);
         });
+    }
 
-        /*const { file, fileID } = result;
-        const finalFile = {};
 
-        finalFile.id = fileID;
-        finalFile.name = file.name;
-        finalFile.type = file.type;
-        finalFile.size = file.size;
-
-        const files = value || [];
-        files.push(finalFile);
-
-        setModelValue(files);*/
+    function fileWasModified(file) {
+        setFilesModified(true);
+        data.relationshipWasModified(binding);
     }
 
     function removeFile(file) {
@@ -127,11 +166,19 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, option
         console.log("Remove file !!!");
         console.dir(file);
 
-        /*if(file.id) {
-            const newFiles = (value || []).filter(f => f.id !== file.id);
-            setModelValue(newFiles);
-            // NOTE: also delete file from server, or allow for a cleanup process to remove unlinked files??
-        }*/
+        fileWasModified(file);
+    }
+
+    function changeFileType(file, newType) {
+        file.type = newType;
+        fileWasModified(file);
+        return newType;
+    }
+
+    function changeFileLabel(file, newLabel) {
+        file.label = newLabel;
+        fileWasModified(file);
+        return newLabel;
     }
 
     const upload = {
@@ -154,7 +201,10 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, option
                 >
                 </FileUploader>
 
-                {fileListing && fileListing.length ? <FileListing files={fileListing} instanceId={instanceId} instanceType={instanceType} removeFile={removeFile} /> : null}
+                {fileListing && fileListing.length ?
+                    <FileListing files={fileListing} instanceId={instanceId} instanceType={instanceType}
+                        changeFileType={changeFileType} changeFileLabel={changeFileLabel} removeFile={removeFile}
+                        fileLabels={fileLabels} fileTypeOptions={fileTypeOptions} /> : null}
             </div>
         </FileUploaderHolder>
     );
@@ -167,8 +217,18 @@ export default withFormField(FormFieldFileUploader, (element) => {
     // From the GraphQL endpoint we want to fetch the file set along with the associated name, size, type etc.
     // The top level field that we are interested in (that comes in via the 'data' data set is the binding values).
 
-    const topLevel = element.binding;
-    const fetch = fetchFields(element.binding, `id, fileName, fileDisplayName, fileMimeType, fileByteSize`);
+    const {binding:topLevel, options = {}} = element;
+    const { fileLabels, fileTypes } = options;
 
+    const fields = ['id', 'fileName', 'fileDisplayName', 'fileMimeType', 'fileByteSize'];
+    if(fileLabels) {
+        fields.push('label');
+    }
+
+    if(fileTypes) {
+        fields.push('type');
+    }
+
+    const fetch = fetchFields(element.binding, fields.join(', '));
     return {topLevel, fetch};
 });

@@ -6,7 +6,7 @@ import { useMemo } from 'react';
 function _generateGraphQL(instanceType, binding) {
     const niceBindingName = binding.charAt(0).toUpperCase() + binding.slice(1);
     return gql`
-        mutation SetInstanceBoundFiles($id:ID, $linked:[ID]) {
+        mutation SetInstanceBoundFiles($id:ID, $linked:[LinkedFileInput]) {
           update: set${instanceType.name}${niceBindingName}(id:$id, linked:$linked)
         }`;
 }
