@@ -7,7 +7,7 @@ const _Checkbox = ({...rest}) => {
 };
 
 const StyledCheckbox = styled(_Checkbox)`
-    margin-right: 3px;
+    margin-right: 5px;
 `;
 
 const _SizeSmall = (tag) => {
@@ -31,7 +31,9 @@ const StyledCheckboxLabel = styled(_CheckboxLabel)`
     color: black;  
 `;
 
+const SmallCheckboxLabel = _SizeSmall(StyledCheckboxLabel);
+
 
 export default StyledCheckbox;
-export { StyledCheckbox as Checkbox, SmallCheckBox, StyledCheckboxLabel as CheckboxLabel };
+export { StyledCheckbox as Checkbox, SmallCheckBox, StyledCheckboxLabel as CheckboxLabel, SmallCheckboxLabel };
 

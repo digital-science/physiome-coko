@@ -26,11 +26,11 @@ const InlineButton = styled(_InlineButton)`
     &.bordered {
         border-radius: 7px;
         padding: 2px 10px;
-        background: #d6d6d6;
+        border: 1px solid #d6d6d6;
     }
 
     &.bordered:hover {
-        background: #b4b4b4;
+        background: #d6d6d6;
     }
 
     & > img {
@@ -62,7 +62,7 @@ const InlineButton = styled(_InlineButton)`
     
     
     &.green > svg {
-      color: #4CAF50;
+        color: #4CAF50;
     }
     &.green:hover > svg {
         color: #3e7d3e;
@@ -71,3 +71,16 @@ const InlineButton = styled(_InlineButton)`
 `;
 
 export default InlineButton;
+
+
+const SmallInlineButton = styled(InlineButton)`
+    font-size: 12px;
+    line-height: 14px;
+    
+    &.bordered {
+        border-radius: 5px;
+        padding: 2px 8px;
+    }
+`;
+
+export { SmallInlineButton };

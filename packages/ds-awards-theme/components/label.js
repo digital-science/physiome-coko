@@ -2,21 +2,29 @@ import React from 'react';
 import styled from 'styled-components';
 
 
-const Label = ({children=null, ...rest}) => {
+const _Label = ({children=null, ...rest}) => {
     return <label {...rest}>{children}</label>
 };
 
-export default styled(Label)`
+const Label = styled(_Label)`
     font-family: ProximaNovaLight, sans-serif;
     font-size: 16px;
     color: #9c9c9c;
 `;
+
+export default Label;
 
 const BlockLabel = styled(Label)`
     display: block;
-    font-family: ProximaNovaLight, sans-serif;
-    font-size: 16px;
-    color: #9c9c9c;
 `;
 
-export { BlockLabel };
+const SmallLabel = styled(Label)`
+  font-size: 12px;
+`;
+
+const SmallBlockLabel = styled(SmallLabel)`
+    display: block;
+`;
+
+
+export { BlockLabel, SmallLabel, SmallBlockLabel };
