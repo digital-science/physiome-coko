@@ -6,8 +6,6 @@ import useDebounce from '../hooks/useDebouncedValue'
 
 import { BorderStyle, SmallBorderStyle } from "ds-awards-theme/components/bordered-element";
 
-import RorIcon from '../static/ror-logo-small.png';
-
 
 // Customisation to ensure suggestions don't show when the autocomplete is read-only mode.
 class CustomisedAutocomplete extends Autocomplete {
@@ -72,9 +70,28 @@ const ItemHolder = styled.div`
     font-size: 12px;
     background: white;
     cursor: pointer;
+    color: #505050;
     
     &.selected {
       background: #b3e7ff;
+    }
+    
+    & .acronyms {
+      color: #909090;
+      font-style: italic;
+    }
+    & .acronyms:before {
+      content: " ("
+    }
+    & .acronyms:after {
+      content: ")"
+    }
+    
+    & .country {
+      color: #909090;
+    }
+    & .country:before {
+      content: " - "
     }
 `;
 
@@ -116,9 +133,32 @@ function _OrganisationAutocomplete({className, readOnly, value, placeholder, onC
         });
     }, []);
 
-    const onSelect = function(val, item) {
+    const onSelect = function(val, entity) {
 
-        if(onChange(val, item)) {
+        let orgEntity = null;
+
+        if(entity && entity.id && entity.name) {
+            orgEntity = {id:entity.id, name:entity.name};
+
+            if(entity.country) {
+                orgEntity.country = entity.country;
+            }
+
+            if(entity.external_ids) {
+
+                const { GRID, FundRef } = entity.external_ids;
+
+                if(GRID && GRID.preferred) {
+                    orgEntity.grid_id = GRID.preferred;
+                }
+
+                if(FundRef && FundRef.all && FundRef.all instanceof Array && FundRef.all.length) {
+                    orgEntity.fund_ref_id = FundRef.all[0];
+                }
+            }
+        }
+
+        if(onChange(val, orgEntity)) {
             const autcomplete = autocompleteRef.current;
             if(autcomplete) {
 
@@ -141,6 +181,8 @@ function _OrganisationAutocomplete({className, readOnly, value, placeholder, onC
                 renderItem={(item, isHighlighted) =>
                     <ItemHolder key={item.id} className={isHighlighted ? "selected" : ""}>
                         {item.name}
+                        {item.acronyms && item.acronyms.length ? <span className="acronyms">{item.acronyms[0]}</span> : null}
+                        {item.country && item.country.country_name ? <span className="country">{item.country.country_name}</span> : null}
                     </ItemHolder>
                 }
 
@@ -174,8 +216,6 @@ function _OrganisationAutocomplete({className, readOnly, value, placeholder, onC
 
                 readOnly={readOnly}
             />
-
-            {organisationEntity && organisationEntity.ror_id ? <a href={currentAffiliation.ror_id} rel="noopener noreferrer" target="_blank"><img src={RorIcon} alt="ror icon" /></a> : null}
         </div>);
 }
 
