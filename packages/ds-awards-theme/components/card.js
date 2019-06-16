@@ -20,6 +20,7 @@ const Card = styled(({Tag = "div", className, reorderingGrabber, children}) => {
   box-shadow: 0 1px 10px 1px #d0d0d0d4;
   padding: 10px;
   border-radius: 5px;
+  background: white;
   
   &.reorder > .reorder-grabber {
     position: absolute;
