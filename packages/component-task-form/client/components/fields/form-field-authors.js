@@ -1,220 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import styled from 'styled-components';
 
 import withFormField from "./withFormField";
-import useFormValueBinding from '../../hooks/useFormValueBinding';
+import { useFormValueBindingForComplexObject } from '../../hooks/useFormValueBinding';
 
 import Label from "ds-awards-theme/components/label";
-import TextInput from "ds-awards-theme/components/text-input";
-import InlineButton from "ds-awards-theme/components/inline-button";
-import AffiliationAutocomplete from '../affiliation-autocomplete';
+import InlineButton, {SmallInlineButton} from "ds-awards-theme/components/inline-button";
 
-import PersonIconSrc from "ds-awards-theme/static/person.svg";
 import { FaPlus, FaPenSquare, FaTrash, FaCheckSquare, FaTimesCircle } from 'react-icons/fa';
 
 
-const ActionsColumn = styled.td`
-    text-align: right;
-    padding-right: 10px;
-`;
-
-
-function _AuthorRow({className, key, author, editing, editAuthor, removeAuthor, modifiedAuthor}) {
-
-    const [name, setName] = useState(author.name || "");
-    const [email, setEmail] = useState(author.email || "");
-    const [affiliationValue, setAffiliationValue] = useState(author.affiliation ? (author.affiliation.name || "") : "");
-    const [affiliation, setAffiliation] = useState(author.affiliation);
-
-    const handleNameChange = (event) => {
-        setName(event.target.value);
-    };
-
-    const handleEmailChange = (event) => {
-        setEmail(event.target.value);
-    };
-
-    const handleAffiliationChange = (value, item) => {
-
-        setAffiliationValue(value);
-
-        const newAffiliation = {name: value};
-
-
-        if(item) {
-            newAffiliation.ror_id = item.id;
-
-            if(item.country && item.country.country_code) {
-                newAffiliation.country = item.country.country_code;
-            }
-
-            if(item.external_ids && item.external_ids.GRID && item.external_ids.GRID.preferred) {
-                newAffiliation.grid_id = item.external_ids.GRID.preferred;
-            }
-        }
-
-        setAffiliation(newAffiliation);
-    };
-
-    const discardChanges = () => {
-        setName(author.name || "");
-        setEmail(author.email || "");
-        setAffiliationValue(author.affiliation ? (author.affiliation.name || "") : "");
-        setAffiliation(author.affiliation);
-        editAuthor(author, true);
-    };
-
-    const saveChanges = () => {
-        author.name = name;
-        author.email = email;
-        author.affiliation = affiliation;
-        modifiedAuthor(author);
-        editAuthor(author, true);
-    };
-
-    return (
-        <tr key={key} className={className}>
-            <td>
-                <img src={PersonIconSrc} alt="person" />
-            </td>
-            <td>
-                <TextInput value={name} placeholder="Author name" onChange={handleNameChange} readOnly={!editing} />
-            </td>
-
-            <td>
-                <TextInput value={email} placeholder="Email address" onChange={handleEmailChange} readOnly={!editing} />
-            </td>
-
-            <td>
-                <AffiliationAutocomplete value={affiliationValue} placeholder="Affiliation" onChange={handleAffiliationChange} readOnly={!editing} currentAffiliation={affiliation} />
-            </td>
-
-            <ActionsColumn>
-                {editing ? <InlineButton icon={<FaCheckSquare />} color="green" onClick={saveChanges} /> : <InlineButton icon={<FaPenSquare />} onClick={() => editAuthor(author)} />}
-                {editing ? <InlineButton icon={<FaTimesCircle />} onClick={discardChanges} /> : <InlineButton icon={<FaTrash/>} onClick={() => removeAuthor(author)} />}
-            </ActionsColumn>
-        </tr>
-    );
-}
-
-const AuthorRow = styled(_AuthorRow)`
-    input {
-        padding: 8px 12px;
-        font-size: 15px;
-    }
-
-    input:read-only {
-        border: 1px solid transparent;
-        background: none;
-        outline: none;
-        box-shadow: none;
-        cursor: default;
-        
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        overflow: hidden;
-    }
-    
-    img {
-        padding-left: 5px;
-        width: 18px;
-    }
-`;
-
-
-function _AuthorsListing({className, authors, edited, editAuthor, removeAuthor, modifiedAuthor, children}) {
-
-    return (
-        <table className={className}>
-            <thead className={authors && authors.length ? "" : "no-authors"}>
-                <tr>
-                    <th className="icon" />
-                    <th className="n">Name</th>
-                    <th className="n">Email</th>
-                    <th className="n">Affiliation</th>
-                    <th className="actions" />
-                </tr>
-            </thead>
-
-            <tbody>
-                <tr className="blank" />
-
-                {authors && authors.length ? authors.map((author) => {
-
-                    const isEdited = (edited && edited.length && edited.indexOf(author.id) !== -1);
-
-                    return (
-                        <AuthorRow key={author.id} author={author} editing={isEdited} editAuthor={editAuthor}
-                            removeAuthor={removeAuthor} modifiedAuthor={modifiedAuthor} />
-                    );
-                }) :
-                    <tr><td className="comment" colSpan={5}>Click "Add Authors" to add an author to the submission.</td></tr>
-                }
-
-                <tr className="blank" />
-                <tr><td className="children" colSpan={5}>{children}</td></tr>
-                <tr className="blank" />
-
-            </tbody>
-        </table>
-    )
-}
-
-const AuthorsListing = styled(_AuthorsListing)`
-
-    font-family: ProximaNovaLight,sans-serif;
-    min-width: 100%;
-    text-align: left;
-    border-spacing: 0;
-    margin-top: 4px;
-    margin-bottom: 12px;
-    border-radius: 5px;
-    border: 1px solid #d0d0d0;
-
-    th {
-        border-bottom: 1px solid #c7c7c7;
-        font-weight: normal;
-        padding-top: 5px;
-        padding-bottom: 5px;
-    }
-    
-    .n {
-        padding-left: 12px;
-    }
-    
-    .icon {
-        width: 1.8em;
-    }
-    
-    .actions {
-        width: 5em;
-    }
-    
-    thead.no-authors th {
-      opacity: 0.5;
-    }
-    
-    tbody td {
-        padding: 2px;
-        vertical-align: middle;
-    }
-    
-    tbody .blank {
-        height: 5px;
-    }
-    
-    .comment {
-        padding: 20px;
-        text-align: center;
-        color: darkgrey;
-    }
-    
-    tbody td.children {
-        text-align: center;
-        border-top: 1px dashed #c7c7c7;
-        padding: 8px 5px 5px;
-    }
-`;
+import AuthorEditorCard from "../author-editor-card";
 
 
 const AuthorsEditorHolder = styled.div`    
@@ -227,7 +24,29 @@ const AuthorsEditorHolder = styled.div`
     min-width: 750px;
 `;
 
+const AuthorEditorCardHolder = styled.div`
 
+    border: 1px solid #d0d0d0;
+    padding: 8px;
+    border-radius: 5px;
+    
+    & .drag-author {
+        margin: 10px 10px 20px;
+    }
+`;
+
+const DraggableAuthorCard = ({authorId, index, ...props}) => {
+
+    return (
+        <Draggable draggableId={authorId} key={authorId} data-id={authorId} index={index}>
+            {(provided, snapshot)=>
+                <div className="drag-author" ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                    <AuthorEditorCard {...props} />
+                </div>
+            }
+        </Draggable>
+    )
+};
 
 function _nextUniqueId(authors) {
     if(!authors || !authors.length) {
@@ -244,11 +63,9 @@ function _nextUniqueId(authors) {
 }
 
 
+function FormFieldAuthorsEditor({ className, data, binding, instanceId, instanceType, options = {} }) {
 
-function FormFieldAuthorsEditor({ data, binding, instanceId, instanceType, options = {} }) {
-
-    const [authors, setAuthors] = useFormValueBinding(data, binding);
-    const [edited, setEdited] = useState([]);
+    const [authors, setAuthors] = useFormValueBindingForComplexObject(data, binding);
 
     // Make sure all authors have a unique id associated.
     useEffect(() => {
@@ -267,52 +84,65 @@ function FormFieldAuthorsEditor({ data, binding, instanceId, instanceType, optio
 
     const addAuthor = () => {
 
-        const newAuthor = {id:_nextUniqueId(authors), name:"", affiliation:"", email:"", orcid:""};
-
+        const newAuthor = {id:_nextUniqueId(authors)};
         const newAuthorsList = (authors || []).splice(0);
 
         newAuthorsList.push(newAuthor);
-
         setAuthors(newAuthorsList);
-        editAuthor(newAuthor);
     };
 
     const removeAuthor = a => {
         const id = a.id;
-        if(edited && edited.length && edited.indexOf(id) !== -1) {
-            setEdited(edited.splice(0).filter(e => e !== id));
-        }
         setAuthors(authors.splice(0).filter(a => a.id !== id));
     };
 
-    const editAuthor = (a, remove=false) => {
+    const didModifyAuthor = (author) => {
+        console.log("Did modify author");
+        console.dir(author);
 
-        if(remove) {
-            setEdited(edited.splice(0).filter(e => e !== a.id));
-        } else {
-            if(edited.indexOf(a.id) === -1) {
-                const newEdited = edited ? edited.splice(0) : [];
-                newEdited.push(a.id);
-                setEdited(newEdited);
-            }
+        setAuthors(authors);
+    };
+
+    const onDragEnd = ({destination, source}) => {
+
+        if(!destination) {
+            return;
         }
+
+        const newAuthorListing = Array.from(authors);
+        const [movedAuthor] = newAuthorListing.splice(source.index, 1);
+
+        newAuthorListing.splice(destination.index, 0, movedAuthor);
+        setAuthors(newAuthorListing);
     };
 
-    const modifiedAuthor = a => {
-        console.log("modifiedAuthor !!!");
-        setAuthors(authors ? authors.splice(0) : []);
-    };
-
-    console.log("edited: ");
-    console.dir(edited);
 
     return (
-        <AuthorsEditorHolder>
+        <AuthorsEditorHolder className={className}>
             {options.label ? <Label>{options.label}</Label> : null}
 
-            <AuthorsListing authors={authors} edited={edited} editAuthor={editAuthor} removeAuthor={removeAuthor} modifiedAuthor={modifiedAuthor}>
-                <InlineButton icon={<FaPlus />} bordered={true} onClick={addAuthor}>Add Author</InlineButton>
-            </AuthorsListing>
+            <AuthorEditorCardHolder>
+
+                <DragDropContext onDragEnd={onDragEnd}>
+                    <Droppable droppableId="author-listing">
+                        {(provided, snapshot) => (
+                            <div ref={provided.innerRef}>
+
+                                {(authors || []).map((author, index) => {
+                                    return <DraggableAuthorCard key={author.id} authorId={author.id} index={index} author={author} didModifyAuthor={didModifyAuthor} />
+                                })}
+
+                                {provided.placeholder}
+                            </div>
+                        )}
+                    </Droppable>
+                </DragDropContext>
+
+                <div style={{"padding": "8px"}}>
+                    <InlineButton icon={<FaPlus />} bordered={true} onClick={addAuthor}>Add Additional Author</InlineButton>
+                </div>
+
+            </AuthorEditorCardHolder>
 
         </AuthorsEditorHolder>
     );
