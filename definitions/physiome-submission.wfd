@@ -57,6 +57,7 @@ instance Submission {
         pmrWorkspace: String,
         priceAcknowledged: Boolean,
         keywords: JSON,
+        funding: JSON,
 
         allFilesPresent: Boolean,
         resultsMatch: Boolean,
@@ -73,7 +74,7 @@ instance Submission {
     acl {
 
         fields "submit" {
-    	    kind, title, abstract, primaryPapers, authors, pmrWorkspace, priceAcknowledged, keywords, submissionDate,
+    	    kind, title, abstract, primaryPapers, authors, pmrWorkspace, priceAcknowledged, keywords, funding, submissionDate,
     	    articleFiles, supplementaryFiles, supplementaryDataFiles
         }
 
@@ -82,7 +83,7 @@ instance Submission {
         }
 
         fields "curation" {
-    	    kind, title, abstract, primaryPapers, authors, pmrWorkspace, priceAcknowledged, keywords, submissionDate,
+    	    kind, title, abstract, primaryPapers, authors, pmrWorkspace, priceAcknowledged, keywords, funding, submissionDate,
     	    articleFiles, supplementaryFiles, supplementaryDataFiles,
     	    curator,
     	    allFilesPresent, resultsMatch, modelAnnotated, curationNotes,
@@ -210,7 +211,7 @@ instance Submission {
 
         elements: {
 
-            { Panel, heading:"Article Details", children:{
+            { Panel, children:{
 
                 { SelectValue => kind, label:"Manuscript Type", options:mapping("DisplayedSubmissionKind") }
 
@@ -220,12 +221,16 @@ instance Submission {
 
                 { AuthorsEditor => authors, label:"Authors" }
 
+                { FundingEditor => funding, label:"Funding Acknowledgements" }
+
                 { Text => pmrWorkspace, label:"Associated PMR Workspace" }
 
                 { FileUploader => articleFiles, label:"Manuscript" }
 
                 { FileUploader => supplementaryFiles, label:"Supplementary Files",
                     fileLabels:true, fileTypes:mapping("DisplayedSupplementaryFileTypes") }
+
+                { Checkbox => priceAcknowledged, label: "I understand that there is an article processing charge (APC) of $300 USD associated with the successful acceptance of this manuscript." }
 
             } }
 
