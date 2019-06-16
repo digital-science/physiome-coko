@@ -65,7 +65,7 @@ const _AffiliationEditorRow = ({className, affiliation, showRemoveIcon, removeAf
     return (
         <div className={`${className} ${showRemoveIcon ? "has-remove" : ""}`}>
             <div>
-                <SmallOrganisationAutocomplete value={orgValue} organisationEntity={orgEntity} onChange={onOrgChange} placeholder="Organisation" />
+                <SmallOrganisationAutocomplete value={orgValue} entity={orgEntity} onChange={onOrgChange} placeholder="Organisation" />
             </div>
 
             <div>
