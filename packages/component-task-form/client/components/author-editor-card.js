@@ -76,19 +76,22 @@ const AuthorAffiliationsFormGroup = styled(AuthorFormGroup)`
 
 const AuthorEditorRemove = styled(({className, author, removeAuthor}) => {
 
-    return <div className={className || ""}><FaTrashAlt onClick={() => removeAuthor(author)} /></div>
+    return <div className={className || ""} onClick={() => removeAuthor(author)}><FaTrashAlt /></div>
 })`
-    width: 1em;
-    height: 1em;
     color: #b3b3b3;
     position: absolute;
-    right: 0;
-    bottom: 5px;
+    right: -20px;
+    bottom: -11px;
     font-size: 12px;
     cursor: pointer;
-  
+    border-top: 1px solid #d0d0d0;
+    border-left: 1px solid #d0d0d0;
+    padding: 4px;
+    border-top-left-radius: 5px;
+      
     &:hover {
         color: #505050;
+        background: #d0d0d0;
     }
 `;
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import styled from 'styled-components';
 
@@ -6,9 +6,8 @@ import withFormField from "./withFormField";
 import { useFormValueBindingForComplexObject } from '../../hooks/useFormValueBinding';
 
 import Label from "ds-awards-theme/components/label";
-import InlineButton, {SmallInlineButton} from "ds-awards-theme/components/inline-button";
-
-import { FaPlus, FaPenSquare, FaTrash, FaCheckSquare, FaTimesCircle } from 'react-icons/fa';
+import InlineButton from "ds-awards-theme/components/inline-button";
+import { FaPlus } from 'react-icons/fa';
 
 
 import AuthorEditorCard from "../author-editor-card";
@@ -59,7 +58,7 @@ function _nextUniqueId(authors) {
             maxAuthorId = a.id;
         }
     });
-    return maxAuthorId + 1;
+    return (maxAuthorId !== undefined) ? maxAuthorId + 1 : 1;
 }
 
 
