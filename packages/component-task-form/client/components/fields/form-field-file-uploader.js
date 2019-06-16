@@ -42,7 +42,11 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, option
         }
 
         data.on(`field.${binding}`, formDataWasChanged);
-        setFileListing(data.getFieldValue(binding) || []);
+
+        const fileList = data.getFieldValue(binding) || [];
+        fileList.sort((a, b) => a.order - b.order);
+
+        setFileListing(fileList);
         setFilesModified(false);
 
         return function cleanup() {
@@ -74,7 +78,6 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, option
         }
 
         const regId = data.registerRelationshipModifier(function(instanceId, instanceType, formData) {
-            console.log("registered relationship modifier for binding called: " + binding);
             return updateAssociatedFilesWithInstance(instanceId, fileListing);
         });
 
@@ -146,6 +149,7 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, option
             }
 
             const newFiles = fileListing ? fileListing.slice(0) : [];
+            result.order = newFiles.length;
             newFiles.push(result);
 
             setFileListing(newFiles);
@@ -181,6 +185,18 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, option
         return newLabel;
     }
 
+    function reorderFile(file, newIndex, oldIndex) {
+
+        const newFileListing = Array.from(fileListing);
+        const [movedFile] = newFileListing.splice(oldIndex, 1);
+
+        newFileListing.splice(newIndex, 0, movedFile);
+        newFileListing.forEach((f, index) => f.order = index);
+
+        setFileListing(newFileListing);
+        fileWasModified(movedFile);
+    }
+
     const upload = {
         getSignedUrl: getSignedUrl,
         uploadRequestHeaders:{}
@@ -203,7 +219,7 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, option
 
                 {fileListing && fileListing.length ?
                     <FileListing files={fileListing} instanceId={instanceId} instanceType={instanceType}
-                        changeFileType={changeFileType} changeFileLabel={changeFileLabel} removeFile={removeFile}
+                        changeFileType={changeFileType} changeFileLabel={changeFileLabel} reorderFile={reorderFile} removeFile={removeFile}
                         fileLabels={fileLabels} fileTypeOptions={fileTypeOptions} /> : null}
             </div>
         </FileUploaderHolder>
@@ -220,7 +236,7 @@ export default withFormField(FormFieldFileUploader, (element) => {
     const {binding:topLevel, options = {}} = element;
     const { fileLabels, fileTypes } = options;
 
-    const fields = ['id', 'fileName', 'fileDisplayName', 'fileMimeType', 'fileByteSize'];
+    const fields = ['id', 'fileName', 'fileDisplayName', 'fileMimeType', 'fileByteSize', 'order'];
     if(fileLabels) {
         fields.push('label');
     }
