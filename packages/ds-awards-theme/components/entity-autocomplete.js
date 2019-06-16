@@ -79,7 +79,7 @@ function _EntityAutocomplete({className, readOnly, entity, value, placeholder, o
                               getItemValue=DefaultGetItemValue, renderItem=DefaultRenderItem, renderEntityValueRepresentation=DefaultEntityRenderer,
                               menuHolderComponent=MenuHolder, maximumEntities=15, debounceInterval=250}) {
 
-    const MenuHolderComponent = menuHolderComponent
+    const MenuHolderComponent = menuHolderComponent;
     const generationRef = useRef(0);
     const displayedGenerationRef = useRef(0);
     const [open, setOpen] = useState(false);
@@ -218,7 +218,9 @@ const EntityAutocomplete = styled(_EntityAutocomplete)`
   }
 `;
 
-const SmallEntityAutocomplete = styled(EntityAutocomplete)`
+
+const ApplySmallAutocompleteStyle = (tag) => styled(tag)`
+
   & input {
       font-size: 12px;
       ${SmallBorderStyle}
@@ -236,7 +238,9 @@ const SmallEntityAutocomplete = styled(EntityAutocomplete)`
   }
 `;
 
+const SmallEntityAutocomplete = ApplySmallAutocompleteStyle(EntityAutocomplete);
+
 
 export default EntityAutocomplete;
 
-export { SmallEntityAutocomplete, MenuItem, MenuHolder };
+export { EntityAutocomplete, SmallEntityAutocomplete, MenuItem, MenuHolder, ApplySmallAutocompleteStyle };
