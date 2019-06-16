@@ -129,7 +129,7 @@ function FormFieldAuthorsEditor({ className, data, binding, instanceId, instance
                             <div ref={provided.innerRef}>
 
                                 {(authors || []).map((author, index) => {
-                                    return <DraggableAuthorCard key={author.id} authorId={author.id} index={index} author={author} didModifyAuthor={didModifyAuthor} />
+                                    return <DraggableAuthorCard key={author.id} authorId={author.id} index={index} author={author} didModifyAuthor={didModifyAuthor} removeAuthor={removeAuthor} />
                                 })}
 
                                 {provided.placeholder}

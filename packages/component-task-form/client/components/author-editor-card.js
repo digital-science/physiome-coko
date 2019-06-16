@@ -5,6 +5,7 @@ import Card from "ds-awards-theme/components/card";
 import { SmallBlockLabel } from "ds-awards-theme/components/label";
 import { SmallTextInput } from "ds-awards-theme/components/text-input";
 import { SmallCheckBox, SmallCheckboxLabel } from "ds-awards-theme/components/checkbox-input";
+import { FaTrashAlt } from 'react-icons/fa';
 
 import AffiliationEditor from './affiliation-editor';
 
@@ -72,7 +73,27 @@ const AuthorRelationshipFormGroup = styled(AuthorFormGroup)`
 const AuthorAffiliationsFormGroup = styled(AuthorFormGroup)`
 `;
 
-function _AuthorEditorCard({className, author, didModifyAuthor}) {
+
+const AuthorEditorRemove = styled(({className, author, removeAuthor}) => {
+
+    return <div className={className || ""}><FaTrashAlt onClick={() => removeAuthor(author)} /></div>
+})`
+    width: 1em;
+    height: 1em;
+    color: #b3b3b3;
+    position: absolute;
+    right: 0;
+    bottom: 5px;
+    font-size: 12px;
+    cursor: pointer;
+  
+    &:hover {
+        color: #505050;
+    }
+`;
+
+
+function _AuthorEditorCard({className, author, removeAuthor, didModifyAuthor}) {
 
     const [name, setName, handleNameChange] = useAuthorValueField(author, "name", didModifyAuthor);
     const [email, setEmail, handleEmailChange] = useAuthorValueField(author, "email", didModifyAuthor);
@@ -112,6 +133,7 @@ function _AuthorEditorCard({className, author, didModifyAuthor}) {
                 <SmallBlockLabel>Affiliations</SmallBlockLabel>
                 <AffiliationEditor value={affiliations} onChange={onAffiliationsChanged} />
             </AuthorAffiliationsFormGroup>
+            <AuthorEditorRemove author={author} removeAuthor={removeAuthor} />
         </Card>
     )
 }
@@ -119,6 +141,7 @@ function _AuthorEditorCard({className, author, didModifyAuthor}) {
 export default styled(_AuthorEditorCard)`
     
     & .content {
+        position: relative;
         display: flex;
         align-items: flex-start;
         justify-content: space-between;
