@@ -36,6 +36,10 @@ class InstanceViewData {
         throw new Error('InstanceViewData does not support modifying data values.');
     }
 
+    setFieldValueForComplexObject(fieldID, value) {
+        throw new Error('InstanceViewData does not support modifying data values.');
+    }
+
     resetFieldValue(fieldID) {
         throw new Error('InstanceViewData does not support modifying data values.');
     }

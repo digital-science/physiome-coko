@@ -63,6 +63,18 @@ class TaskFormData {
         ++this._generation;
     }
 
+    setFieldValueForComplexObject(fieldID, value) {
+
+        if(fieldID.indexOf('.') !== -1) {
+            throw new Error(`TaskFormData - setFieldValueForComplexObject doesn't support field paths (${fieldID})`);
+        }
+
+        this._modifiedFields[fieldID] = value;
+        this.emit(`field.${fieldID}`, this, fieldID, value);
+        this.emit(`modified`);
+        ++this._generation;
+    }
+
     resetFieldValue(fieldID) {
 
         if(fieldID.indexOf('.') !== -1) {
