@@ -49,7 +49,6 @@ const WorkflowHeroHeading = styled.div`
   text-align: center;
   font-size: 32px;
   font-weight: bold;
-  letter-spacing: 0.1em;
   color: #828282;
   
   /*background: #ebebeb;*/

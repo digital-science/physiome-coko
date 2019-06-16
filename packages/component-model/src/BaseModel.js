@@ -17,7 +17,7 @@ class WorkflowBaseModel extends DBErrors(BaseModel) {
 
         if (!object) {
             throw new NotFoundError(
-                `Object not found: ${this.name} with 'id' ${id}`,
+                `Object not found: ${this.name} with 'id' ${id}`
             );
         }
 
