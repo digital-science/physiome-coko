@@ -5,9 +5,10 @@
   "license": "MIT",
   "dependencies": {
     "@pubsweet/ui-toolkit": "^2.0.0",
-    "styled-components": "4.1.3",
     "moment": "^2.24.0",
+    "react-beautiful-dnd": "^11.0.4",
     "react-dates": "18.4.0",
-    "react-dropzone-s3-uploader": "^1.1.0"
+    "react-dropzone-s3-uploader": "^1.1.0",
+    "styled-components": "4.1.3"
   }
 }

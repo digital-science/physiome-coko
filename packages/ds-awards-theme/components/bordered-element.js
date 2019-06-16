@@ -14,7 +14,15 @@ export default (element) => {
 `;
 };
 
-export { BorderStyle };
+
+const SmallBorderStyle = `
+    padding: 6px;
+    border-radius: 5px;
+    border: 1px solid #d0d0d0;
+`;
+
+
+export { BorderStyle, SmallBorderStyle };
 
 
 

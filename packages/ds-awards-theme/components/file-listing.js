@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import styled from 'styled-components';
 
 import Card from './card';
@@ -6,7 +7,7 @@ import Card from './card';
 import SelectInput from './select-input';
 import { SmallTextInput } from './text-input';
 
-import { FaFilePdf, FaTimes } from 'react-icons/fa';
+import { FaTimes } from 'react-icons/fa';
 import humanFormatByteCount from "../helpers/humanFormatByteCount";
 import mimeTypeToIcon from "../helpers/mimeTypeToIcon";
 
@@ -29,7 +30,7 @@ const FileDownloadLink = styled(_FileDownloadLink)`
 
 
 
-function _FileListingRow({className, file, index, fileLabels, fileTypeOptions, linkForFile, removeFile, changeFileType, changeFileLabel, fileDownloadLinkComponent}) {
+function _FileListingRow({className, file, ref, fileLabels, fileTypeOptions, linkForFile, removeFile, changeFileType, changeFileLabel, fileDownloadLinkComponent}) {
 
     const [label, setLabel] = useState(file.label || "");
     const [type, setType] = useState(file.type || "");
@@ -50,8 +51,8 @@ function _FileListingRow({className, file, index, fileLabels, fileTypeOptions, l
     const FileIcon = useMemo(() => mimeTypeToIcon(file.fileMimeType), [file.fileMimeType]);
 
     return (
-        <Card Tag="li" reorderingGrabber={true} className={className}>
-            <div className="file-index">{index + 1}</div>
+        <Card className={className} reorderingGrabber={true} >
+            <div className="file-index" />
             <div className="file-icon"><FileIcon /></div>
             <div className="file-name">
                 <DownloadLink file={file} linkForFile={linkForFile}>
@@ -83,7 +84,6 @@ const FileListingRow = styled(_FileListingRow)`
 
     padding: 5px 2px;
     height: 2em;
-    margin-bottom: 12px;
     
     & .content {
       display: flex;
@@ -165,8 +165,7 @@ const FileListingRow = styled(_FileListingRow)`
 `;
 
 
-
-function _FileUploadFileListing({ className, files, removeFile, changeFileType, changeFileLabel,
+function _FileUploadFileListing({ className, files, reorderFile, removeFile, changeFileType, changeFileLabel,
                                   fileLabels, fileTypeOptions, linkForFile, fileDownloadLinkComponent }) {
 
     const listingProps = {
@@ -179,13 +178,45 @@ function _FileUploadFileListing({ className, files, removeFile, changeFileType, 
         fileDownloadLinkComponent: (fileDownloadLinkComponent || FileDownloadLink)
     };
 
+
     const listing = (files || []).map((file, index) => {
-        return <FileListingRow key={file.id} file={file} index={index} {...listingProps} />;
+
+        return (
+            <Draggable draggableId={file.id} key={file.id} data-id={file.id} index={index}>
+                {(provided, snapshot)=>
+                    <li key={file.id} ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                        <FileListingRow file={file} {...listingProps}  />
+                    </li>
+                }
+            </Draggable>
+        );
     });
+
+    const onDragEnd = function({source, destination}) {
+
+        if (!destination || !reorderFile) {
+            return;
+        }
+
+        const sourceIndex = source.index;
+        const destinationIndex = destination.index;
+        const file = files[sourceIndex];
+
+        reorderFile(file, destinationIndex, sourceIndex);
+    };
 
     return (
         <div className={`${className || ''} ${listing ? 'has-listing' : ''}`}>
-            <ol style={{listStyle:"none", padding:0}}>{listing}</ol>
+            <DragDropContext onDragEnd={onDragEnd}>
+                <Droppable droppableId="file-listing">
+                    {(provided, snapshot) => (
+                        <ol style={{listStyle:"none", padding:0}} ref={provided.innerRef}>
+                            {listing}
+                            {provided.placeholder}
+                        </ol>
+                    )}
+                </Droppable>
+            </DragDropContext>
         </div>
     );
 }
@@ -199,6 +230,10 @@ export default styled(_FileUploadFileListing)`
         list-style: none;
         padding: 0;
         margin: 0;
+    }
+    
+    ol li {
+        margin-bottom: 12px;
     }
     
     &.has-listing {
