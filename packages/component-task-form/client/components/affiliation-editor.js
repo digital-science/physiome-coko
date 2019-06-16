@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { SmallBlockLabel } from "ds-awards-theme/components/label";
 import { SmallTextInput } from "ds-awards-theme/components/text-input";
 import { SmallInlineButton } from "ds-awards-theme/components/inline-button";
 
@@ -32,27 +31,8 @@ const _AffiliationEditorRow = ({className, affiliation, showRemoveIcon, removeAf
 
         if(entity) {
 
-            const orgEntity = {id:entity.id, name:entity.name};
-
-            if(entity.country) {
-                orgEntity.country = entity.country;
-            }
-
-            if(entity.external_ids) {
-
-                const { GRID, FundRef } = entity.external_ids;
-
-                if(GRID && GRID.preferred) {
-                    orgEntity.grid_id = GRID.preferred;
-                }
-
-                if(FundRef && FundRef.all && FundRef.all instanceof Array && FundRef.all.length) {
-                    orgEntity.fund_ref_id = FundRef.all[0];
-                }
-            }
-
-            affiliation.organization = orgEntity;
-            setOrgEntity(orgEntity);
+            affiliation.organization = entity;
+            setOrgEntity(entity);
             affiliationWasModified(affiliation);
 
         } else {
