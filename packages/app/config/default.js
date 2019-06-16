@@ -115,6 +115,11 @@ const values = {
             's.grimme@digital-science.com'
         ]
     },
+    dimensions: {
+        apiBaseUrl: process.env.DIMENSIONS_API_BASE || "https://app.dimensions.ai/api",
+        apiUserName: process.env.DIMENSIONS_API_USERNAME,
+        apiUserPassword: process.env.DIMENSIONS_API_PASSWORD
+    },
     figshare: {
         apiBaseUrl: process.env.FIGSHARE_API_BASE,
         apiToken: process.env.FIGSHARE_API_TOKEN

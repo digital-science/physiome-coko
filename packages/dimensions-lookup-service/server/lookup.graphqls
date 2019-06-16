@@ -1,0 +1,15 @@
+
+
+
+type GrantDetails {
+    id: ID!
+    title: String,
+    projectNumber: String,
+    startYear: Int,
+    funders: JSON,
+    link: String
+}
+
+extend type Query {
+    grantsForProjectNumber(projectNumber: String) : [GrantDetails]
+}

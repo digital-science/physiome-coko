@@ -5,5 +5,6 @@
   "component-model",
   "component-task-form",
   "component-workflow-physiome-tasks",
-  "component-workflow-model"
+  "component-workflow-model",
+  "dimensions-lookup-service"
 ]
