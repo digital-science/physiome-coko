@@ -207,10 +207,10 @@ function createModelForTask(task, enums, lookupModel) {
                                 to: `${destTableName}.id`
                             };
 
-                            // Files can support additional fields on the relations.
+                            // Files support additional fields on the relations (order, as well as labels and types).
                             if(e.type === "File") {
 
-                                mapping.join.through.extra = [];
+                                mapping.join.through.extra = ['order'];
 
                                 if(e.fileLabels === true) {
                                     mapping.join.through.extra.push('label');
@@ -320,8 +320,8 @@ function createResolversForTask(task, enums, models) {
 
                     if(e.type === "File") {
 
-                        const linkedWithMetaDataFields = linked.map(l => {
-                            const r = {id:l.id};
+                        const linkedWithMetaDataFields = linked.map((l, index) => {
+                            const r = {id:l.id, order:index};
 
                             if (e.fileLabels === true) {
                                 if(l.metaData) {
@@ -341,7 +341,7 @@ function createResolversForTask(task, enums, models) {
 
                             return r;
                         });
-                        
+
                         await object.$relatedQuery(e.field).relate(linkedWithMetaDataFields);
 
                     } else {
