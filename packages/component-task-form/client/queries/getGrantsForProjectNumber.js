@@ -29,7 +29,11 @@ query GetGrantsForProjectNumber($projectNumber:String) {
         opts.variables = {projectNumber};
 
         return client.query(opts).then(r => {
-            return (r && r.data && r.data.grants) ? r.data.grants : [];
+            return (r && r.data && r.data.grants) ? r.data.grants.map(grant => {
+                const t = Object.assign({}, grant);
+                delete t['__typename'];
+                return t;
+            }) : [];
         });
     };
 
