@@ -1,7 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { EntityAutocomplete, MenuItem, ApplySmallAutocompleteStyle } from "ds-awards-theme/components/entity-autocomplete";
+import { EntityAutocomplete, MenuItem, MenuHolder, ApplySmallAutocompleteStyle } from "ds-awards-theme/components/entity-autocomplete";
+
+import RorLogoSmall from '../static/ror-logo-small.png';
 
 
 const organisationEntityModifier = (entity) => {
@@ -94,17 +96,45 @@ const renderOrganisationValueRepresentation = (organisationEntity) =>
         {organisationEntity.country && organisationEntity.country.country_code ? <CountryCodeSpan>{organisationEntity.country.country_code}</CountryCodeSpan> : null}
     </React.Fragment>;
 
-/*
-                              , renderItem=DefaultRenderItem, renderEntityValueRepresentation=DefaultEntityRendere
- */
+
+const LookupProviderNote = styled(MenuItem)`
+
+  font-size: 10px;
+  text-align: right;
+
+  & img {
+    height: 1.2em;
+    vertical-align: middle;
+  }  
+`;
+
+
+const OrganisationMenuHolder = styled(MenuHolder)`
+  & > * + ${LookupProviderNote} {
+    margin-top: 2px;
+    border-top: 1px dashed lightgray;
+  }
+`;
+
+const renderOrganisationMenu = function (items, value, style) {
+    return (
+        <OrganisationMenuHolder style={{ ...style, ...this.menuStyle }} children={items}>
+            {items}
+            <LookupProviderNote>
+                <img src={RorLogoSmall} alt="ROR logo" /> Organisation lookup data sourced via ROR
+            </LookupProviderNote>
+        </OrganisationMenuHolder>
+    );
+};
+
 
 
 const OrganisationAutocomplete = ({entityModifier=organisationEntityModifier, entityLookup=organisationEntityLookup,
                                    renderItem=renderOrganisationMenuItem, renderEntityValueRepresentation=renderOrganisationValueRepresentation,
-                                   ...props}) => (
+                                   renderMenu=renderOrganisationMenu, ...props}) => (
 
     <EntityAutocomplete entityModifier={entityModifier} entityLookup={entityLookup} renderItem={renderItem}
-        renderEntityValueRepresentation={renderEntityValueRepresentation} {...props} />
+        renderMenu={renderMenu} renderEntityValueRepresentation={renderEntityValueRepresentation} {...props} />
 );
 
 export default OrganisationAutocomplete;
