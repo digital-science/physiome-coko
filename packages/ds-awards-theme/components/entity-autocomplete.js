@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import useDebounce from '../hooks/useDebouncedValue'
 
 import { BorderStyle, SmallBorderStyle } from "./bordered-element";
+import { FaTimesCircle } from 'react-icons/fa';
 
 
 // Customisation to ensure suggestions don't show when the autocomplete is read-only mode.
@@ -82,6 +83,7 @@ const DefaultRenderMenu = function (items, value, style) {
 
 
 function _EntityAutocomplete({className, readOnly, entity, value, placeholder, onChange, entityLookup, entityModifier,
+                              showRemoveButton=false, removeEntity,
                               getItemValue=DefaultGetItemValue, renderItem=DefaultRenderItem, renderEntityValueRepresentation=DefaultEntityRenderer,
                               renderMenu=DefaultRenderMenu, maximumEntities=15, debounceInterval=250}) {
 
@@ -122,7 +124,7 @@ function _EntityAutocomplete({className, readOnly, entity, value, placeholder, o
 
 
     return (
-        <div className={`${className} ${entity ? "has-entity" : ""} ${(open || focused) ? "open" : "closed"}`}>
+        <div className={`${className} ${entity ? "has-entity" : ""} ${(open || focused) ? "open" : "closed"} ${showRemoveButton ? "remove-button" : ""}`}>
             <CustomisedAutocomplete
                 ref={autocompleteRef}
                 wrapperStyle={{}}
@@ -131,6 +133,7 @@ function _EntityAutocomplete({className, readOnly, entity, value, placeholder, o
                     return (
                         <React.Fragment>
                             <input placeholder={placeholder} readOnly={readOnly} {...props} />
+                            <div className="remove-button-holder"><FaTimesCircle onClick={() => removeEntity(entity)} /></div>
                             {entity ? <div className={`value-rep-holder`}><span>{renderEntityValueRepresentation(entity)}</span></div> : null}
                         </React.Fragment>
                     )
@@ -170,7 +173,11 @@ const EntityAutocomplete = styled(_EntityAutocomplete)`
     color: black;
     ${BorderStyle}
   }
-    
+  
+  & .remove-button-holder {
+    display: none;
+  }
+  
   & .value-rep-holder {
     position: absolute;
     display: flex;
@@ -202,6 +209,7 @@ const EntityAutocomplete = styled(_EntityAutocomplete)`
     text-overflow: ellipsis;
   }
   
+  
   & .value-rep-holder > span .cc {
     font-style: italic;
   }
@@ -218,6 +226,40 @@ const EntityAutocomplete = styled(_EntityAutocomplete)`
   
   &.closed.has-entity input {
     color: transparent;
+  }
+  
+  
+  &.closed.remove-button .remove-button-holder {
+    display: flex;
+    align-items: center;
+    
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 24px;
+    right: 0;
+    
+    border-left: 1px solid #d0d0d0;
+    font-size: 15px;
+  }
+  
+  &.closed.remove-button .remove-button-holder > svg {
+     display: block;
+     margin: auto;
+     cursor: pointer;
+     color: #d0d0d0;
+  }
+  
+  &.closed.remove-button .remove-button-holder > svg:hover {
+     color: #909090;
+  }
+  
+  &.closed.remove-button input {
+     padding-right: 24px;
+  }
+
+  &.closed.remove-button .value-rep-holder > span {
+    max-width: calc(100% - 48px);
   }
 `;
 
