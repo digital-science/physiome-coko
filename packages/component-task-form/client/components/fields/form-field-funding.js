@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { nextUniqueIdInArray, assignUniqueIdsToArrayItems } from '../../utils/helpers';
 import styled from 'styled-components';
 
 import withFormField from "./withFormField";
@@ -51,21 +52,6 @@ const DraggableFunderCard = ({funderId, index, ...props}) => {
 };
 
 
-function _nextUniqueId(funding) {
-    if(!funding || !funding.length) {
-        return 1;
-    }
-
-    let maxFundingId = undefined;
-    funding.forEach(f => {
-        if(f.id && (f.id > maxFundingId || maxFundingId === undefined)) {
-            maxFundingId = f.id;
-        }
-    });
-    return (maxFundingId !== undefined) ? maxFundingId + 1 : 1;
-}
-
-
 function FormFieldFundingEditor({ className, data, binding, instanceId, instanceType, options = {} }) {
 
     const [funding, setFunding] = useFormValueBindingForComplexObject(data, binding, [{id:1}]);
@@ -75,19 +61,13 @@ function FormFieldFundingEditor({ className, data, binding, instanceId, instance
         if(!funding || !funding.length) {
             return;
         }
+        assignUniqueIdsToArrayItems(funding);
 
-        let nextId = _nextUniqueId(funding);
-        funding.forEach(a => {
-            if(!a.id) {
-                a.id = nextId;
-                ++nextId;
-            }
-        });
     }, [funding]);
 
     const addFunding = () => {
 
-        const newFunding = {id:_nextUniqueId(funding)};
+        const newFunding = {id:nextUniqueIdInArray(funding), grants:[{id:1}]};
         const newFundingList = (funding || []).splice(0);
 
         newFundingList.push(newFunding);
@@ -102,6 +82,8 @@ function FormFieldFundingEditor({ className, data, binding, instanceId, instance
     const didModifyFunder = (funder) => {
         console.log("Did modify funder");
         console.dir(funder);
+
+        console.dir(funding);
 
         setFunding(funding);
     };
@@ -133,7 +115,7 @@ function FormFieldFundingEditor({ className, data, binding, instanceId, instance
 
                                 {(funding || []).map((funder, index) => {
                                     return <DraggableFunderCard key={funder.id} funderId={funder.id} index={index} funder={funder}
-                                        didModifyFunder={didModifyFunder} removeFunding={removeFunding} />
+                                        didModifyFunder={didModifyFunder} removeFunder={removeFunding} />
                                 })}
 
                                 {provided.placeholder}
