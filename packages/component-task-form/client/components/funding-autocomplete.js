@@ -64,6 +64,9 @@ const FundingAutocomplete = ({entityModifier=grantEntityModifier, entityLookup, 
 
     const [lookupGrantsForProjectNumber] = useGetGrantsForProjectNumber();
     const grantLookup = (value, maxItems=15) => {
+        if(!value || !value.length) {
+            return Promise.resolve([]);
+        }
         return lookupGrantsForProjectNumber(value).catch(e => []);
     };
 
