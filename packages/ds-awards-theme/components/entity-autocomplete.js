@@ -71,15 +71,20 @@ const MenuHolder = styled.div`
 
 
 const DefaultGetItemValue = (item)=>item.name;
+
 const DefaultRenderItem = (item, isHighlighted) => <MenuItem key={item.id} className={isHighlighted ? "selected" : ""}>{item.name}</MenuItem>;
+
 const DefaultEntityRenderer = (entity) => <React.Fragment>{entity.name}</React.Fragment>;
+
+const DefaultRenderMenu = function (items, value, style) {
+    return <MenuHolder style={{ ...style, ...this.menuStyle }} children={items}/>;
+};
 
 
 function _EntityAutocomplete({className, readOnly, entity, value, placeholder, onChange, entityLookup, entityModifier,
                               getItemValue=DefaultGetItemValue, renderItem=DefaultRenderItem, renderEntityValueRepresentation=DefaultEntityRenderer,
-                              menuHolderComponent=MenuHolder, maximumEntities=15, debounceInterval=250}) {
+                              renderMenu=DefaultRenderMenu, maximumEntities=15, debounceInterval=250}) {
 
-    const MenuHolderComponent = menuHolderComponent;
     const generationRef = useRef(0);
     const displayedGenerationRef = useRef(0);
     const [open, setOpen] = useState(false);
@@ -131,9 +136,7 @@ function _EntityAutocomplete({className, readOnly, entity, value, placeholder, o
                     )
                 }}
 
-                renderMenu={function (items, value, style) {
-                    return <MenuHolderComponent style={{ ...style, ...this.menuStyle }} children={items}/>;
-                }}
+                renderMenu={renderMenu}
 
                 renderItem={renderItem}
                 items={debouncedItems}
