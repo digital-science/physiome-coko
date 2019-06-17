@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { nextUniqueIdInArray, assignUniqueIdsToArrayItems } from '../../utils/helpers';
 import styled from 'styled-components';
 
 import withFormField from "./withFormField";
@@ -47,20 +48,6 @@ const DraggableAuthorCard = ({authorId, index, ...props}) => {
     )
 };
 
-function _nextUniqueId(authors) {
-    if(!authors || !authors.length) {
-        return 1;
-    }
-
-    let maxAuthorId = undefined;
-    authors.forEach(a => {
-        if(a.id && (a.id > maxAuthorId || maxAuthorId === undefined)) {
-            maxAuthorId = a.id;
-        }
-    });
-    return (maxAuthorId !== undefined) ? maxAuthorId + 1 : 1;
-}
-
 
 function FormFieldAuthorsEditor({ className, data, binding, instanceId, instanceType, options = {} }) {
 
@@ -71,19 +58,12 @@ function FormFieldAuthorsEditor({ className, data, binding, instanceId, instance
         if(!authors || !authors.length) {
             return;
         }
-
-        let nextId = _nextUniqueId(authors);
-        authors.forEach(a => {
-            if(!a.id) {
-                a.id = nextId;
-                ++nextId;
-            }
-        });
+        assignUniqueIdsToArrayItems(authors);
     }, [authors]);
 
     const addAuthor = () => {
 
-        const newAuthor = {id:_nextUniqueId(authors)};
+        const newAuthor = {id:nextUniqueIdInArray(authors)};
         const newAuthorsList = (authors || []).splice(0);
 
         newAuthorsList.push(newAuthor);
