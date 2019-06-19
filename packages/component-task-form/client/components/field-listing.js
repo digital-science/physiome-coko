@@ -1,6 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 
+import { FormFieldHolder } from './fields/withFormField';
+
 
 function _FormFieldListing({ className, elements, fieldRegistry, data, binding, options, description, ...elementComponentProps }) {
 
@@ -33,4 +35,8 @@ function _FormFieldListing({ className, elements, fieldRegistry, data, binding, 
 
 export default styled(_FormFieldListing)`
     max-width: 750px;
+    
+    & > ${FormFieldHolder} + ${FormFieldHolder} {
+        margin-top: 20px;
+    }
 `;
