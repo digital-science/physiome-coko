@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
-import Card from "ds-awards-theme/components/card";
+import Card, { CardRemoveButton } from "ds-awards-theme/components/card";
 import { SmallBlockLabel } from "ds-awards-theme/components/label";
 import { SmallTextInput } from "ds-awards-theme/components/text-input";
 import { SmallCheckBox, SmallCheckboxLabel } from "ds-awards-theme/components/checkbox-input";
-import { FaTrashAlt } from 'react-icons/fa';
 
 import AffiliationEditor from './affiliation-editor';
 
@@ -73,27 +72,7 @@ const AuthorRelationshipFormGroup = styled(AuthorFormGroup)`
 const AuthorAffiliationsFormGroup = styled(AuthorFormGroup)`
 `;
 
-
-const AuthorEditorRemove = styled(({className, author, removeAuthor}) => {
-
-    return <div className={className || ""} onClick={() => removeAuthor(author)}><FaTrashAlt /></div>
-})`
-    color: #b3b3b3;
-    position: absolute;
-    right: -20px;
-    bottom: -11px;
-    font-size: 12px;
-    cursor: pointer;
-    border-top: 1px solid #d0d0d0;
-    border-left: 1px solid #d0d0d0;
-    padding: 4px;
-    border-top-left-radius: 5px;
-      
-    &:hover {
-        color: #505050;
-        background: #d0d0d0;
-    }
-`;
+const AuthorEditorRemove = ({className, author, removeAuthor}) => <CardRemoveButton className={className} onClick={() => removeAuthor(author)} />;
 
 
 function _AuthorEditorCard({className, author, removeAuthor, didModifyAuthor}) {

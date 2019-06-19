@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { nextUniqueIdInArray, assignUniqueIdsToArrayItems } from '../utils/helpers';
 import styled from 'styled-components';
 
-import Card from "ds-awards-theme/components/card";
+import Card, { CardRemoveButton } from "ds-awards-theme/components/card";
 import { SmallBlockLabel } from "ds-awards-theme/components/label";
 import { FaPlus, FaTrashAlt, FaTimesCircle } from 'react-icons/fa';
 
@@ -11,27 +11,7 @@ import { SmallInlineButton } from "ds-awards-theme/components/inline-button";
 import { SmallFundingAutocomplete } from './funding-autocomplete';
 
 
-const FunderEditorRemove = styled(({className, funder, removeFunder}) => {
-
-    return <div className={className || ""} onClick={() => removeFunder(funder)}><FaTrashAlt /></div>;
-
-})`
-    color: #b3b3b3;
-    position: absolute;
-    right: -20px;
-    bottom: -11px;
-    font-size: 12px;
-    cursor: pointer;
-    border-top: 1px solid #d0d0d0;
-    border-left: 1px solid #d0d0d0;
-    padding: 4px;
-    border-top-left-radius: 5px;
-      
-    &:hover {
-        color: #505050;
-        background: #d0d0d0;
-    }
-`;
+const FunderEditorRemove = ({className, funder, removeFunder}) => <CardRemoveButton className={className} onClick={() => removeFunder(funder)} />;
 
 const FunderFormGroup = styled.div`
   margin-bottom: 8px;
