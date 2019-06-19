@@ -2,10 +2,12 @@ import React, {Fragment, useMemo} from 'react';
 import styled from 'styled-components';
 
 import FieldListing from './field-listing';
-import { FormFieldHolder } from './fields/withFormField'
+import { FormFieldHolder } from './fields/withFormField';
+
+import Spinner from 'ds-awards-theme/components/spinner';
 
 
-export default function SideBySideHeroLayout({ elements, data, loading, error, instance, fieldListingProps }) {
+export default function SideBySideHeroLayout({ className, elements, data, loading, error, instance, fieldListingProps }) {
 
     const {panels, decisionPanel} = useMemo(() => {
 
@@ -28,21 +30,16 @@ export default function SideBySideHeroLayout({ elements, data, loading, error, i
 
     }, [elements]);
 
-    if(loading) {
-        return <div>Loading</div>;
-    }
-
     if(error) {
         return <div>Error: {error}</div>;
     }
 
-    if(!instance) {
+    if(!loading && !instance) {
         return <div>Instance Not Found</div>
     }
 
-    return data ? (
-        <SideBySideHeroHolder>
-
+    return (data && !loading) ? (
+        <SideBySideHeroHolder className={className}>
             <PanelHolder>
                 {panels.map((panel, index) =>
                     <Fragment key={index}>
@@ -62,14 +59,19 @@ export default function SideBySideHeroLayout({ elements, data, loading, error, i
             ) : null}
 
         </SideBySideHeroHolder>
+
     ) : (
-        <div>Loading</div>
+        <SideBySideHeroHolder className={`${className || ""} loading`}>
+            <Spinner center={true} message={"Loading"} />
+        </SideBySideHeroHolder>
     );
 };
 
 
-const SideBySideHeroHolder= styled.div`
-  
+const SideBySideHeroHolder = styled.div`
+  &.loading {
+    text-align: center;
+  }
 `;
 
 
@@ -133,4 +135,11 @@ const DecisionFieldListing = styled(FieldListing)`
   > ${FormFieldHolder} + ${FormFieldHolder} {
     margin-top: 0;
   }
+  
+  & > ${FormFieldHolder}:last-child {
+    margin-bottom: 0;
+  }
 `;
+
+
+export { DecisionPanelHolder, DecisionFieldListing };

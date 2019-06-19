@@ -38,6 +38,8 @@ function WorkflowTaskFormHero({ match, history }) {
 const WorkflowTaskFormHeroHolder = styled.div`
   padding: 20px;
   background: white;
+  min-height: calc(100vh - 68px);
+  box-sizing: border-box;
 `;
 
 const WorkflowHeroHeading = styled.div`
@@ -47,8 +49,7 @@ const WorkflowHeroHeading = styled.div`
   font-family: NovcentoSansWideNormal, sans-serif;
   text-transform: uppercase;
   text-align: center;
-  font-size: 32px;
-  font-weight: bold;
+  font-size: 28px;
   color: #828282;
   
   /*background: #ebebeb;*/

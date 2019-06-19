@@ -1,10 +1,18 @@
 import React from 'react';
+import styled from 'styled-components';
 
 import useTimedMinimumDisplay from './../hooks/useTimedMinimumDisplay';
 import useFormInstanceData from './../hooks/useFormInstanceData';
 
-import SideBySideHeroLayout from './side-by-side-hero-layout';
+import SideBySideHeroLayout, { DecisionPanelHolder } from './side-by-side-hero-layout';
 
+const StyledSideBySideHeroLayout = styled(SideBySideHeroLayout)`
+
+  & ${DecisionPanelHolder} {
+      padding-top: 40px;
+      padding-bottom: 40px;
+  }
+`;
 
 export default function SideBySideHeroTaskForm({ instanceId, taskId, taskName, instanceType, formDefinition, workflowDescription, wasSubmitted, autoSave=true }) {
 
@@ -17,7 +25,7 @@ export default function SideBySideHeroTaskForm({ instanceId, taskId, taskName, i
     const fieldListingProps = {fieldRegistry, data:formData, refetchData:refetchFormData, instanceId, instanceType, taskId:resolvedTaskId, submitTaskOutcome};
 
     return (
-        <SideBySideHeroLayout elements={formDefinition.elements} data={formData} loading={loading} error={error}
+        <StyledSideBySideHeroLayout elements={formDefinition.elements} data={formData} loading={loading} error={error}
             instance={instance} fieldListingProps={fieldListingProps} />
     );
 
