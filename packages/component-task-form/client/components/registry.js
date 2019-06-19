@@ -15,6 +15,8 @@ import FormFieldGroup from './fields/form-field-group';
 
 import FormFieldAuthors from './fields/form-field-authors';
 import FormFieldFunding from './fields/form-field-funding';
+import FormFieldArticleCitation from './fields/form-field-article-citation';
+
 
 import FormFieldFigshareEmbed from './fields/form-field-figshare-embed';
 
@@ -31,6 +33,7 @@ const FormFieldRegistry = {
     'FileUploader': FormFieldFileUploader,
     'AuthorsEditor' : FormFieldAuthors,
     'FundingEditor' : FormFieldFunding,
+    'ArticleCitation' : FormFieldArticleCitation,
 
     'InlineTaskForm' : FormFieldInlineTask,
 
