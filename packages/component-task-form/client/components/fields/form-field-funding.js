@@ -80,11 +80,6 @@ function FormFieldFundingEditor({ className, data, binding, instanceId, instance
     };
 
     const didModifyFunder = (funder) => {
-        console.log("Did modify funder");
-        console.dir(funder);
-
-        console.dir(funding);
-
         setFunding(funding);
     };
 
