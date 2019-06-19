@@ -22,7 +22,7 @@ const FormStyledTextArea = styled(TextArea)`
 function FormFieldTextArea({data, binding, options = {}}) {
 
     const [value, _, handleInputChange] = useFormValueBinding(data, binding, "", (v) => v || "");
-    const textInput = <FormStyledTextArea value={value || ""} onChange={handleInputChange} />;
+    const textInput = <FormStyledTextArea value={value || ""} onChange={handleInputChange} rows={options.rows || 2} />;
 
     return (
         <React.Fragment>
