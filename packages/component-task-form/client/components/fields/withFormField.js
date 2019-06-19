@@ -2,8 +2,6 @@ import React from "react";
 import styled from 'styled-components';
 
 const FormFieldHolder = styled.div`
-    margin-top: 5px;
-    margin-bottom: 15px;
 `;
 
 export default function withFormField(f, bindingResolver) {
@@ -82,4 +80,4 @@ function mergeFetchFields(destFields, srcFields) {
 }
 
 
-export { fetchFields, mergeFetchFields };
+export { fetchFields, mergeFetchFields, FormFieldHolder };
