@@ -13,13 +13,13 @@ import { FaPlus, FaTimesCircle } from 'react-icons/fa';
 const _AffiliationEditorRow = ({className, affiliation, showRemoveIcon, removeAffiliation, affiliationWasModified}) => {
 
     const [orgValue, setOrgValue] = useState((affiliation && affiliation.organization) ? (affiliation.organization.name || "") : "");
-    const [orgEntity, setOrgEntity] = useState(affiliation ? affiliation.organization : null);
+    const [orgEntity, setOrgEntity] = useState((affiliation && affiliation.organization && affiliation.organization.id) ? affiliation.organization : null);
     const [departmentValue, setDepartmentValue] = useState(affiliation ? (affiliation.department || "") : "");
 
     useEffect(() => {
 
         setOrgValue((affiliation && affiliation.organization) ? (affiliation.organization.name || "") : "");
-        setOrgEntity(affiliation ? affiliation.organization : null);
+        setOrgEntity((affiliation && affiliation.organization && affiliation.organization.id) ? affiliation.organization : null);
 
         setDepartmentValue(affiliation ? (affiliation.department || "") : "");
 
