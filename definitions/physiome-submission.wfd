@@ -35,6 +35,29 @@ mapping "DisplayedSupplementaryFileTypes" on SupplementaryFileTypes {
 }
 
 
+enum IUPSCommissionKind {
+    Locomotion => "locomotion",
+    CirculationRespiration => "circulation_and_respiration",
+    EndocrineReproductionDevelopment => "endocrine_reproduction_and_development",
+    Neurobiology => "Neurobiology",
+    SecretionAbsorption => "secretion_and_absorption",
+    MolecularCellular => "molecular_and_cellular",
+    ComparativeEvolutionAdaptationEnvironment => "comparative_evolution_adaptation_environment",
+    GenomicsBiodiversity => "genomics_and_biodiversity"
+}
+
+mapping "DisplayedIUPSCommissionKinds" on IUPSCommissionKind {
+    Locomotion => "I. Locomotion",
+    CirculationRespiration => "II. Circulation & Respiration",
+    EndocrineReproductionDevelopment => "III. Endocrine, Reproduction & Development",
+    Neurobiology => "IV. Neurobiology",
+    SecretionAbsorption => "V. Secretion & Absorption",
+    MolecularCellular => "VI. Molecular & Cellular",
+    ComparativeEvolutionAdaptationEnvironment => "VII. Comparative: Evolution, Adaptation & Environment",
+    GenomicsBiodiversity => "VIII. Genomics & Biodiversity"
+}
+
+
 instance Submission {
 
     processKey: "physiome-submission"
@@ -48,8 +71,10 @@ instance Submission {
         publishDate: DateTime <listing-sortable>,
 
         phase: SubmissionPhase <state, listing-filter-multiple, default:SubmissionPhase.Pending>,
+        hidden: Boolean <listing-filter, default:false>,
 
         kind: SubmissionKind <default:SubmissionKind.Original>,
+        iupsCommission: IUPSCommissionKind,
         title: String,
         abstract: String,
         primaryPapers: JSON,
@@ -62,6 +87,9 @@ instance Submission {
         allFilesPresent: Boolean,
         resultsMatch: Boolean,
         modelAnnotated: Boolean,
+        primaryPaperExists: Boolean,
+        resultsInPapersOverlap: Boolean,
+        sameModelInPapers: Boolean,
         curationNotes: String,
 
         articleFiles: [File] <set>,
@@ -74,8 +102,9 @@ instance Submission {
     acl {
 
         fields "submit" {
-    	    kind, title, abstract, primaryPapers, authors, pmrWorkspace, priceAcknowledged, keywords, funding, submissionDate,
-    	    articleFiles, supplementaryFiles, supplementaryDataFiles
+    	    kind, title, abstract, primaryPapers, authors, pmrWorkspace, priceAcknowledged, keywords, funding, iupsCommission,
+    	    articleFiles, supplementaryFiles, supplementaryDataFiles,
+            submissionDate
         }
 
         fields "phase" {
@@ -83,10 +112,11 @@ instance Submission {
         }
 
         fields "curation" {
-    	    kind, title, abstract, primaryPapers, authors, pmrWorkspace, priceAcknowledged, keywords, funding, submissionDate,
-    	    articleFiles, supplementaryFiles, supplementaryDataFiles,
+            hidden,
     	    curator,
-    	    allFilesPresent, resultsMatch, modelAnnotated, curationNotes,
+    	    allFilesPresent, resultsMatch, modelAnnotated,
+    	    primaryPaperExists, resultsInPapersOverlap, sameModelInPapers,
+    	    curationNotes,
     	    publishDate, figshareArticleId
         }
 
@@ -104,6 +134,7 @@ instance Submission {
         allow <owner> [task] on "owner-submit"
         allow <owner> [destroy] where (phase == SubmissionPhase.Pending)
 
+        allow <administrator> [write, read] on "submit"
         allow <administrator> [write, read] on "curation"
         allow <administrator> [read] on "phase"
         allow <administrator> [create, destroy]
@@ -206,14 +237,14 @@ instance Submission {
         ]
 
         options: {
-           heading: "Article Submission"
+           heading: "Manuscript Submission"
         }
 
         elements: {
 
             { Panel, children:{
 
-                { SelectValue => kind, label:"Manuscript Type", options:mapping("DisplayedSubmissionKind") }
+                { SelectValue => kind, label:"Manuscript Type", options:mapping("DisplayedSubmissionKind"), placeholder:"Please select a Manuscript type" }
 
                 { TextArea => title, label:"Title", rows:2 }
 
@@ -222,6 +253,10 @@ instance Submission {
                 { ArticleCitation => primaryPapers, label:"Primary Paper" }
 
                 { AuthorsEditor => authors, label:"Authors" }
+
+                { SelectValue => iupsCommission, label:"Commission Type", options:mapping("DisplayedIUPSCommissionKinds"), placeholder:"Please select a Commission" }
+
+                { KeywordsEditor => keywords, label:"Keywords", placeholder:"Enter Manuscript keywords" }
 
                 { FundingEditor => funding, label:"Funding Acknowledgements" }
 
@@ -232,7 +267,8 @@ instance Submission {
                 { FileUploader => supplementaryFiles, label:"Supplementary Files",
                     fileLabels:true, fileTypes:mapping("DisplayedSupplementaryFileTypes") }
 
-                { Checkbox => priceAcknowledged, label: "I understand that there is an article processing charge (APC) of $300 USD associated with the successful acceptance of this manuscript." }
+                { HeroCheckbox => priceAcknowledged, heading:"Conditions of Submission",
+                    label: "I understand that there is an article processing charge (APC) of $300 USD associated with the successful acceptance of this manuscript." }
 
             } }
 
