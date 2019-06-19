@@ -215,9 +215,11 @@ instance Submission {
 
                 { SelectValue => kind, label:"Manuscript Type", options:mapping("DisplayedSubmissionKind") }
 
-                { TextArea => title, label:"Title" }
+                { TextArea => title, label:"Title", rows:2 }
 
-                { TextArea => abstract, label:"Abstract" }
+                { TextArea => abstract, label:"Abstract", rows:6 }
+
+                { ArticleCitation => primaryPapers, label:"Primary Paper" }
 
                 { AuthorsEditor => authors, label:"Authors" }
 
