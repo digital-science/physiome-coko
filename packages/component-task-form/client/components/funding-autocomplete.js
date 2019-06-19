@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import useGetGrantsForProjectNumber from '../queries/getGrantsForProjectNumber';
+import useGetGrantsForProjectNumber from 'dimensions-lookup-service/client/queries/getGrantsForProjectNumber';
 
 import { EntityAutocomplete, MenuItem, MenuHolder, ApplySmallAutocompleteStyle } from "ds-awards-theme/components/entity-autocomplete";
 import DimensionsLogo from "../static/dimensions-logo.svg";
