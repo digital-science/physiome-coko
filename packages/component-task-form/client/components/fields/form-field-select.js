@@ -27,7 +27,7 @@ function FormFieldSelect({data, binding, options = {}}) {
 
     }, [options, options.values]);
 
-    const selectInput = <SelectInput value={value || ""} onChange={handleInputChange} options={optValues} />;
+    const selectInput = <SelectInput value={value || ""} placeholder={options.placeholder} onChange={handleInputChange} options={optValues} />;
 
     return (
         <React.Fragment>
