@@ -33,6 +33,17 @@ const AuthorEditorCardHolder = styled.div`
     & .drag-author {
         margin: 10px 10px 20px;
     }
+    
+    & .drag-author:focus {
+        border-radius: 5px;
+        box-shadow: 0 0 2px 2px #2196F3;
+        border-color: #2196F3;
+        outline: 0;
+    }
+    
+    & .drag-author:focus > ${AuthorEditorCard} {
+        border-color: #2196F3;
+    }
 `;
 
 const DraggableAuthorCard = ({authorId, index, ...props}) => {

@@ -33,6 +33,17 @@ const FundingEditorCardHolder = styled.div`
         margin: 10px 10px 20px;
     }
     
+    & .drag-funder:focus {
+        border-radius: 5px;
+        box-shadow: 0 0 2px 2px #2196F3;
+        border-color: #2196F3;
+        outline: 0;
+    }
+    
+    & .drag-funder:focus > ${FunderEditorCard} {
+        border-color: #2196F3;
+    }
+    
     & .button-holder {
         padding: 8px;
     }
