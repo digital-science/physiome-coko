@@ -1,5 +1,7 @@
 import gql from 'graphql-tag';
 import { useApolloClient } from 'react-apollo-hooks';
+import { deepRemoveKeys } from '../utils/utils'
+import { cloneDeep } from 'lodash';
 
 export default () => {
 
@@ -30,9 +32,9 @@ query GetGrantsForProjectNumber($projectNumber:String) {
 
         return client.query(opts).then(r => {
             return (r && r.data && r.data.grants) ? r.data.grants.map(grant => {
-                const t = Object.assign({}, grant);
-                delete t['__typename'];
-                return t;
+                const copy = cloneDeep(grant);
+                deepRemoveKeys(copy, '__typename');
+                return copy;
             }) : [];
         });
     };

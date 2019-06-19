@@ -1,4 +1,6 @@
 const logger = require("@pubsweet/logger");
+const URL = require("url");
+const _ = require("lodash");
 
 
 function GrantsForProjectNumber(dimensionsApi, projectNumber) {
@@ -25,6 +27,110 @@ function GrantsForProjectNumber(dimensionsApi, projectNumber) {
 }
 
 
+function JournalsMatchingName(dimensionsApi, journalName) {
+
+    const q = `search publications where journal.title~"${journalName.replace('"', `\\"`)}" return journal limit 20`;
+
+    return dimensionsApi.query(q).then(result => {
+
+        if(!result || !result.grants) {
+            return [];
+        }
+
+        return result.journal.map(j => {
+            return {
+                id:j.id,
+                title:j.title,
+            };
+        });
+    });
+}
+
+
+function _cleanedDoi(doi) {
+
+    const parsedDoi = URL.parse(doi);
+    if(!parsedDoi) {
+        return doi;
+    }
+
+    if(parsedDoi.pathname && parsedDoi.pathname.length > 1) {
+        return parsedDoi.pathname.replace(/^\//, "");
+    }
+
+    return doi;
+}
+
+function _mapAuthors(authorsList) {
+
+    const r = [];
+
+    authorsList.forEach(a => {
+        if(a instanceof Array) {
+            const list = _mapAuthors(a);
+            if(list && list.length) {
+                r.push.apply(r, list);
+            }
+        } else {
+            const author = _mapAuthor(a);
+            if(author) {
+                r.push(author);
+            }
+        }
+    });
+
+    return r.length ? r : null;
+}
+
+function _mapAuthor(src) {
+
+    const author = {id:src.researcher_id, researcherId:src.researcher_id};
+
+    if(src.first_name) {
+        author.firstName = src.first_name;
+    }
+
+    if(src.last_name) {
+        author.lastName = src.last_name;
+    }
+
+    return author;
+}
+
+
+function DOIInfoLookup(dimensionsApi, doi) {
+
+    const cleanedDoi = _cleanedDoi(doi);
+
+    const q = `search publications where doi="${cleanedDoi.replace('"', '\\"')}" return publications[basics + doi + pmcid + pmid + linkout] limit 1`;
+
+    return dimensionsApi.query(q).then(result => {
+
+        if(!result || !result.publications || !result.publications.length) {
+            return null;
+        }
+
+        const pub = result.publications[0];
+        const r = {id:pub.id};
+
+        Object.assign(r, _.pick(pub, ['title', 'volume', 'issue', 'pages', 'year', 'pmid', 'pmcid', 'type', 'doi']));
+
+        if(pub.linkout) {
+            r.link = pub.linkout;
+        }
+
+        if(pub.author_affiliations) {
+            const authors = _mapAuthors(pub.author_affiliations);
+            if(authors) {
+                r.authors = authors;
+            }
+        }
+
+        return r;
+    });
+}
+
+
 module.exports = (dimensionsApi) => {
 
     return {
@@ -38,6 +144,18 @@ module.exports = (dimensionsApi) => {
 
                 return GrantsForProjectNumber(dimensionsApi, projectNumber).catch(err => {
                     logger.error(`[DimenionsLookupService/GrantsForProjectNumber] lookup failed due to: ${err.toString()}`);
+                    throw new Error("Server error");
+                });
+            },
+
+            detailsForDOI: (ctxt, input, context, info) => {
+
+                const { doi } = input;
+
+                // FIXME: check for user auth, shouldn't be a public API endpoint
+
+                return DOIInfoLookup(dimensionsApi, doi).catch(err => {
+                    logger.error(`[DimenionsLookupService/DetailsForDOI] lookup failed due to: ${err.toString()}`);
                     throw new Error("Server error");
                 });
             }

@@ -13,3 +13,36 @@ type GrantDetails {
 extend type Query {
     grantsForProjectNumber(projectNumber: String) : [GrantDetails]
 }
+
+
+
+type DOIAuthorDetails {
+
+    id: ID!,
+    researcherId: String,
+    firstName: String,
+    lastName: String
+}
+
+type DOIDetails {
+
+    id: ID!,
+    doi: String,
+    title: String,
+    volume: String,
+    issue: String,
+    pages: String,
+    year: Int,
+
+    pmid: String,
+    pmcid: String,
+    type: String,
+
+    link: String,
+
+    authors: [DOIAuthorDetails]
+}
+
+extend type Query {
+    detailsForDOI(doi: String!) : DOIDetails
+}
