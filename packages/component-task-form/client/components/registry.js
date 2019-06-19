@@ -4,6 +4,7 @@ import FormFieldText from './fields/form-field-text';
 import FormFieldFileUploader from './fields/form-field-file-uploader';
 import FormFieldButton from './fields/form-field-button';
 import FormFieldCheckbox from './fields/form-field-check-box';
+import FormFieldHeroCheckbox from './fields/form-field-hero-checkbox';
 import FormFieldSelect from './fields/form-field-select';
 
 import FormFieldInlineTask from './fields/form-field-inline-task';
@@ -16,24 +17,27 @@ import FormFieldGroup from './fields/form-field-group';
 import FormFieldAuthors from './fields/form-field-authors';
 import FormFieldFunding from './fields/form-field-funding';
 import FormFieldArticleCitation from './fields/form-field-article-citation';
-
+import FormFieldKeywords from './fields/form-field-keywords';
 
 import FormFieldFigshareEmbed from './fields/form-field-figshare-embed';
 
 
 // Lookup registry for form fields.
 const FormFieldRegistry = {
+
     'Date' : FormFieldDate,
     'TextArea' : FormFieldTextArea,
     'Text' : FormFieldText,
     'Button' : FormFieldButton,
     'Checkbox' : FormFieldCheckbox,
+    'HeroCheckbox' : FormFieldHeroCheckbox,
     'SelectValue' : FormFieldSelect,
 
     'FileUploader': FormFieldFileUploader,
     'AuthorsEditor' : FormFieldAuthors,
     'FundingEditor' : FormFieldFunding,
     'ArticleCitation' : FormFieldArticleCitation,
+    'KeywordsEditor' : FormFieldKeywords,
 
     'InlineTaskForm' : FormFieldInlineTask,
 
