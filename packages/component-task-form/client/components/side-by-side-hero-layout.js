@@ -2,6 +2,7 @@ import React, {Fragment, useMemo} from 'react';
 import styled from 'styled-components';
 
 import FieldListing from './field-listing';
+import { FormFieldHolder } from './fields/withFormField'
 
 
 export default function SideBySideHeroLayout({ elements, data, loading, error, instance, fieldListingProps }) {
@@ -123,9 +124,13 @@ const DecisionFieldListing = styled(FieldListing)`
   display: flex;
   justify-content: center;
   
-  > .form-field {
+  > ${FormFieldHolder} {
     display: inline-block;
     margin-left: 5px;
     margin-right: 5px;
+  }
+  
+  > ${FormFieldHolder} + ${FormFieldHolder} {
+    margin-top: 0;
   }
 `;

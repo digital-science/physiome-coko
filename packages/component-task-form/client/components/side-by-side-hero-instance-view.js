@@ -9,6 +9,8 @@ export default function SideBySideHeroInstanceView({ instanceId, instanceType, v
     const {instance, tasks, error, loading, viewData, refetchViewData, fieldRegistry} = useViewInstanceData({instanceId, instanceType, viewDefinition, workflowDescription});
     const fieldListingProps = {fieldRegistry, data:viewData, refetchData:refetchViewData, tasks, instanceId, instanceType, workflowDescription};
 
-    return <SideBySideHeroLayout elements={viewDefinition.elements} data={viewData} loading={loading} error={error}
-        instance={instance} fieldListingProps={fieldListingProps} />;
+    return (
+        <SideBySideHeroLayout elements={viewDefinition.elements} data={viewData} loading={loading} error={error}
+            instance={instance} fieldListingProps={fieldListingProps} />
+    );
 };
