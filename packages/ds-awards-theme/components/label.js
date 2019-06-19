@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { th } from '../src/index';
 
 
 const _Label = ({children=null, ...rest}) => {
@@ -7,19 +8,17 @@ const _Label = ({children=null, ...rest}) => {
 };
 
 const Label = styled(_Label)`
-    font-family: ProximaNovaLight, sans-serif;
-    font-size: 16px;
-    color: #9c9c9c;
+    font-family: ${th("label.fontFamily")};
+    font-size: ${th("label.default.fontSize")};
+    color: ${th("label.textColor")};
 `;
-
-export default Label;
 
 const BlockLabel = styled(Label)`
     display: block;
 `;
 
 const SmallLabel = styled(Label)`
-  font-size: 12px;
+    font-size: ${th("label.small.fontSize")};
 `;
 
 const SmallBlockLabel = styled(SmallLabel)`
@@ -27,4 +26,5 @@ const SmallBlockLabel = styled(SmallLabel)`
 `;
 
 
+export default Label;
 export { BlockLabel, SmallLabel, SmallBlockLabel };

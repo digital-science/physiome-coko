@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-
+import { th } from '../src/index';
 
 const _Select = ({options, ...rest}) => {
     return (
@@ -12,21 +12,18 @@ const _Select = ({options, ...rest}) => {
 
 const Select = styled(_Select)`
     width: 100%;
-    font-family: ProximaNovaLight, sans-serif;
-    font-size: 16px;
-    color: black;
+    font-family: ${th('input.fontFamily')};
+    font-size: ${th('input.default.fontSize')};
+    color: ${th('input.textColor')};
     box-sizing: border-box;
 `;
 
-const _SizeSmall = (tag) => {
-    return styled(tag)`
-  
-  font-size:12px;
+const _SizeSmall = (tag) => styled(tag)`
+    font-size: ${th('input.small.fontSize')};
 `;
-};
 
 const SmallSelect = _SizeSmall(Select);
 
 export default Select;
 
-export { SmallSelect };
+export { Select, SmallSelect };

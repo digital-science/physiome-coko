@@ -1,28 +1,25 @@
 import React from 'react';
-import styled from 'styled-components';
+import styled, {css} from 'styled-components';
+import { th } from '../src/index';
 
-const BorderStyle = `    
-    padding: 12px;
-    border-radius: 5px;
-    border: 1px solid #d0d0d0;
+const BorderStyle = css`    
+    padding: ${th('borderedElement.default.padding')};
+    border-radius: ${th('borderedElement.default.borderRadius')};
+    border: ${th('borderedElement.default.borderWidth')} ${th('borderedElement.default.borderStyle')} ${th('borderedElement.default.borderColor')};
 `;
 
-export default (element) => {
-
-    return styled(element)`
-    ${BorderStyle}
-`;
-};
-
-
-const SmallBorderStyle = `
-    padding: 6px;
-    border-radius: 5px;
-    border: 1px solid #d0d0d0;
+const SmallBorderStyle = css`
+    padding: ${th('borderedElement.small.padding')};
+    border-radius: ${th('borderedElement.small.borderRadius')};
+    border: ${th('borderedElement.small.borderWidth')} ${th('borderedElement.small.borderStyle')} ${th('borderedElement.small.borderColor')};
 `;
 
 
-export { BorderStyle, SmallBorderStyle };
+const BorderedElement = (element) => styled(element)`${BorderStyle}`;
+const SmallBorderedElement = (element) => styled(element)`${SmallBorderStyle}`;
+
+export default BorderedElement;
+export { BorderedElement, SmallBorderedElement, BorderStyle, SmallBorderStyle };
 
 
 

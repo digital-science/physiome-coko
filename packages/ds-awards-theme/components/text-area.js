@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import BorderedElement from './bordered-element'
+import { th } from '../src/index';
 
 
 const _TextArea = ({children=null, ...rest}) => {
@@ -11,8 +12,8 @@ const TextArea = BorderedElement(_TextArea);
 
 export default styled(TextArea)`
     width: 100%;
-    font-family: ProximaNovaLight;
-    font-size: 16px;
-    color: black;
+    font-family: ${th('textArea.fontFamily')};
+    font-size: ${th('textArea.fontSize')};
+    color: ${th('textArea.textColor')};
     box-sizing: border-box;
 `;

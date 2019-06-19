@@ -1,17 +1,23 @@
 import React from 'react';
-import styled from 'styled-components';
-import BorderedInput from './bordered-input';
+import styled, { css } from 'styled-components';
+import { BorderedInput, SmallBorderedInput } from './bordered-input';
+import { th } from '../src/index';
 
-const TextInput = styled(BorderedInput)`
+const TextInputStyle = css`
     width: 100%;
     box-sizing: border-box;
 `;
 
-export default TextInput;
-
-const SmallTextInput = styled(TextInput)`
-  font-size: 12px;
-  padding: 6px;
+const TextInput = styled(BorderedInput)`
+  ${TextInputStyle};
+  font-size: ${th('textInput.default.fontSize')};
 `;
 
-export { SmallTextInput };
+
+const SmallTextInput = styled(SmallBorderedInput)`
+  ${TextInputStyle};
+  font-size: ${th('textInput.small.fontSize')};
+`;
+
+export default TextInput;
+export { TextInput, SmallTextInput };

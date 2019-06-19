@@ -2,9 +2,9 @@ import React from 'react';
 import styled from 'styled-components';
 
 
-const _InlineButton = ({className, tag, plain=false, children=null, bordered=false, color="", icon, ...rest}) => {
+const _InlineButton = ({className, tag, plain=false, children=null, bordered=false, selected=false, color="", icon, ...rest}) => {
 
-    const combinedClassName = `${className || ""} ${children ? "" : "empty"} ${bordered ? "bordered" : "" } ${color}`;
+    const combinedClassName = `${className || ""} ${children ? "" : "empty"} ${bordered ? "bordered" : "" } ${selected ? "selected" : "" } ${color}`;
 
     if(tag) {
         return <tag className={combinedClassName} {...rest}>{icon || null}{children}</tag>
@@ -22,16 +22,28 @@ const InlineButton = styled(_InlineButton)`
     font-family: ProximaNovaLight, sans-serif;
     cursor: pointer;
     outline: none;
+    user-select: none;
     
     &.bordered {
         border-radius: 7px;
-        padding: 2px 10px;
+        padding: 4px 10px;
         border: 1px solid #d6d6d6;
     }
 
     &.bordered:hover {
         background: #d6d6d6;
     }
+    
+    &.selected {
+        background: #9E9E9E;
+        color: white;
+    }
+        
+    &.selected:hover {
+        background: #9E9E9E;
+        color: white;
+    }
+
 
     & > img {
         height: 0.65em;
@@ -83,4 +95,4 @@ const SmallInlineButton = styled(InlineButton)`
     }
 `;
 
-export { SmallInlineButton };
+export { InlineButton, SmallInlineButton };

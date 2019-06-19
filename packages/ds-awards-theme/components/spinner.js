@@ -22,19 +22,21 @@ const MessageHolder = styled.div`
   }
 `;
 
-function Spinner({center, small, message}) {
+const _Spinner = ({className, center, small, message}) => {
 
     const r = <div className={`loader ${small ? 'loader-small small' : 'loader-normal'} ${center ? 'center' : ''}`} />;
 
     if(message) {
         return (
-            <MessageHolder>
+            <MessageHolder className={className}>
                 {r} <span className="message">{message}</span>
             </MessageHolder>
         );
     }
 
     return r
-}
+};
+
+const Spinner = styled(_Spinner)``;
 
 export default Spinner;
