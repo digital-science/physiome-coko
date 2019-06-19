@@ -13,7 +13,12 @@ const Header = styled.header`
     font-size: 36px;
     font-family: NovcentoSansWideLight, sans-serif;
     text-transform: uppercase;
-    color: #3e3476;
+    
+    & a,
+    & a:visited {
+      color: #3e3476;
+      text-decoration: none;
+    }
 `;
 
 const Person = styled.div`
@@ -46,7 +51,7 @@ const Person = styled.div`
 const BaseHeader = ({children}) => {
     return (
         <Header>
-            Physiome Submission Portal
+            <a href="/">Physiome Submission Portal</a>
             {children}
         </Header>
     );

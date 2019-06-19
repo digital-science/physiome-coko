@@ -18,7 +18,6 @@ import { getMainDefinition } from 'apollo-utilities';
 import { setContext } from 'apollo-link-context';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { Normalize } from 'styled-normalize';
-//import StyleRoot from 'pubsweet-client/src/helpers/StyleRoot';
 
 import desc from './../config/description.json';
 import { WorkflowDescriptionContext, WorkflowDescription } from 'client-workflow-model';
