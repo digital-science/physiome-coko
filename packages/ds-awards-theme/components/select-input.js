@@ -22,6 +22,11 @@ const Select = styled(_Select)`
         color: darkgrey;
     }
     
+    &:focus {
+        box-shadow: 0 0 2px 2px #2196F3;
+        border-color: #2196F3;
+        outline: 0;
+    }
 `;
 
 const _SizeSmall = (tag) => styled(tag)`

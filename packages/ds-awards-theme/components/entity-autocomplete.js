@@ -174,6 +174,12 @@ const EntityAutocomplete = styled(_EntityAutocomplete)`
     ${BorderStyle}
   }
   
+  & input:focus {
+    box-shadow: 0 0 1px 1px #2196F3;
+    border-color: #2196F3;
+    outline: 0;
+  }
+  
   & .remove-button-holder {
     display: none;
   }
