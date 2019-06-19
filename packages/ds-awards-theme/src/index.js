@@ -140,6 +140,12 @@ const DSAwardsTheme = {
         textColor: ThemeBaseDefaults.TextColor,
 
         selectedBackground: "#b3e7ff"
+    },
+
+    // Tag input
+    tagInput: {
+        fontFamily: ThemeBaseDefaults.InputFontFamily,
+        fontSize: ThemeBaseDefaults.FontSizeSmall
     }
 
 };
