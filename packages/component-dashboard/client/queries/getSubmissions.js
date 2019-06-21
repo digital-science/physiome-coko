@@ -23,6 +23,7 @@ query GetSubmissions($filter:SubmissionListingFilterInput, $sorting:SubmissionLi
     title
     authors
     phase
+    hidden
     submissionDate
     submitter {
         id

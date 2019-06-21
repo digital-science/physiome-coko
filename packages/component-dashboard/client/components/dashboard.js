@@ -17,7 +17,6 @@ import BinIconImage from './../static/bin.svg';
 import Spinner from 'ds-awards-theme/components/spinner';
 import Button, { SmallPlainButton } from 'ds-awards-theme/components/button';
 import SubmissionStatusPill from './submission-status-pill';
-import { FaUserCheck } from 'react-icons/fa';
 
 
 import './dashboard.css';
