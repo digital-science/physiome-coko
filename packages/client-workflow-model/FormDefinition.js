@@ -1,9 +1,11 @@
 import FormElement from './FormElement';
+import LayoutDefinition from './LayoutDefinition';
 
-class FormDefinition {
+class FormDefinition extends LayoutDefinition {
 
     constructor(definition, enumResolver, mappingResolver) {
 
+        super();
         this.name = definition.form;
 
         if(definition.extend) {
