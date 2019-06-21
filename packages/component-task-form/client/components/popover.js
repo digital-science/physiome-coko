@@ -36,7 +36,7 @@ export { Tooltip };
 export default function PopoverTrigger(props) {
 
     return (
-        <TooltipTrigger placement={props.placement || "bottom"} trigger={props.trigger || "click"} tooltip={({
+        <TooltipTrigger onVisibilityChange={props.onVisibilityChange} placement={props.placement || "bottom"} trigger={props.trigger || "click"} tooltip={({
             arrowRef,
             tooltipRef,
             getArrowProps,
