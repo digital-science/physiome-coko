@@ -24,17 +24,17 @@ const MessageHolder = styled.div`
 
 const _Spinner = ({className, center, small, message}) => {
 
-    const r = <div className={`loader ${small ? 'loader-small small' : 'loader-normal'} ${center ? 'center' : ''}`} />;
+    const cn = `loader ${small ? 'loader-small small' : 'loader-normal'} ${center ? 'center' : ''}`;
 
     if(message) {
         return (
             <MessageHolder className={className}>
-                {r} <span className="message">{message}</span>
+                <div className={cn} /> <span className="message">{message}</span>
             </MessageHolder>
         );
     }
 
-    return r
+    return <div className={`${className} ${cn}`} />;
 };
 
 const Spinner = styled(_Spinner)``;
