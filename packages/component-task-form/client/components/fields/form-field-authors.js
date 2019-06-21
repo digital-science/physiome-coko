@@ -7,8 +7,9 @@ import { th } from 'ds-awards-theme';
 import withFormField from "./withFormField";
 import { useFormValueBindingForComplexObject } from '../../hooks/useFormValueBinding';
 
-import Label from "ds-awards-theme/components/label";
+import Label, { BlockLabel } from "ds-awards-theme/components/label";
 import InlineButton from "ds-awards-theme/components/inline-button";
+import { DisabledStaticText } from 'ds-awards-theme/components/static-text';
 import { FaPlus } from 'react-icons/fa';
 
 
@@ -88,9 +89,6 @@ function FormFieldAuthorsEditor({ className, data, binding, instanceId, instance
     };
 
     const didModifyAuthor = (author) => {
-        console.log("Did modify author");
-        console.dir(author);
-
         setAuthors(authors);
     };
 
@@ -203,8 +201,10 @@ function _FormFieldAuthorsListing({ className, data, binding, instanceId, instan
 
     return (
         <div className={className}>
-            {options.label ? <Label>{options.label}</Label> : null}
-            {(authors && authors instanceof Array && authors.length) ? <AuthorListing authors={authors} /> : <span>No Authors were specified</span>}
+            {options.label ? <BlockLabel>{options.label}</BlockLabel> : null}
+            {(authors && authors instanceof Array && authors.length) ?
+                <AuthorListing authors={authors} /> : <DisabledStaticText>No Authors were specified</DisabledStaticText>
+            }
         </div>
     );
 }

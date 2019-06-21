@@ -6,8 +6,9 @@ import styled from 'styled-components';
 import withFormField from "./withFormField";
 import { useFormValueBindingForComplexObject } from '../../hooks/useFormValueBinding';
 
-import Label from "ds-awards-theme/components/label";
+import Label, { BlockLabel } from "ds-awards-theme/components/label";
 import InlineButton from "ds-awards-theme/components/inline-button";
+import { DisabledStaticText } from 'ds-awards-theme/components/static-text';
 import { FaPlus } from 'react-icons/fa';
 
 import FunderEditorCard from '../funder-editor-card';
@@ -188,7 +189,7 @@ const FundingListing = styled( ({className, funding}) => {
         </ol>
     );
 })`
-  
+ 
     list-style: none;
     margin: 0;
     padding: 0;
@@ -218,19 +219,17 @@ const FundingListing = styled( ({className, funding}) => {
     & > li + li {
       margin-top: 5px;
     }
-
 `;
 
 function _FormFieldFundingListing({ className, data, binding, instanceId, instanceType, options = {} }) {
 
     const [funding] = useFormValueBindingForComplexObject(data, binding);
-
-    console.dir(funding);
-
     return (
         <div className={className}>
-            {options.label ? <Label>{options.label}</Label> : null}
-            {(funding && funding instanceof Array && funding.length) ? <FundingListing funding={funding} /> : <span>No Funding Acknowledgements were specified</span>}
+            {options.label ? <BlockLabel>{options.label}</BlockLabel> : null}
+            {(funding && funding instanceof Array && funding.length) ?
+                <FundingListing funding={funding} /> : <DisabledStaticText>No Funding Acknowledgements were specified</DisabledStaticText>
+            }
         </div>
     );
 }
