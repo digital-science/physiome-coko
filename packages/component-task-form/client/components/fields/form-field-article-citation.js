@@ -10,9 +10,7 @@ import ArticleCitation from './../article-citation';
 
 
 const FormStyledArticleCitation = styled(ArticleCitation)`
-  & span {
-    color: black !important;
-  }
+  color: black !important;
 `;
 
 
