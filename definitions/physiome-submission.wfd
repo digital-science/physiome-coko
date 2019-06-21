@@ -184,6 +184,8 @@ instance Submission {
 
                 { SubmissionStatusPill => phase, label:"Submission Status" }
 
+                { ClaimSubmission => curator, label:"Assigned Curator" }
+
                 { StaticText => submissionDate, label:"Submission Date" }
 
                 { StaticText => publishDate, (phase == SubmissionPhase.Published), label:"Published Date" }
@@ -198,7 +200,7 @@ instance Submission {
                 { InlineTaskForm, form:"checks" }
             } }
 
-            { DetailPanel, (phase != SubmissionPhase.Checking), heading:"Curation Checks", children:{
+            { DetailPanel, (phase in [SubmissionPhase.Decision, SubmissionPhase.Publish, SubmissionPhase.Reject, SubmissionPhase.Published]), heading:"Curation Checks", children:{
 
                 { Checkbox => primaryPaperExists, label: "Primary paper exists", readOnly:true }
 
