@@ -19,11 +19,11 @@ function _FormFieldListing({ className, elements, fieldRegistry, data, binding, 
                 return null;
             }
 
-            return <ElementComponent key={i} binding={e.binding} options={e.options || {}} fieldRegistry={fieldRegistry}
+            return <ElementComponent key={i} className={`type-${e.type.toLowerCase()}`} binding={e.binding} options={e.options || {}} fieldRegistry={fieldRegistry}
                 description={e} data={data} {...elementComponentProps} />;
         }
 
-        return <div key={i}>Unknown Element Type</div>;
+        return <div key={i}>Unknown Element Type</div>;  //FIXME: this is displayed for debugging purposes only
     });
 
     return (
