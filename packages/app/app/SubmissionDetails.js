@@ -36,20 +36,18 @@ function SubmissionDetailsPage({match}) {
 const SubmissionDetailsPageHolder = styled.div`
     padding-left: 20px;
     padding-right: 20px;
+    background: white;
+    min-height: calc(100vh - 70px);
+    border-top: 2px solid #ebebeb;
 `;
 
 const SubmissionDetailsHeader = styled.div`
-    text-align: center;
-    font-family: ProximaNovaBold,sans-serif;
-    color: white;
-    font-size: 20px;
-    padding-bottom: 12px;
-    padding-top: 12px;
-    background: #3496af;
-    margin-bottom: 20px;
-    margin-right: -20px;
-    margin-left: -20px;
-    border-bottom: 3px solid white;
+  font-family: NovcentoSansWideNormal, sans-serif;
+  text-transform: uppercase;
+  text-align: center;
+  font-size: 28px;
+  color: #828282;
+  padding: 20px;
 `;
 
 

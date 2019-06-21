@@ -10,7 +10,7 @@ function SubmissionDetails({instanceId, instanceType, viewDefinition, workflowDe
         throw new Error("Unable to find task view type for view definition.");
     }
 
-    const instanceViewProps = {instanceId, instanceType, viewDefinition, workflowDescription, children};
+    const instanceViewProps = {instanceId, instanceType, layoutDefinition:viewDefinition, workflowDescription, children};
 
     return (
         <SubmissionDetailsHolder>
