@@ -134,6 +134,13 @@ const DSAwardsTheme = {
         hoverButtonColor: ThemeBaseDefaults.HoveredColor
     },
 
+    // Author listing
+    authorListing: {
+        fontFamily: ThemeBaseDefaults.LabelFontFamily,
+        fontSize: "14px",
+        textColor: "black"
+    },
+
     // Citation
     citation: {
         fontFamily: ThemeBaseDefaults.LabelFontFamily,

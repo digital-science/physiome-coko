@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React, {Fragment, useEffect} from 'react';
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { nextUniqueIdInArray, assignUniqueIdsToArrayItems } from '../../utils/helpers';
 import styled from 'styled-components';
+import { th } from 'ds-awards-theme';
 
 import withFormField from "./withFormField";
 import { useFormValueBindingForComplexObject } from '../../hooks/useFormValueBinding';
@@ -140,3 +141,77 @@ function FormFieldAuthorsEditor({ className, data, binding, instanceId, instance
 
 
 export default withFormField(FormFieldAuthorsEditor);
+
+
+// ----
+// Authors (static list)
+// ---
+
+const AuthorRow = styled.li`
+  > div {
+    margin-left: 24px;
+    font-size: 95%;
+    color: #505050;
+  }
+  
+  > ul {
+    font-size: 95%;
+  }
+`;
+
+const AuthorListing = styled( ({className, authors}) => {
+
+    return (
+        <ol className={className}>
+            {authors.map((author, index) => {
+
+                const affiliations = author.affiliations ? author.affiliations.filter(a => a.organization && a.organization.name) : null;
+
+                return (
+                    <AuthorRow key={index}>
+                        {index + 1}. {author.name} ({author.email})
+                        { affiliations ?
+                            <Fragment>
+                                <div>Affiliations:</div>
+                                <ul>
+                                    {affiliations.map((a, i) => <li key={i}>{a.organization.name}{a.department ? <span>, {a.department}</span> : null}</li>)}
+                                </ul>
+                            </Fragment>
+                            : null
+                        }
+                    </AuthorRow>
+                );
+            } )}
+        </ol>
+    );
+})`
+  
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: ${th('authorListing.fontFamily')};
+  font-size: ${th('authorListing.fontSize')};
+  
+  & > li + li {
+    margin-top: 5px;
+  }
+
+`;
+
+function _FormFieldAuthorsListing({ className, data, binding, instanceId, instanceType, options = {} }) {
+
+    const [authors] = useFormValueBindingForComplexObject(data, binding);
+
+    return (
+        <div className={className}>
+            {options.label ? <Label>{options.label}</Label> : null}
+            {(authors && authors instanceof Array && authors.length) ? <AuthorListing authors={authors} /> : <span>No Authors were specified</span>}
+        </div>
+    );
+}
+
+const FormFieldAuthorsListing = withFormField(_FormFieldAuthorsListing);
+
+
+
+export { FormFieldAuthorsListing };
