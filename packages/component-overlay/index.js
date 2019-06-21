@@ -1,3 +1,4 @@
-import Overlay from './components/overlay';
+import Overlay, { BasicOverlay } from './components/overlay';
 
 export default Overlay;
+export {Overlay, BasicOverlay};

@@ -76,14 +76,24 @@ const OverlayHeader = styled(_OverlayHeader)`
 `;
 
 
-
-function Overlay({children, heading, hasClose, close, style, ...rest}) {
+function BasicOverlay({className, children, style, ...rest}) {
     return (
-        <Modal style={style || customStyles} {...rest}>
-            <OverlayHeader heading={heading} hasClose={hasClose} close={close} />
+        <Modal className={className} style={style || customStyles} {...rest}>
             {children}
         </Modal>
     );
 }
 
+
+function Overlay({className, children, heading, hasClose, close, ...rest}) {
+    return (
+        <BasicOverlay className={className} {...rest}>
+            <OverlayHeader heading={heading} hasClose={hasClose} close={close} />
+            {children}
+        </BasicOverlay>
+    );
+}
+
 export default Overlay;
+
+export { BasicOverlay, Overlay };

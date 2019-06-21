@@ -57,6 +57,25 @@ const ThemeBaseDefaults = {
 
 const DSAwardsTheme = {
 
+    // Modal
+    modal: {
+        fontFamily: ThemeBaseDefaults.LabelFontFamily,
+
+        headingFontSize: "20px",
+        headingTextColor: ThemeBaseDefaults.LabelColor,
+        headingFontWeight: "bold",
+
+        messageFontSize: "14px",
+        messageTextColor: ThemeBaseDefaults.LabelColor
+    },
+
+    helpPopover: {
+        fontFamily: ThemeBaseDefaults.LabelFontFamily,
+        textColor: ThemeBaseDefaults.LabelColor,
+        fontSize: ThemeBaseDefaults.FontSizeSmall,
+        maximumWidth: "250px"
+    },
+
     // Label
     label: {
         fontFamily: ThemeBaseDefaults.LabelFontFamily,
