@@ -14,10 +14,10 @@ import FormFieldFilesListing from './fields/form-field-files-listing';
 
 import FormFieldGroup from './fields/form-field-group';
 
-import FormFieldAuthors from './fields/form-field-authors';
+import FormFieldAuthorsEditor, { FormFieldAuthorsListing } from './fields/form-field-authors';
 import FormFieldFunding from './fields/form-field-funding';
 import FormFieldArticleCitation from './fields/form-field-article-citation';
-import FormFieldKeywords from './fields/form-field-keywords';
+import FormFieldKeywords, { FormFieldKeywordsListing } from './fields/form-field-keywords';
 
 import FormFieldFigshareEmbed from './fields/form-field-figshare-embed';
 
@@ -33,17 +33,22 @@ const FormFieldRegistry = {
     'HeroCheckbox' : FormFieldHeroCheckbox,
     'SelectValue' : FormFieldSelect,
 
+    'AuthorsEditor' : FormFieldAuthorsEditor,
+    'AuthorsListing' : FormFieldAuthorsListing,
+
     'FileUploader': FormFieldFileUploader,
-    'AuthorsEditor' : FormFieldAuthors,
+    'FilesListing': FormFieldFilesListing,
+
     'FundingEditor' : FormFieldFunding,
     'ArticleCitation' : FormFieldArticleCitation,
+
     'KeywordsEditor' : FormFieldKeywords,
+    'KeywordsListing' : FormFieldKeywordsListing,
 
     'InlineTaskForm' : FormFieldInlineTask,
 
     // Static details form fields
     'StaticText' : FormFieldStaticText,
-    'FilesListing': FormFieldFilesListing,
 
     'Group': FormFieldGroup,
 
