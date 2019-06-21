@@ -103,7 +103,7 @@ instance Submission {
 
         fields "submit" {
     	    kind, title, abstract, primaryPapers, authors, pmrWorkspace, priceAcknowledged, keywords, funding, iupsCommission,
-    	    articleFiles, supplementaryFiles, supplementaryDataFiles,
+    	    articleFiles, supplementaryFiles,
             submissionDate
         }
 
@@ -143,72 +143,81 @@ instance Submission {
     }
 
 
-    view "details" extend "SideBySideHeroPanels" {
+    view "details" extend "MasterDetailEditor" {
 
         elements: {
 
-            { Panel, heading:"Article Details", children:{
+            { MasterPanel, heading:"Manuscript Details", children:{
 
-                { Group, heading:"Submitted Details", children:{
+                { StaticText => kind, label:"Article Type", mapping:mapping("DisplayedSubmissionKind") }
 
-                    { StaticText => title, label:"Title" }
+                { StaticText => title, label:"Title" }
 
-                    { StaticText => abstract, label:"Abstract" }
+                { StaticText => abstract, label:"Abstract" }
 
-                    { StaticText => pmrWorkspace, label:"Associated PMR Workspace" }
+                { AuthorsListing => authors, label:"Authors" }
 
-                    { FilesListing => articleFiles, label:"Article Files" }
+                { ArticleCitation => primaryPapers, label:"Primary Paper", readOnly:true }
 
-                } }
+                { StaticText => pmrWorkspace, label:"Associated PMR Workspace" }
 
-                { Group, heading:"Additional Information", children:{
+                { StaticText => iupsCommission, label:"Commission Type", mapping:mapping("DisplayedIUPSCommissionKinds") }
 
-                    { SubmissionStatusPill => phase, label:"Submission Status" }
+                { KeywordsListing => keywords, label:"Keywords" }
 
-                    { StaticText => submissionDate, label:"Submission Date" }
+                { FilesListing => articleFiles, label:"Manuscript Files" }
 
-                    { StaticText => publishDate, (phase == SubmissionPhase.Published), label:"Published Date" }
+                { FilesListing => supplementaryFiles, label:"Supplementary Files" }
 
-                } }
+            } }
+
+            { MasterPanel, (phase == SubmissionPhase.Published), heading:"Published Article", children:{
+
+                { FishareArticleEmbed => figshareArticleId }
 
             } }
 
 
-            { Panel, heading:"Actions", children:{
+            { DetailPanel, children:{
 
-                { Group, (phase == SubmissionPhase.Checking), heading:"Checks", children:{
+                { SubmissionStatusPill => phase, label:"Submission Status" }
 
-                    { InlineTaskForm, form:"checks" }
+                { StaticText => submissionDate, label:"Submission Date" }
 
-                } }
+                { StaticText => publishDate, (phase == SubmissionPhase.Published), label:"Published Date" }
 
-                { Group, (phase != SubmissionPhase.Checking), heading:"Checks", children:{
+                { TextArea => curationNotes, label:"Notes" }
 
-                    { Checkbox => allFilesPresent, label: "All files are present within the model and successfully execute", readOnly:true }
-
-                    { Checkbox => resultsMatch, label: "Results of of the model match the results present in referenced articles", readOnly:true }
-
-                    { Checkbox => modelAnnotated, label: "Model is fully annotated", readOnly:true }
-
-                    { StaticText => curationNotes, label:"Notes" }
-
-                } }
-
-                { Group, (phase == SubmissionPhase.Checking || phase == SubmissionPhase.Decision), heading:"Decisions", children:{
-
-                    { InlineTaskForm, form:"final-decision", tasks:[ "final-decision" ] }
-
-                    { InlineTaskForm, (phase != SubmissionPhase.Decision), form:"reject", tasks:[ "checks" ] }
-
-                } }
-
-                { Group, (phase == SubmissionPhase.Published), heading:"Published", children:{
-
-                    { FishareArticleEmbed => figshareArticleId, label:"Figshare Article" }
-
-                } }
-
+                { Checkbox => hidden, (phase in [SubmissionPhase.Submitted, SubmissionPhase.Checking, SubmissionPhase.Decision]), label:"Place submission on-hold" }
             } }
+
+            { DetailPanel, (phase == SubmissionPhase.Checking), heading:"Curation Checks", children:{
+
+                { InlineTaskForm, form:"checks" }
+            } }
+
+            { DetailPanel, (phase != SubmissionPhase.Checking), heading:"Curation Checks", children:{
+
+                { Checkbox => primaryPaperExists, label: "Primary paper exists", readOnly:true }
+
+                { Checkbox => sameModelInPapers, label: "Same model in manuscript and primary paper", readOnly:true }
+
+                { Checkbox => resultsMatch, label: "Results of of the model match the results present in primary article", readOnly:true }
+
+                { Checkbox => resultsInPapersOverlap, label: "Results in manuscript and primary paper overlap", readOnly:true }
+
+                { Checkbox => allFilesPresent, label: "All files are present within the model and successfully execute", readOnly:true }
+
+                { Checkbox => modelAnnotated, label: "Model is fully annotated", readOnly:true }
+            } }
+
+            { DetailPanel, (phase == SubmissionPhase.Checking || phase == SubmissionPhase.Decision), heading:"Decisions", children:{
+
+                { InlineTaskForm, form:"final-decision", tasks:[ "final-decision" ] }
+
+                { InlineTaskForm, (phase != SubmissionPhase.Decision), form:"reject", tasks:[ "checks" ] }
+            } }
+
         }
     }
 
@@ -316,13 +325,17 @@ instance Submission {
 
         elements: {
 
+            { Checkbox => primaryPaperExists, label: "Primary paper exists" }
+
+            { Checkbox => sameModelInPapers, label: "Same model in manuscript and primary paper" }
+
+            { Checkbox => resultsMatch, label: "Results of of the model match the results present in primary article" }
+
+            { Checkbox => resultsInPapersOverlap, label: "Results in manuscript and primary paper overlap" }
+
             { Checkbox => allFilesPresent, label: "All files are present within the model and successfully execute" }
 
-            { Checkbox => resultsMatch, label: "Results of of the model match the results present in referenced articles" }
-
             { Checkbox => modelAnnotated, label: "Model is fully annotated" }
-
-            { TextArea => curationNotes, label:"Notes" }
 
             { Button, default:true, outcome:"checked", label:"Checks Completed" }
         }
