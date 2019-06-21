@@ -83,7 +83,7 @@ const DashboardTable = styled.table`
     }
     
     tbody {
-        font-size: 15px;
+        font-size: 14px;
     }
     
     tbody tr {
@@ -189,7 +189,7 @@ function Dashboard(props) {
                         <th>Submission Title</th>
                         <th className="small">Date</th>
                         <th className="small status">Status</th>
-                        <th>Authors</th>
+                        {/*<th>Authors</th>*/}
                         <th className="medium">Submitter</th>
                         <th className="medium">Assigned</th>
                         <th className="small actions">Actions</th>
@@ -198,7 +198,7 @@ function Dashboard(props) {
                 <tbody>
                     {loading ? (
                         <tr>
-                            <td colSpan={6}>
+                            <td colSpan={5}>
                                 <Spinner center={true}/>
                             </td>
                         </tr>) : null
@@ -206,7 +206,7 @@ function Dashboard(props) {
 
                     {error ? (
                         <tr>
-                            <td colSpan={6}>
+                            <td colSpan={5}>
                                 An error occurred while loading the active award submissions.
                             </td>
                         </tr>) : null
@@ -260,6 +260,17 @@ const AuthorListing = styled.ol`
   list-style: none;
   padding: 0;
   margin: 0;
+  font-size: 12.6px;
+  margin-top: 3px;
+  
+   overflow: hidden;
+   text-overflow: ellipsis;
+   display: -webkit-box;
+   line-height: 14.49px;     /* fallback */
+   max-height: 28.98px;      /* fallback */
+   -webkit-line-clamp: 2; /* number of lines to show */
+   -webkit-box-orient: vertical;
+
   
   & li {
     display: inline;
@@ -324,8 +335,8 @@ const LineLimitedText = styled.div`
    overflow: hidden;
    text-overflow: ellipsis;
    display: -webkit-box;
-   line-height: 17.25px;     /* fallback */
-   max-height: 34.5px;      /* fallback */
+   line-height: 16.1px;     /* fallback */
+   max-height: 32.2px;      /* fallback */
    -webkit-line-clamp: 2; /* number of lines to show */
    -webkit-box-orient: vertical;
 `;
@@ -339,9 +350,9 @@ function ActiveSubmissionTableRow({submission, workflowDescription, claimSubmiss
     const { tasks } = submission;
     const submissionTask = (tasks && tasks.length && tasks.find(task => task.formKey === "custom:submission"));
     const claimTask = (tasks && tasks.length && tasks.find(task => task.formKey === "custom:claim"));
-    const checkTask = (tasks && tasks.length && tasks.find(task => task.formKey === "custom:checks"));
+    //const checkTask = (tasks && tasks.length && tasks.find(task => task.formKey === "custom:checks"));
 
-    const checksActionIcon = checkTask ? <UserChecksIconHolder to={`/details/${encodeURI(submission.id)}`}><FaUserCheck /></UserChecksIconHolder> : null;
+    //const checksActionIcon = checkTask ? <UserChecksIconHolder to={`/details/${encodeURI(submission.id)}`}><FaUserCheck /></UserChecksIconHolder> : null;
 
     const deleteSubmission = () => {
         destroySubmission(submission.id, {phase:"Cancelled"}).then(() => {
@@ -377,6 +388,10 @@ function ActiveSubmissionTableRow({submission, workflowDescription, claimSubmiss
         <SubmissionRow>
             <TitleColumn className={`title ${!submission.title ? "no-title" : ""}`}>
                 {linkedTitle}
+                {submission.authors && submission.authors instanceof Array && submission.authors.length ?
+                    <AuthorListing>
+                        {(submission.authors.map((a, i) => <li key={i}>{a.name}</li>))}
+                    </AuthorListing> : null}
             </TitleColumn>
             <td className="date">
                 {submission.submissionDate ? moment(submission.submissionDate).format("MMMM D, YYYY") : <span>&ndash;</span>}
@@ -384,12 +399,12 @@ function ActiveSubmissionTableRow({submission, workflowDescription, claimSubmiss
             <td className="small status">
                 <SubmissionStatusPill submission={submission} />
             </td>
-            <td className="authors">
+            {/*<td className="authors">
                 {submission.authors && submission.authors instanceof Array && submission.authors.length ?
                     <AuthorListing>
                         {(submission.authors.map((a, i) => <li key={i}>{a.name}</li>))}
                     </AuthorListing> : null}
-            </td>
+            </td>*/}
 
             <IdentityColumn className="submitter">
                 {submission.submitter && submission.submitter.displayName ? <span>{submission.submitter.displayName}</span> : <span className="no-identity">&mdash;</span>}
@@ -402,14 +417,11 @@ function ActiveSubmissionTableRow({submission, workflowDescription, claimSubmiss
             </IdentityColumn>
 
             <td className="small actions">
-                {checksActionIcon}
-
                 <PopoverTrigger renderContent={() => {
                     return <Button onClick={deleteSubmission}>Delete Submission</Button>
                 }}>
                     <DeleteIcon />
                 </PopoverTrigger>
-
             </td>
         </SubmissionRow>
     );

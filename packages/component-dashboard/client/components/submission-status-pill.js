@@ -76,6 +76,12 @@ const SubmissionStatusPill = styled(_SubmissionStatusPill)`
     border-radius: 3px;
     letter-spacing: 0.05em;
     
+    &.pending {
+        border: 1px solid #505050;
+        color: #505050;
+        background: white;
+    }
+    
     &.submitted {
         background-color: #FFC107;
     }
