@@ -15,7 +15,7 @@ import FormFieldFilesListing from './fields/form-field-files-listing';
 import FormFieldGroup from './fields/form-field-group';
 
 import FormFieldAuthorsEditor, { FormFieldAuthorsListing } from './fields/form-field-authors';
-import FormFieldFunding from './fields/form-field-funding';
+import FormFieldFundingEditor, { FormFieldFundingListing } from './fields/form-field-funding';
 import FormFieldArticleCitation from './fields/form-field-article-citation';
 import FormFieldKeywords, { FormFieldKeywordsListing } from './fields/form-field-keywords';
 
@@ -39,7 +39,9 @@ const FormFieldRegistry = {
     'FileUploader': FormFieldFileUploader,
     'FilesListing': FormFieldFilesListing,
 
-    'FundingEditor' : FormFieldFunding,
+    'FundingEditor' : FormFieldFundingEditor,
+    'FundingListing' : FormFieldFundingListing,
+
     'ArticleCitation' : FormFieldArticleCitation,
 
     'KeywordsEditor' : FormFieldKeywords,

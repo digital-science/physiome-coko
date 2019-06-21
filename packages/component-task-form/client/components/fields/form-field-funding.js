@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { nextUniqueIdInArray, assignUniqueIdsToArrayItems } from '../../utils/helpers';
 import styled from 'styled-components';
@@ -11,6 +11,7 @@ import InlineButton from "ds-awards-theme/components/inline-button";
 import { FaPlus } from 'react-icons/fa';
 
 import FunderEditorCard from '../funder-editor-card';
+import { th } from "ds-awards-theme";
 
 
 const FundingEditorHolder = styled.div`    
@@ -142,3 +143,100 @@ function FormFieldFundingEditor({ className, data, binding, instanceId, instance
 
 
 export default withFormField(FormFieldFundingEditor);
+
+
+// ----
+// Authors (static list)
+// ---
+
+const FunderRow = styled.li`
+  > ol {
+    margin: 0;
+    padding: 0;
+  }
+  > ol li {
+    display: inline;
+  }
+  > ol li:before {
+    content: ', ';
+  }
+  > ol li:first-child:before {
+    content: '';
+  } 
+`;
+
+const FundingListing = styled( ({className, funding}) => {
+    return (
+        <ol className={className}>
+            {funding.map((funder, index) => {
+
+                const grants = funder.grants ? funder.grants.filter(g => g.projectNumber) : null;
+
+                return (
+                    <FunderRow key={index}>
+                        {funder.organization.name} {funder.organization.country && funder.organization.country.country_code ? <span> ({funder.organization.country.country_code})</span> : null}
+                        { grants ?
+                            <ol>
+                                {grants.map((g, i) => <li key={i}>{g.projectNumber}</li>)}
+                            </ol>
+                            : null
+                        }
+                    </FunderRow>
+                );
+
+            } )}
+        </ol>
+    );
+})`
+  
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-family: ${th('authorListing.fontFamily')};
+    font-size: ${th('authorListing.fontSize')};
+    
+    counter-reset: funding-counter;
+    padding-left: 20px;
+
+    & > li {
+      margin: 0;
+      counter-increment: funding-counter;
+      position: relative;
+    }
+    & > li::before {
+      content: counter(funding-counter) ".";
+      font-size: ${th('authorListing.fontSize')};
+      position: absolute;
+      left: -20px;
+      line-height: 1.2em;
+      width: 20px;
+      height: 1.2em;
+      top: 0;
+      text-align: left;
+    }
+    
+    & > li + li {
+      margin-top: 5px;
+    }
+
+`;
+
+function _FormFieldFundingListing({ className, data, binding, instanceId, instanceType, options = {} }) {
+
+    const [funding] = useFormValueBindingForComplexObject(data, binding);
+
+    console.dir(funding);
+
+    return (
+        <div className={className}>
+            {options.label ? <Label>{options.label}</Label> : null}
+            {(funding && funding instanceof Array && funding.length) ? <FundingListing funding={funding} /> : <span>No Funding Acknowledgements were specified</span>}
+        </div>
+    );
+}
+
+const FormFieldFundingListing = withFormField(_FormFieldFundingListing);
+
+
+
+export { FormFieldFundingListing };

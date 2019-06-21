@@ -160,7 +160,6 @@ const AuthorRow = styled.li`
 `;
 
 const AuthorListing = styled( ({className, authors}) => {
-
     return (
         <ol className={className}>
             {authors.map((author, index) => {
