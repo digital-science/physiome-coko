@@ -1,7 +1,9 @@
 import React from 'react';
-import { FormFieldInlineTaskHolder } from './form-field-inline-task';
+import { FormFieldInlineTaskHolder, InlineTaskContext } from './form-field-inline-task';
 
 import Button, { PlainButtonStyle, SmallButtonStyle } from 'ds-awards-theme/components/button';
+import { InlineButton } from 'ds-awards-theme/components/inline-button';
+
 import styled from 'styled-components';
 
 import withFormField from './withFormField';
@@ -17,7 +19,10 @@ const FormStyledButton = styled(Button)`
 
 
 
-function FormFieldButton({taskId, submitTaskOutcome, options}) {
+function FormFieldButton({taskId, submitTaskOutcome, context, options}) {
+
+    const isInsideInlineForm = (context && context.length && context[0] === InlineTaskContext);
+    const ButtonTag = isInsideInlineForm ? InlineButton : FormStyledButton;
 
     function handleSubmit(taskOutcome) {
         if(submitTaskOutcome && taskOutcome) {
@@ -25,10 +30,15 @@ function FormFieldButton({taskId, submitTaskOutcome, options}) {
         }
     }
 
+    const additionalProps = {};
+    if(isInsideInlineForm) {
+        additionalProps.bordered = true;
+    }
+
     return (
-        <FormStyledButton default={options.default || false} className={"form-field-button"}
-            onClick={() => {handleSubmit(options.outcome)}}>{options.label}
-        </FormStyledButton>
+        <ButtonTag default={options.default || false} className={"form-field-button"} onClick={() => {handleSubmit(options.outcome)}} {...additionalProps}>
+            {options.label}
+        </ButtonTag>
     );
 }
 
