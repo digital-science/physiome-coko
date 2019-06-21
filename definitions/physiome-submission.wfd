@@ -102,9 +102,10 @@ instance Submission {
     acl {
 
         fields "submit" {
-    	    kind, title, abstract, primaryPapers, authors, pmrWorkspace, priceAcknowledged, keywords, funding, iupsCommission,
+    	    kind, title, abstract, primaryPapers, authors, funding,
+    	    pmrWorkspace, keywords, iupsCommission,
     	    articleFiles, supplementaryFiles,
-            submissionDate
+            priceAcknowledged, submissionDate
         }
 
         fields "phase" {
@@ -139,7 +140,6 @@ instance Submission {
         allow <administrator> [read] on "phase"
         allow <administrator> [create, destroy]
         allow <administrator> [task]
-
     }
 
 
@@ -159,11 +159,13 @@ instance Submission {
 
                 { ArticleCitation => primaryPapers, label:"Primary Paper", readOnly:true }
 
-                { StaticText => pmrWorkspace, label:"Associated PMR Workspace" }
-
                 { StaticText => iupsCommission, label:"Commission Type", mapping:mapping("DisplayedIUPSCommissionKinds") }
 
                 { KeywordsListing => keywords, label:"Keywords" }
+
+                { FundingListing => funding, label:"Funding Acknowledgements" }
+
+                { StaticText => pmrWorkspace, label:"Associated PMR Workspace" }
 
                 { FilesListing => articleFiles, label:"Manuscript Files" }
 
