@@ -15,67 +15,25 @@ import resolveFieldsForFormElements from "../../utils/resolveFieldsForFormElemen
 
 
 
-/**
- * @return {null}
- */
-function FormFieldInlineTask({className, description, data, instanceId, instanceType, fieldRegistry, refetchData, options = {}, tasks, ...rest}) {
+const InlineTaskContext = { content: "InlineTask" };
+export { InlineTaskContext };
 
-    // Note: for this inline form, the GraphQL request has already fetched all the data required to
-    // display the form inline. We need to create a custom "data" type that supports editing
-    // and only reflects the top level fields of interest to this inline task.
 
-    console.log("---- FormFieldInlineTask ----");
-    console.dir(options);
-    console.dir(description);
-    console.dir(rest);
-    console.log("");
 
-    if(!tasks || !tasks.length) {
-        return null;
+// If the higher level context supports saving form data back to the instance, then we use that. Otherwise
+// we setup a new "update instance" mutation and utilise that.
+
+function useInlineFormData(instanceId, instanceType, data, saveData, topLevelFields, autoSaveDebounceInterval=2000) {
+
+    if(saveData && data && data.supportsUpdates()) {
+        return [data, saveData];
     }
-
-    const { form } = options;
-    if(!form) {
-        return null;
-    }
-
-    const formDefinition = instanceType.formDefinitionForFormName(form);
-    if(!formDefinition) {
-        return null;
-    }
-
-    const matchingTasks = tasks.filter(t => t.formKey === `custom:${form}`);
-
-    if(!matchingTasks.length && options.tasks && options.tasks.length) {
-
-        const allowedFormKeys = {};
-        options.tasks.forEach(a => allowedFormKeys[`custom:${a}`] = true);
-
-        tasks.forEach(t => {
-            if(allowedFormKeys.hasOwnProperty(t.formKey)) {
-                matchingTasks.push(t);
-            }
-        });
-    }
-
-    if(!matchingTasks.length) {
-        return null;
-    }
-
-    const task = matchingTasks[0];
-
-    const { topLevelFields } = useMemo(() => {
-        return resolveFieldsForFormElements(formDefinition.elements, instanceType, fieldRegistry);
-    }, [formDefinition, instanceType, fieldRegistry]);
-
 
     const formData = useMemo(() => {
         return new ShadowedTaskFormData(data, topLevelFields);
     }, [data, topLevelFields]);
 
-
     const updateInstance = useUpdateInstance(instanceType);
-
 
     function _updateInstanceFromFormData() {
 
@@ -99,12 +57,6 @@ function FormFieldInlineTask({className, description, data, instanceId, instance
         });
     }
 
-    const submitTaskOutcome = useSubmitTaskOutcome(instanceId, formDefinition, instanceType, _updateInstanceFromFormData, () => {
-        if(refetchData) {
-            refetchData();
-        }
-    });
-
     useEffect(() => {
 
         if(!formData) {
@@ -116,7 +68,7 @@ function FormFieldInlineTask({className, description, data, instanceId, instance
             }).catch(err => {
                 console.error(`Unable to save form data due to: ` + err.toString());
             });
-        }, 2000);
+        }, autoSaveDebounceInterval);
 
         formData.on('modified', formDataWasChanged);
 
@@ -125,16 +77,81 @@ function FormFieldInlineTask({className, description, data, instanceId, instance
             formDataWasChanged.cancel();
         });
 
-    }, [formData]);
+    }, [formData, _updateInstanceFromFormData]);
+
+    return [formData, _updateInstanceFromFormData];
+}
 
 
 
-    console.dir(task);
-    console.dir(formData);
-    console.dir(formDefinition);
-    console.log("");
+/**
+ * @return {null}
+ */
+function FormFieldInlineTask({className, description, data, instanceId, instanceType, fieldRegistry, saveData, refetchData, context = [], options = {}, tasks, ...rest}) {
 
-    const fieldListingProps = {data:formData, instanceId, taskId:task.id, tasks, instanceType, submitTaskOutcome, fieldRegistry, refetchData, ...rest};
+    // Note: for this inline form, the GraphQL request has already fetched all the data required to
+    // display the form inline. We need to create a custom "data" type that supports editing
+    // and only reflects the top level fields of interest to this inline task.
+
+    if(!tasks || !tasks.length) {
+        return null;
+    }
+
+    const { form } = options;
+    if(!form) {
+        return null;
+    }
+
+    const formDefinition = instanceType.formDefinitionForFormName(form);
+    if(!formDefinition) {
+        return null;
+    }
+
+    const matchingTasks = tasks.filter(t => t.formKey === `custom:${form}`);
+    if(!matchingTasks.length && options.tasks && options.tasks.length) {
+
+        const allowedFormKeys = {};
+        options.tasks.forEach(a => allowedFormKeys[`custom:${a}`] = true);
+
+        tasks.forEach(t => {
+            if(allowedFormKeys.hasOwnProperty(t.formKey)) {
+                matchingTasks.push(t);
+            }
+        });
+    }
+
+    if(!matchingTasks.length) {
+        return null;
+    }
+
+    const task = matchingTasks[0];
+
+    const { topLevelFields } = useMemo(() => {
+        return resolveFieldsForFormElements(formDefinition.elements, instanceType, fieldRegistry);
+    }, [formDefinition, instanceType, fieldRegistry]);
+
+    const [formData, inlineSaveData] = useInlineFormData(instanceId, instanceType, data, saveData, topLevelFields);
+
+    const submitTaskOutcome = useSubmitTaskOutcome(instanceId, formDefinition, instanceType, inlineSaveData, () => {
+        if(refetchData) {
+            refetchData();
+        }
+    });
+
+
+    const fieldListingProps = {
+        data:formData,
+        instanceId,
+        taskId:task.id,
+        tasks,
+        instanceType,
+        submitTaskOutcome,
+        fieldRegistry,
+        saveData:inlineSaveData,
+        refetchData,
+        context: [InlineTaskContext, ...context],
+        ...rest
+    };
 
     return (
         <FormFieldInlineTaskHolder className={className}>
