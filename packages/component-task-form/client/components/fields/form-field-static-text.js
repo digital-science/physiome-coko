@@ -12,14 +12,21 @@ import {BlockLabel} from 'ds-awards-theme/components/label';
 function FormFieldStaticText({data, binding, options = {}}) {
 
     const [value] = useFormValueBinding(data, binding, "");
+    const { format, mapping } = options;
 
     const transformedValue = useMemo(() => {
+
+        if(mapping) {
+            return mapping.mapping[value] || null;
+        }
+
         const d = new Date(value);
         if(d !== "Invalid Date" && !isNaN(d)) {
-            return moment(d).format(options.format || "MMM DD, YYYY");
+            return moment(d).format(format || "MMM DD, YYYY");
         }
         return (value !== null && value !== undefined) ? '' + value : null;
-    }, [value]);
+
+    }, [value, options, format, mapping]);
 
     return (
         <FormFieldStaticTextHolder>
