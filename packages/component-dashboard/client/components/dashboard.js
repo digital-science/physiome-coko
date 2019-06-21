@@ -15,11 +15,9 @@ import PopoverTrigger from 'component-task-form/client/components/popover';
 
 import BinIconImage from './../static/bin.svg';
 import Spinner from 'ds-awards-theme/components/spinner';
-import Button, { SmallPlainButton } from 'ds-awards-theme/components/button';
+import Button from 'ds-awards-theme/components/button';
+import { SmallInlineButton } from 'ds-awards-theme/components/inline-button';
 import SubmissionStatusPill from './submission-status-pill';
-
-
-import './dashboard.css';
 
 
 const DashboardHolder = styled.div`
@@ -198,7 +196,7 @@ function Dashboard(props) {
                     {loading ? (
                         <tr>
                             <td colSpan={5}>
-                                <Spinner center={true}/>
+                                <Spinner center={true} />
                             </td>
                         </tr>) : null
                     }
@@ -410,7 +408,7 @@ function ActiveSubmissionTableRow({submission, workflowDescription, claimSubmiss
             </IdentityColumn>
 
             <IdentityColumn className="curator">
-                {claimTask ? <SmallPlainButton onClick={handleClaimSubmission}>Assign to me</SmallPlainButton> :
+                {claimTask ? <SmallInlineButton bordered={true} onClick={handleClaimSubmission}>Assign to me</SmallInlineButton> :
                     (submission.curator && submission.curator.displayName) ? <span>{submission.curator.displayName}</span> : <span className="no-identity">&mdash;</span>
                 }
             </IdentityColumn>
