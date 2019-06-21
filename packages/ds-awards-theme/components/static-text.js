@@ -6,10 +6,18 @@ const _StaticText = ({children=null, ...rest}) => {
     return <span{...rest}>{children}</span>
 };
 
-export default styled(_StaticText)`
+const StaticText = styled(_StaticText)`
     font-family: ProximaNovaLight, sans-serif;
     font-size: 14px;
     color: black;
     box-sizing: border-box;
     word-break: break-word;
 `;
+
+export default StaticText;
+
+const DisabledStaticText = styled(StaticText)`
+    color: #b3b3b3;
+`;
+
+export { DisabledStaticText };
