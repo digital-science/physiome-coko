@@ -22,11 +22,19 @@ class Condition {
             _addBindings(expression.lhs);
             _addBindings(expression.rhs);
 
-            if(expression.lhs && expression.lhs.type === "enum") {
-                expression.lhs.value = _enumResolve(expression.lhs.value);
+            if(expression.lhs) {
+                if(expression.lhs.type === "enum") {
+                    expression.lhs.value = _enumResolve(expression.lhs.value);
+                } else if(expression.lhs.type === "enum-set") {
+                    expression.lhs.value = expression.lhs.value.map(v => _enumResolve(v));
+                }
             }
-            if(expression.rhs && expression.rhs.type === "enum") {
-                expression.rhs.value = _enumResolve(expression.rhs.value);
+            if(expression.rhs) {
+                if(expression.rhs.type === "enum") {
+                    expression.rhs.value = _enumResolve(expression.rhs.value);
+                } else if(expression.rhs.type === "enum-set") {
+                    expression.rhs.value = expression.rhs.value.map(v => _enumResolve(v));
+                }
             }
 
             if(expression.expression) {
