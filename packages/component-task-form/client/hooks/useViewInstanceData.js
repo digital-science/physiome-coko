@@ -10,22 +10,20 @@ import InstanceViewData from "../utils/InstanceViewData";
 import pick from "lodash/pick";
 
 
-export default function useViewInstanceData({instanceId, instanceType, viewDefinition, workflowDescription}) {
+export default function useViewInstanceData({instanceId, instanceType, layoutDefinition, workflowDescription}) {
 
 
     const { fetchFields, topLevelFields } = useMemo(() => {
-        return resolveFieldsForFormElements(viewDefinition.elements, instanceType, FieldRegistry);
-    }, [viewDefinition, instanceType]);
+        return resolveFieldsForFormElements(layoutDefinition.elements, instanceType, FieldRegistry);
+    }, [layoutDefinition, instanceType]);
 
     const { data, error, loading, refetch } = useGetInstanceQuery(instanceId, instanceType, workflowDescription, fetchFields);
 
     const [viewData, setViewData] = useState(null);
 
-
     const refetchViewData = () => {
         return refetch();
     };
-
 
     useEffect(() => {
 

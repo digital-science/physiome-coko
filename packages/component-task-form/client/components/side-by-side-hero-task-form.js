@@ -28,5 +28,4 @@ export default function SideBySideHeroTaskForm({ instanceId, taskId, taskName, i
         <StyledSideBySideHeroLayout elements={formDefinition.elements} data={formData} loading={loading} error={error}
             instance={instance} fieldListingProps={fieldListingProps} />
     );
-
 };

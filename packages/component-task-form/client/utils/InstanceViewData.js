@@ -43,6 +43,10 @@ class InstanceViewData {
     resetFieldValue(fieldID) {
         throw new Error('InstanceViewData does not support modifying data values.');
     }
+
+    supportsUpdates() {
+        return false;
+    }
 }
 
 EventEmitter(InstanceViewData.prototype);

@@ -31,9 +31,13 @@ function taskFormForFormDefinition(formDefinition) {
 
 import InstanceView from './components/instance-view';
 import SideBySideHeroInstanceView from './components/side-by-side-hero-instance-view';
+import MasterDetailEditor from './components/master-detail-editor';
+import MasterDetailView from './components/master-detail-view';
 
 const InstanceViewTypeMap = {
     'SideBySideHeroPanels': SideBySideHeroInstanceView,
+    'MasterDetailEditor': MasterDetailEditor,
+    'MasterDetailView': MasterDetailView,
     'Simple': InstanceView
 };
 

@@ -135,7 +135,9 @@ class TaskFormData {
         return this._generation;
     }
 
-
+    supportsUpdates() {
+        return true;
+    }
 
     registerRelationshipModifier(callback) {
 
