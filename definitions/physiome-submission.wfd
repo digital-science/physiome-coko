@@ -285,7 +285,10 @@ instance Submission {
 
                 { Button, outcome:"save-for-later", label:"Save for Later" }
 
-                { Button, outcome:"cancel", label:"Cancel" }
+                { Button, outcome:"cancel", label:"Cancel",
+                    confirmation:"Are you sure you want to cancel this manuscript submission? The submission and any saved answers will be lost.",
+                    confirmationHeading:"Cancel Manuscript Submission",
+                    confirmationAffirmativeLabel: "Delete Submission", confirmationNegativeLabel: "Cancel"}
 
                 { Button, default:true, outcome:"complete", label:"Submit" }
 
@@ -325,17 +328,27 @@ instance Submission {
 
         elements: {
 
-            { Checkbox => primaryPaperExists, label: "Primary paper exists" }
+            { Checkbox => primaryPaperExists, label: "Primary paper exists",
+                help:"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." }
 
-            { Checkbox => sameModelInPapers, label: "Same model in manuscript and primary paper" }
+            { Checkbox => sameModelInPapers, label: "Same model in manuscript and primary paper",
+                help:"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." }
 
-            { Checkbox => resultsMatch, label: "Results of of the model match the results present in primary article" }
 
-            { Checkbox => resultsInPapersOverlap, label: "Results in manuscript and primary paper overlap" }
+            { Checkbox => resultsMatch, label: "Results of of the model match the results present in primary article",
+                help:"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." }
 
-            { Checkbox => allFilesPresent, label: "All files are present within the model and successfully execute" }
 
-            { Checkbox => modelAnnotated, label: "Model is fully annotated" }
+            { Checkbox => resultsInPapersOverlap, label: "Results in manuscript and primary paper overlap",
+                help:"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." }
+
+
+            { Checkbox => allFilesPresent, label: "All files are present within the model and successfully execute",
+                help:"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." }
+
+
+            { Checkbox => modelAnnotated, label: "Model is fully annotated",
+                help:"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." }
 
             { Button, default:true, outcome:"checked", label:"Checks Completed" }
         }
@@ -355,7 +368,9 @@ instance Submission {
 
         elements: {
 
-            { Button, outcome:"reject", label:"Reject Article" }
+            { Button, outcome:"reject", label:"Reject Article",
+                confirmation:"Are you sure you want to reject this manuscript submission?", confirmationHeading:"Reject Manuscript Submission",
+                confirmationAffirmativeLabel: "Reject Manuscript", confirmationNegativeLabel: "Cancel" }
         }
     }
 
@@ -379,9 +394,13 @@ instance Submission {
 
         elements: {
 
-            { Button, default:true, outcome:"publish", label:"Publish Article" }
+            { Button, default:true, outcome:"publish", label:"Publish Article",
+                confirmation:"Are you sure you want to reject this manuscript submission?", confirmationHeading:"Publish Manuscript to Figshare",
+                confirmationAffirmativeLabel: "Publish Manuscript", confirmationNegativeLabel: "Cancel"}
 
-            { Button, outcome:"reject", label:"Reject Article" }
+            { Button, outcome:"reject", label:"Reject Article",
+                confirmation:"Are you sure you want to reject this manuscript submission?", confirmationHeading:"Reject Manuscript Submission",
+                confirmationAffirmativeLabel: "Reject Manuscript", confirmationNegativeLabel: "Cancel" }
 
         }
     }
