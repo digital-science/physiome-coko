@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { th } from 'ds-awards-theme';
 
@@ -24,7 +24,7 @@ const FormStyledHelp = styled.span`
 
     & svg {
       font-size: 80%;
-      vertical-align: text-top;
+      /*vertical-align: middle;*/
       cursor: pointer;
     }
     & svg:hover {
@@ -47,8 +47,7 @@ const HelpContent = styled.span`
 function FormFieldCheckbox({data, binding, options = {}}) {
 
     const [value, _, handleInputChange] = useFormValueBinding(data, binding, "", (v) => v || "");
-    const handleCheckedChange = options.readOnly === true ? null : handleInputChange;
-    const input = <FormStyledCheckbox checked={value || false} disabled={options.readOnly || false} onChange={handleCheckedChange} />;
+    const [helpIsShown, setHelpIsShown] = useState(false);
 
     const help = useMemo(() => {
 
@@ -58,13 +57,22 @@ function FormFieldCheckbox({data, binding, options = {}}) {
 
         return (
             <FormStyledHelp>
-                <PopoverTrigger renderContent={(props) => <HelpContent>{options.help}</HelpContent>}>
+                <PopoverTrigger onVisibilityChange={v => setHelpIsShown(v)} renderContent={(props) => <HelpContent>{options.help}</HelpContent>}>
                     <FaQuestionCircle />
                 </PopoverTrigger>
             </FormStyledHelp>
         );
 
     }, [options.help]);
+
+    const handleCheckedChange = (e) => {
+        if(options.readOnly || helpIsShown) {
+            return;
+        }
+        handleInputChange(e);
+    };
+
+    const input = <FormStyledCheckbox checked={value || false} disabled={options.readOnly || false} onChange={handleCheckedChange} />;
 
     return (
         options.label ? (<FormStyledLabel>{input}<span>{options.label}{help}</span></FormStyledLabel>) : <React.Fragment>{input}{help}</React.Fragment>

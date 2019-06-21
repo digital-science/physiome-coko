@@ -32,7 +32,7 @@ export default withFormField(FormFieldSubmissionStatusPill, function(element) {
     const topLevel = [element.binding, "hidden"];
     const fetch = {hidden:null};
     fetch[element.binding] = null;
-    
+
     return {topLevel, fetch};
 
 });
