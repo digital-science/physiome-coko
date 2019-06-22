@@ -548,6 +548,47 @@ InstanceResolver.prototype.destroy = async function(input, context) {
 };
 
 
+InstanceResolver.prototype.restart = async function restart(instance, startAfterActivityId) {
+
+    // If we have a state update to apply then we can do this here and now.
+    const { processKey } = this.taskDef.options;
+    const createProcessOpts = {
+        key: processKey,
+        businessKey: instance.id,
+        startInstructions:[
+            {
+                type: "startAfterActivity",
+                activityId: startAfterActivityId
+            }
+        ]
+    };
+
+    if(this.stateFields && this.stateFields.length) {
+
+        const variables = {};
+        let hasVariables = false;
+
+        this.stateFields.forEach(f => {
+
+            const value = instance[f.field];
+
+            if(typeof(value) === "string" || typeof(value) === "number" || value === null) {
+                variables[f.field] = {value: value};
+                hasVariables = true;
+            }
+        });
+
+        if(hasVariables) {
+            createProcessOpts.variables = variables;
+        }
+    }
+
+    return processDefinitionService.start(createProcessOpts).then(data => {
+        return data;
+    });
+};
+
+
 InstanceResolver.prototype.getTasks = async function getTasks(instanceID, context) {
 
     // FIXME: this should use the parent context, if that has resolved the user and object already then we shouldn't need
