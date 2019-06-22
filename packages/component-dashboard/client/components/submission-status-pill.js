@@ -57,16 +57,22 @@ SubmissionStatusMapping[SubmissionStatus.Cancelled] = {
 };
 
 
-function _SubmissionStatusPill({className, phase, submission, onHold=false}) {
+function _SubmissionStatusPill({className, phase, submission, onHold=false, curator=null}) {
 
     const usedPhase = submission ? submission.phase : phase;
     const isOnHold = submission ? submission.hidden : onHold;
+    const hasCuratorAssigned = !!(submission ? submission.curator : curator);
 
     if(isOnHold) {
         return <div className={`${className} on-hold`}>On-hold</div>
     }
 
-    const status = (usedPhase && SubmissionStatusMapping.hasOwnProperty(usedPhase)) ? SubmissionStatusMapping[usedPhase] : SubmissionStatusMapping[SubmissionStatus.Pending];
+    let status = (usedPhase && SubmissionStatusMapping.hasOwnProperty(usedPhase)) ? SubmissionStatusMapping[usedPhase] : SubmissionStatusMapping[SubmissionStatus.Pending];
+
+    if(usedPhase === SubmissionStatus.Submitted && hasCuratorAssigned) {
+        status = SubmissionStatusMapping[SubmissionStatus.Checking];
+    }
+
     return <div className={`${className} ${status.className}`}>{status.text}</div>
 }
 
