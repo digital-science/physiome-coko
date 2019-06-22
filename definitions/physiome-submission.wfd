@@ -231,9 +231,11 @@ instance Submission {
                 { Checkbox => modelAnnotated, label: "Model is fully annotated", readOnly:true }
             } }
 
-            { DetailPanel, (phase == SubmissionPhase.Submitted || phase == SubmissionPhase.Decision), heading:"Decisions", children:{
+            { DetailPanel, (phase in [SubmissionPhase.Submitted, SubmissionPhase.Decision, SubmissionPhase.Reject]), heading:"Decisions", children:{
 
                 { InlineTaskForm, form:"decisions", tasks:[ "final-decision", "checks" ] }
+
+                { ResumeRejectedSubmission, (phase == SubmissionPhase.Reject) }
 
             } }
 
@@ -355,10 +357,9 @@ instance Submission {
                 confirmation:"Are you sure you want to reject this manuscript submission?", confirmationHeading:"Publish Manuscript to Figshare",
                 confirmationAffirmativeLabel: "Publish Manuscript", confirmationNegativeLabel: "Cancel"}
 
-            { Button, outcome:"reject", label:"Reject Article",
+            { Button, (phase != SubmissionPhase.Reject), outcome:"reject", label:"Reject Article",
                 confirmation:"Are you sure you want to reject this manuscript submission?", confirmationHeading:"Reject Manuscript Submission",
                 confirmationAffirmativeLabel: "Reject Manuscript", confirmationNegativeLabel: "Cancel" }
-
         }
     }
 
