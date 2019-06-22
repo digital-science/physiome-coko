@@ -5,7 +5,6 @@ import moment from 'moment';
 
 import { WorkflowDescriptionContext } from 'client-workflow-model';
 
-import useCompleteInstanceTask from 'component-task-form/client/mutations/completeInstanceTask';
 import useCreateTaskMutation from './../mutations/createTask';
 import useDestroySubmissionMutation from './../mutations/destroySubmission';
 import useClaimSubmissionMutation from './../mutations/claimSubmission';
@@ -116,7 +115,6 @@ function Dashboard(props) {
     const createNewTask = useCreateTaskMutation(submissionTaskID);
     const destroySubmission = useDestroySubmissionMutation(submissionTaskID);
     const claimSubmission = useClaimSubmissionMutation(submissionTaskID);
-    const completeInstanceTask = useCompleteInstanceTask(submissionInstanceType);
 
     const createTaskUrl = (id, taskName, taskId) => {
         return `/submission/${id}`;
@@ -145,7 +143,6 @@ function Dashboard(props) {
         phase: [
             "Pending",
             "Submitted",
-            "Checking",
             "Decision",
             "Publish",
             "Reject",
@@ -214,7 +211,7 @@ function Dashboard(props) {
                             data.submissions.map(submission =>
                                 <ActiveSubmissionTableRow submission={submission} workflowDescription={workflowDescription}
                                     key={submission.id} refreshDashboard={refreshDashboard} claimSubmission={claimSubmission}
-                                    destroySubmission={destroySubmission} completeInstanceTask={completeInstanceTask} />
+                                    destroySubmission={destroySubmission} />
                             ) : null
                     }
                 </tbody>
@@ -341,12 +338,12 @@ const LineLimitedText = styled.div`
 
 
 
-function ActiveSubmissionTableRow({submission, workflowDescription, claimSubmission, destroySubmission, refreshDashboard, completeInstanceTask}) {
+function ActiveSubmissionTableRow({submission, workflowDescription, claimSubmission, destroySubmission, refreshDashboard}) {
 
     // Determine the current status to apply to the submission.
     const { tasks } = submission;
     const submissionTask = (tasks && tasks.length && tasks.find(task => task.formKey === "custom:submission"));
-    const claimTask = (tasks && tasks.length && tasks.find(task => task.formKey === "custom:claim"));
+    //const claimTask = (tasks && tasks.length && tasks.find(task => task.formKey === "custom:claim"));
     //const checkTask = (tasks && tasks.length && tasks.find(task => task.formKey === "custom:checks"));
 
     //const checksActionIcon = checkTask ? <UserChecksIconHolder to={`/details/${encodeURI(submission.id)}`}><FaUserCheck /></UserChecksIconHolder> : null;
@@ -358,17 +355,8 @@ function ActiveSubmissionTableRow({submission, workflowDescription, claimSubmiss
     };
 
     const handleClaimSubmission = () => {
-        if(!claimTask) {
-            return;
-        }
-
-        claimSubmission(submission.id).then(result => {
-
-            if(result) {
-                completeInstanceTask(submission.id, claimTask.id, {phase:"Checking"}).then(() => {
-                    refreshDashboard();
-                });
-            }
+        claimSubmission(submission.id).then(r => {
+            refreshDashboard();
         });
     };
 
@@ -408,8 +396,9 @@ function ActiveSubmissionTableRow({submission, workflowDescription, claimSubmiss
             </IdentityColumn>
 
             <IdentityColumn className="curator">
-                {claimTask ? <SmallInlineButton bordered={true} onClick={handleClaimSubmission}>Assign to me</SmallInlineButton> :
-                    (submission.curator && submission.curator.displayName) ? <span>{submission.curator.displayName}</span> : <span className="no-identity">&mdash;</span>
+                {(submission.curator && submission.curator.displayName)
+                    ? <span>{submission.curator.displayName}</span>
+                    : <SmallInlineButton bordered={true} onClick={handleClaimSubmission}>Assign to me</SmallInlineButton>
                 }
             </IdentityColumn>
 

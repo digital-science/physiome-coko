@@ -1,7 +1,6 @@
 enum SubmissionPhase {
     Pending => "pending",
     Submitted => "submitted",
-    Checking => "checking",
     Decision => "decision",
     Publish => "publish",
     Reject => "reject",
@@ -192,12 +191,29 @@ instance Submission {
 
                 { TextArea => curationNotes, label:"Notes" }
 
-                { Checkbox => hidden, (phase in [SubmissionPhase.Submitted, SubmissionPhase.Checking, SubmissionPhase.Decision]), label:"Place submission on-hold" }
+                { Checkbox => hidden, (phase in [SubmissionPhase.Submitted, SubmissionPhase.Decision]), label:"Place submission on-hold" }
             } }
 
-            { DetailPanel, (phase == SubmissionPhase.Checking), heading:"Curation Checks", children:{
+            { DetailPanel, (phase == SubmissionPhase.Submitted), heading:"Curation Checks", children:{
 
-                { InlineTaskForm, form:"checks" }
+                { Checkbox => primaryPaperExists, label: "Primary paper exists",
+                    help:"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." }
+
+                { Checkbox => sameModelInPapers, label: "Same model in manuscript and primary paper",
+                    help:"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." }
+
+                { Checkbox => resultsMatch, label: "Results of of the model match the results present in primary article",
+                    help:"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." }
+
+                { Checkbox => resultsInPapersOverlap, label: "Results in manuscript and primary paper overlap",
+                    help:"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." }
+
+                { Checkbox => allFilesPresent, label: "All files are present within the model and successfully execute",
+                    help:"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." }
+
+                { Checkbox => modelAnnotated, label: "Model is fully annotated",
+                    help:"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." }
+
             } }
 
             { DetailPanel, (phase in [SubmissionPhase.Decision, SubmissionPhase.Publish, SubmissionPhase.Reject, SubmissionPhase.Published]), heading:"Curation Checks", children:{
@@ -215,11 +231,10 @@ instance Submission {
                 { Checkbox => modelAnnotated, label: "Model is fully annotated", readOnly:true }
             } }
 
-            { DetailPanel, (phase == SubmissionPhase.Checking || phase == SubmissionPhase.Decision), heading:"Decisions", children:{
+            { DetailPanel, (phase == SubmissionPhase.Submitted || phase == SubmissionPhase.Decision), heading:"Decisions", children:{
 
-                { InlineTaskForm, form:"final-decision", tasks:[ "final-decision" ] }
+                { InlineTaskForm, form:"decisions", tasks:[ "final-decision", "checks" ] }
 
-                { InlineTaskForm, (phase != SubmissionPhase.Decision), form:"reject", tasks:[ "checks" ] }
             } }
 
         }
@@ -301,85 +316,7 @@ instance Submission {
     }
 
 
-    form "claim" {
-
-        outcomes: [
-            {
-                "claim" => Complete,
-                state: {
-                    phase: SubmissionPhase.Checking
-                }
-                identity => curator
-            }
-        ]
-
-        elements: {
-            { Button, default:true, outcome:"claim", label:"Assign to me" }
-        }
-    }
-
-
-    form "checks" {
-
-        outcomes: [
-            {
-                "checked" => Complete,
-                state: {
-                    phase: SubmissionPhase.Decision
-                }
-            }
-        ]
-
-        elements: {
-
-            { Checkbox => primaryPaperExists, label: "Primary paper exists",
-                help:"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." }
-
-            { Checkbox => sameModelInPapers, label: "Same model in manuscript and primary paper",
-                help:"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." }
-
-
-            { Checkbox => resultsMatch, label: "Results of of the model match the results present in primary article",
-                help:"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." }
-
-
-            { Checkbox => resultsInPapersOverlap, label: "Results in manuscript and primary paper overlap",
-                help:"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." }
-
-
-            { Checkbox => allFilesPresent, label: "All files are present within the model and successfully execute",
-                help:"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." }
-
-
-            { Checkbox => modelAnnotated, label: "Model is fully annotated",
-                help:"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." }
-
-            { Button, default:true, outcome:"checked", label:"Checks Completed" }
-        }
-    }
-
-
-    form "reject" {
-
-        outcomes: [
-            {
-                "reject" => Complete,
-                state: {
-                    phase: SubmissionPhase.Reject
-                }
-            }
-        ]
-
-        elements: {
-
-            { Button, outcome:"reject", label:"Reject Article",
-                confirmation:"Are you sure you want to reject this manuscript submission?", confirmationHeading:"Reject Manuscript Submission",
-                confirmationAffirmativeLabel: "Reject Manuscript", confirmationNegativeLabel: "Cancel" }
-        }
-    }
-
-
-    form "final-decision" {
+    form "decisions" {
 
         outcomes: [
             {
@@ -393,12 +330,28 @@ instance Submission {
                 state: {
                     phase: SubmissionPhase.Reject
                 }
+            },
+            {
+                "checked" => Complete,
+                state: {
+                    phase: SubmissionPhase.Decision
+                }
+            },
+            {
+                "resume-checks" => Complete,
+                state: {
+                    phase: SubmissionPhase.Submitted
+                }
             }
         ]
 
         elements: {
 
-            { Button, default:true, outcome:"publish", label:"Publish Article",
+            { Button, (phase == SubmissionPhase.Submitted), outcome:"checked", label:"Checks Completed" }
+
+            { Button, (phase == SubmissionPhase.Decision), outcome:"resume-checks", label:"Resume Quality Checks"}
+
+            { Button, (phase == SubmissionPhase.Decision), outcome:"publish", label:"Publish Article",
                 confirmation:"Are you sure you want to reject this manuscript submission?", confirmationHeading:"Publish Manuscript to Figshare",
                 confirmationAffirmativeLabel: "Publish Manuscript", confirmationNegativeLabel: "Cancel"}
 
