@@ -5,7 +5,8 @@ import useFormValueBinding from './../../hooks/useFormValueBinding';
 import withFormField from './withFormField'
 
 import ArticleCitationEditorCard from '../article-citation-editor-card';
-import {BlockLabel} from 'ds-awards-theme/components/label';
+import { DisabledStaticText } from 'ds-awards-theme/components/static-text';
+import { BlockLabel } from 'ds-awards-theme/components/label';
 import ArticleCitation from './../article-citation';
 
 
@@ -25,7 +26,10 @@ const FormFieldArticleCitation = ({data, binding, readOnly, options = {}}) => {
     return (
         <React.Fragment>
             {options.label ? <BlockLabel>{options.label}</BlockLabel> : null}
-            {options.readOnly ? <FormStyledArticleCitation citation={citation} /> : <ArticleCitationEditorCard citation={citation} didModifyCitation={didModifyCitation} />}
+            {options.readOnly
+                ? (citation ? <FormStyledArticleCitation citation={citation} /> : <DisabledStaticText>No citation specified.</DisabledStaticText>)
+                : <ArticleCitationEditorCard citation={citation} didModifyCitation={didModifyCitation} />
+            }
         </React.Fragment>
     );
 };

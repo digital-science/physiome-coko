@@ -4,7 +4,8 @@ import styled from 'styled-components';
 import withFormField, { fetchFields } from './withFormField';
 import withFormFieldData from './withFormFieldData';
 
-import Label from 'ds-awards-theme/components/label';
+import { BlockLabel } from 'ds-awards-theme/components/label';
+import { DisabledStaticText } from 'ds-awards-theme/components/static-text';
 import humanFormatByteCount from "ds-awards-theme/helpers/humanFormatByteCount";
 
 import { FaFilePdf } from 'react-icons/fa';
@@ -99,8 +100,11 @@ function FormFieldFilesListing({ data, binding, instanceId, instanceType, option
 
     return (
         <FileListingHolder className={"form-field-files"}>
-            {options.label ? <Label>{options.label}</Label> : null}
-            {fileListing && fileListing.length ? <SimpleFileListing files={fileListing} instanceId={instanceId} instanceType={instanceType} /> : null}
+            {options.label ? <BlockLabel>{options.label}</BlockLabel> : null}
+            {fileListing && fileListing.length
+                ? <SimpleFileListing files={fileListing} instanceId={instanceId} instanceType={instanceType} />
+                : <DisabledStaticText>No files uploaded.</DisabledStaticText>
+            }
         </FileListingHolder>
     );
 }
