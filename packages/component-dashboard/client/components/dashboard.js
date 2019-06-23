@@ -2,6 +2,7 @@ import React, { useContext, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import moment from 'moment';
+import debounce from 'lodash/debounce';
 
 import { WorkflowDescriptionContext } from 'client-workflow-model';
 
@@ -154,33 +155,19 @@ function Dashboard(props) {
 
 
     const { data, error, loading, refetch } = useGetSubmissions(filter, sorting);
+    const throttledRefetch = debounce(refetch, 2000, { leading: true, trailing: true, maxWait:2000 });
 
     useSubmissionWasCreatedSubscription(submissionId => {
-        console.log("submission was created, refetching: " + submissionId);
-        return refetch();
+        return throttledRefetch();
     });
 
     useSubmissionWasModifiedSubscription(submissionId => {
-        console.log("submission was modified, refetching: " + submissionId);
-        return refetch();
+        return throttledRefetch();
     });
 
     const refreshDashboard = () => {
-        return refetch();
+        return throttledRefetch();
     };
-
-    // On a set interval, refresh the data fot the dashboard.
-    // FIXME: this is here just until subscription and pushes are implemented.
-
-    /*useEffect(() => {
-        const timer = setInterval(() => {
-            refreshDashboard();
-        }, 3000);
-
-        return () => {
-            clearInterval(timer);
-        };
-    });*/
 
 
     return (
