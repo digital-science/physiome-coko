@@ -439,7 +439,6 @@ InstanceResolver.prototype.create = async function create(context) {
 
     return processDefinitionService.start(createProcessOpts).then(async data => {
 
-        console.log(`*** publishInstanceWasCreated will be called ***`);
         await this.publishInstanceWasCreated(newInstance.id);
         return newInstance;
     });
