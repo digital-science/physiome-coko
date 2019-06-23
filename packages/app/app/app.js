@@ -19,7 +19,7 @@ const render = () => {
     ReactDOM.render(
         <React.Fragment>
             <Root
-                connectToWebSocket={false}
+                connectToWebSocket={true}
                 history={history}
                 makeApolloConfig={makeApolloConfig}
                 routes={<Routes />}
