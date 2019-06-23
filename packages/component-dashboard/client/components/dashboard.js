@@ -9,6 +9,7 @@ import useCreateTaskMutation from './../mutations/createTask';
 import useDestroySubmissionMutation from './../mutations/destroySubmission';
 import useClaimSubmissionMutation from './../mutations/claimSubmission';
 import useGetSubmissions from './../queries/getSubmissions';
+import { useSubmissionWasCreatedSubscription, useSubmissionWasModifiedSubscription } from './../subscriptions/submissionsChanged';
 
 import PopoverTrigger from 'component-task-form/client/components/popover';
 
@@ -154,6 +155,16 @@ function Dashboard(props) {
 
     const { data, error, loading, refetch } = useGetSubmissions(filter, sorting);
 
+    useSubmissionWasCreatedSubscription(submissionId => {
+        console.log("submission was created, refetching: " + submissionId);
+        return refetch();
+    });
+
+    useSubmissionWasModifiedSubscription(submissionId => {
+        console.log("submission was modified, refetching: " + submissionId);
+        return refetch();
+    });
+
     const refreshDashboard = () => {
         return refetch();
     };
@@ -161,7 +172,7 @@ function Dashboard(props) {
     // On a set interval, refresh the data fot the dashboard.
     // FIXME: this is here just until subscription and pushes are implemented.
 
-    useEffect(() => {
+    /*useEffect(() => {
         const timer = setInterval(() => {
             refreshDashboard();
         }, 3000);
@@ -169,7 +180,7 @@ function Dashboard(props) {
         return () => {
             clearInterval(timer);
         };
-    });
+    });*/
 
 
     return (

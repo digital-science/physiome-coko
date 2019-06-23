@@ -26,6 +26,7 @@ module.exports = {
 
             submission.curatorId = userId;
             await submission.save();
+            await Submission.instanceResolver.publishInstanceWasModified(submissionId);
 
             return true;
         },
