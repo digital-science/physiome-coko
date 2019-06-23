@@ -360,9 +360,18 @@ function createResolversForTask(task, enums, models) {
         return ModelClass.instanceResolver.completeTask(args, context);
     };
 
+    const subscription = {};
+    subscription[`created${task.name}`] = {
+        subscribe: async (_, vars, context) => ModelClass.instanceResolver.asyncIteratorWasCreated()
+    };
+    subscription[`modified${task.name}`] = {
+        subscribe: async (_, vars, context) => ModelClass.instanceResolver.asyncIteratorWasModified()
+    };
+
     const r = {
         Mutation: mutation,
-        Query: query
+        Query: query,
+        Subscription: subscription
     };
 
     r[task.name] = fieldResolvers;

@@ -164,7 +164,15 @@ extend type Mutation {
 
     mutation += "\n" + '}';
 
-    return model + "\n\n" + input + "\n" + stateInput + "\n" + listingFilterInput + "\n" + listingSortingInput + "\n" + query + "\n" + mutation;
+    let subscription = `
+extend type Subscription {
+`;
+    subscription += tab + `created${taskDef.name} : ID!\n`;
+    subscription += tab + `modified${taskDef.name} : ID!\n`;
+    subscription += "\n" + '}';
+
+
+    return model + "\n\n" + input + "\n" + stateInput + "\n" + listingFilterInput + "\n" + listingSortingInput + "\n" + query + "\n" + mutation + "\n" + subscription;
 }
 
 

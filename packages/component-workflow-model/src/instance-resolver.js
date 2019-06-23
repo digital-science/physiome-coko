@@ -7,6 +7,7 @@ const { processInstanceService, processDefinitionService, taskService } = requir
 
 const { UserInputError } = require('apollo-server-express');
 const { AuthorizationError, NotFoundError } = require('@pubsweet/errors');
+const { pubsubManager } = require("pubsweet-server");
 const GraphQLFields = require('graphql-fields');
 
 const config = require("config");
@@ -346,6 +347,7 @@ InstanceResolver.prototype.update = async function _update(input, info, context)
         }
     }
 
+    const instanceId = input.id;
     delete input.id;
 
     // Create a listing of fields that can be updated, then we apply the update to the model object
@@ -367,6 +369,7 @@ InstanceResolver.prototype.update = async function _update(input, info, context)
     }
 
     await object.save();
+    await this.publishInstanceWasModified(instanceId);
     return true;
 };
 
@@ -434,7 +437,10 @@ InstanceResolver.prototype.create = async function create(context) {
         businessKey: newInstance.id
     };
 
-    return processDefinitionService.start(createProcessOpts).then(data => {
+    return processDefinitionService.start(createProcessOpts).then(async data => {
+
+        console.log(`*** publishInstanceWasCreated will be called ***`);
+        await this.publishInstanceWasCreated(newInstance.id);
         return newInstance;
     });
 };
@@ -540,6 +546,11 @@ InstanceResolver.prototype.destroy = async function(input, context) {
 
         return false;
 
+    }).then(async r => {
+
+        await this.publishInstanceWasModified(input.id);
+        return r;
+
     }).catch((err) => {
 
         logger.error(`[InstanceResolver/Destroy] BPM engine request failed due to: ${err.toString()}`);
@@ -583,7 +594,9 @@ InstanceResolver.prototype.restart = async function restart(instance, startAfter
         }
     }
 
-    return processDefinitionService.start(createProcessOpts).then(data => {
+    return processDefinitionService.start(createProcessOpts).then(async data => {
+
+        await this.publishInstanceWasModified(instance.id);
         return data;
     });
 };
@@ -730,7 +743,11 @@ InstanceResolver.prototype.completeTask = async function completeTask({id, taskI
         }
     }
 
-    return taskService.complete(completeTaskOpts).then((data) => {
+    return taskService.complete(completeTaskOpts).then(data => {
+
+        return this.publishInstanceWasModified(id);
+
+    }).then(data => {
 
         return true;
 
@@ -740,6 +757,44 @@ InstanceResolver.prototype.completeTask = async function completeTask({id, taskI
         throw new Error("Unable to complete task for instance due to business engine error.");
     });
 };
+
+
+InstanceResolver.prototype.publishInstanceWasCreated = async function(instanceId) {
+
+    const pubSub = await pubsubManager.getPubsub();
+    if(pubSub) {
+        const r = {};
+        r[`created${this.taskDef.name}`] = instanceId;
+        pubSub.publish(`${this.taskDef.name}.created`, r);
+    }
+};
+
+InstanceResolver.prototype.publishInstanceWasModified = async function(instanceId) {
+
+    const pubSub = await pubsubManager.getPubsub();
+    if(pubSub) {
+        const r = {};
+        r[`modified${this.taskDef.name}`] = instanceId;
+        pubSub.publish(`${this.taskDef.name}.updated`, r);
+    }
+};
+
+
+InstanceResolver.prototype.asyncIteratorWasCreated = async function() {
+
+    console.log(`!!!! **** !!!! asyncIteratorWasCreated was called `);
+    const pubSub = await pubsubManager.getPubsub();
+    return pubSub.asyncIterator(`${this.taskDef.name}.created`);
+};
+
+InstanceResolver.prototype.asyncIteratorWasModified = async function() {
+
+    const pubSub = await pubsubManager.getPubsub();
+    return pubSub.asyncIterator(`${this.taskDef.name}.updated`);
+};
+
+
+
 
 
 InstanceResolver.prototype.resolveInstanceUsingContext = async function(instanceId, context) {
