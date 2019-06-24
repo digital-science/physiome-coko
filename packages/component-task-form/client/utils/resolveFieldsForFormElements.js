@@ -59,19 +59,33 @@ export default function resolveFieldsForFormElements(elements, instanceType, reg
 
         elements.forEach(e => {
 
-            const component = registry[e.type];
+            if(e.type !== "Layout") {
 
-            if(component && component.bindingResolver) {
-                const field = component.bindingResolver(e, instanceType, _resolveForElements);
+                const component = registry[e.type];
 
-                if(typeof field === "string") {
-                    addToFetchFields(_bindingStringToFetchFields(field));
-                    addToTopLevelFields(field.split(".")[0]);
-                } else if(field) {
-                    addToFetchFields(field.fetch);
-                    addToTopLevelFields(field.topLevel);
+                if(component && component.bindingResolver) {
+                    const field = component.bindingResolver(e, instanceType, _resolveForElements);
+
+                    if(typeof field === "string") {
+                        addToFetchFields(_bindingStringToFetchFields(field));
+                        addToTopLevelFields(field.split(".")[0]);
+                    } else if(field) {
+                        addToFetchFields(field.fetch);
+                        addToTopLevelFields(field.topLevel);
+                    }
+                }
+
+            } else {
+
+                // For a descendent layout, we want to fetch all required data for all different layout variations.
+                if(e.options.layout) {
+                    const layout = instanceType.layoutDefinitionForLayoutName(e.options.layout);
+                    if(layout && layout.elements && layout.elements) {
+                        _resolveForElements(layout.elements);
+                    }
                 }
             }
+
 
             if(e.condition) {
                 const bindings = e.condition.bindings;
