@@ -279,6 +279,14 @@ task
             });
         }
 
+        const layouts = content.filter(c => c.type === "layout");
+        if(layouts.length) {
+        	m.layouts = layouts.map(layout => {
+            	delete layout.type;
+            	return layout;
+            });
+        }
+
         const acls = content.filter(c => c.type === "acl");
         if(acls.length) {
 
@@ -304,7 +312,7 @@ task
       return m;
     }
 
-taskContent = (taskSpecificModel / enum / form / view / taskOptions / taskListingAccessor / acl)*
+taskContent = (taskSpecificModel / enum / form / view / layout / taskOptions / taskListingAccessor / acl)*
 
 // Task options
 taskOptions = ws "processKey" name_separator processKey:string? {return {type:"options", processKey}}
@@ -624,10 +632,26 @@ modelElementDefaultEnumValue
     }
 
 
+// ----- Layout ------
+
+layout
+	= ws "layout" ws
+      layoutName:string
+      begin_object
+      content:formElement*
+      end_object
+    {
+    	var m = {type:"layout", layout:layoutName};
+        if(content && content.length) {
+        	m.elements = content;
+        }
+        return m;
+    }
+
 // ----- View ------
 
 view
-	= ws? "view" ws viewName:string extend:formExtends? ws
+	= ws "view" ws viewName:string extend:formExtends? ws
     	begin_object content:viewContent end_object ws?
     {
     	var m = {type:"view", view:viewName};
