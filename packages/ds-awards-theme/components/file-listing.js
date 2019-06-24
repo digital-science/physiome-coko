@@ -148,10 +148,14 @@ const FileListingRow = styled(_FileListingRow)`
     }
     
     & .file-type {
-        min-width: 120px;
+        /*min-width: 120px;*/
         margin-right: 15px;
         padding-left: 15px;
         padding-right: 15px;
+        
+        flex-basis: 15%;
+        flex-shrink: 0;
+        flex-grow: 1;
     }
     
     & .file-type > select {
@@ -160,7 +164,10 @@ const FileListingRow = styled(_FileListingRow)`
     }
     
     & .file-label {
-        min-width: 200px;
+        /*min-width: 200px;*/
+        flex-basis: 25%;
+        flex-shrink: 0;
+        flex-grow: 1;
     }
 `;
 
