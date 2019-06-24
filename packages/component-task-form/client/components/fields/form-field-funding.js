@@ -22,7 +22,7 @@ const FundingEditorHolder = styled.div`
         padding: 5px;
     }
     
-    min-width: 750px;
+    /*min-width: 750px;*/
 `;
 
 const FundingEditorCardHolder = styled.div`
@@ -179,7 +179,7 @@ const FundingListing = styled( ({className, funding}) => {
                             <React.Fragment>
                                 {funder.organization.name}
                                 {funder.organization.country && funder.organization.country.country_code ? <span> ({funder.organization.country.country_code})</span> : null}
-                            </React.Fragment> 
+                            </React.Fragment>
                             :
                             <React.Fragment>No funder specified</React.Fragment>
                         }

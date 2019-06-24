@@ -23,7 +23,7 @@ const AuthorsEditorHolder = styled.div`
         padding: 5px;
     }
     
-    min-width: 750px;
+    /*min-width: 750px;*/
 `;
 
 const AuthorEditorCardHolder = styled.div`
