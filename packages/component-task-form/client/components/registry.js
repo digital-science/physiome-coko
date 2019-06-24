@@ -8,6 +8,7 @@ import FormFieldHeroCheckbox from './fields/form-field-hero-checkbox';
 import FormFieldSelect from './fields/form-field-select';
 
 import FormFieldInlineTask from './fields/form-field-inline-task';
+import FormFieldViewerEditorLayout from './fields/form-field-viewer-editor-layout';
 
 import FormFieldStaticText from './fields/form-field-static-text';
 import FormFieldFilesListing from './fields/form-field-files-listing';
@@ -48,6 +49,7 @@ const FormFieldRegistry = {
     'KeywordsListing' : FormFieldKeywordsListing,
 
     'InlineTaskForm' : FormFieldInlineTask,
+    'ViewerEditorLayout' : FormFieldViewerEditorLayout,
 
     // Static details form fields
     'StaticText' : FormFieldStaticText,

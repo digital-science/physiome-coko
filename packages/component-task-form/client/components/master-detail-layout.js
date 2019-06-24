@@ -3,9 +3,10 @@ import styled from 'styled-components';
 
 import FieldListing from './field-listing';
 import { FormFieldHolder } from './fields/withFormField';
+import { FormFieldViewerEditorLayoutHolder } from './fields/form-field-viewer-editor-layout';
 
 import Spinner from 'ds-awards-theme/components/spinner';
-import { InlineButton, SmallInlineButton } from 'ds-awards-theme/components/inline-button'
+import { InlineButton, SmallInlineButton } from 'ds-awards-theme/components/inline-button';
 
 
 export default function MasterDetailLayout({ className, elements, data, loading, error, instance, fieldListingProps }) {
@@ -137,6 +138,12 @@ const Panel = styled.div`
   & ${InlineButton} {
       box-shadow: 2px 2px 5px 0 #00000033;
   }
+  
+  & ${FormFieldViewerEditorLayoutHolder} ${SmallInlineButton},
+  & ${FormFieldViewerEditorLayoutHolder} ${InlineButton} {
+      box-shadow: none;
+  }
+
 `;
 
 const MasterPanel = styled(Panel)``;
@@ -145,10 +152,11 @@ const DetailPanel = styled(Panel)``;
 
 
 
-const PanelHeading = styled(({className, heading}) => {
+const PanelHeading = styled(({className, heading, children}) => {
     return (
         <div className={className}>
             <span>{heading}</span>
+            {children}
         </div>
     );
 })`
@@ -161,4 +169,4 @@ const PanelHeading = styled(({className, heading}) => {
   }
 `;
 
-export { MasterDetailHolder, Panel, MasterPanel, DetailPanel };
+export { MasterDetailHolder, Panel, PanelHeading, MasterPanel, DetailPanel };
