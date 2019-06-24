@@ -10,20 +10,57 @@ function _FormFieldListing({ className, elements, fieldRegistry, data, binding, 
         return null;
     }
 
-    const items = elements.map((e, i) => {
+    const items = [];
 
-        const ElementComponent = fieldRegistry[e.type];
-        if(ElementComponent) {
-            
-            if(e.condition && !e.condition.evaluate(data)) {
-                return null;
+    const pushElement = (ElementComponent, e, key) => {
+        items.push(
+            <ElementComponent key={key} className={`type-${e.type.toLowerCase()}`} binding={e.binding} options={e.options || {}} fieldRegistry={fieldRegistry}
+                description={e} data={data} {...elementComponentProps} />
+        );
+    };
+
+    const pushUnknownElement = (key) => {
+        items.push(<div key={key}>Unknown Element Type</div>);  //FIXME: this is displayed for debugging purposes only
+    };
+
+    /*const items = */
+    elements.forEach((e, i) => {
+
+        if(e.type === "Layout") {
+
+            const { instanceType } = elementComponentProps;
+            if(instanceType && e.options.layout) {
+
+                const layout = instanceType.layoutDefinitionForLayoutName(e.options.layout);
+                if(layout && layout.elements) {
+
+                    layout.elements.forEach((layoutElement, layoutIndex) => {
+
+                        const key = `${i}-${layoutIndex}`;
+                        const LayoutElementComponent = fieldRegistry[layoutElement.type];
+
+                        if(!LayoutElementComponent) {
+                            return pushUnknownElement(key);
+                        }
+
+                        return pushElement(LayoutElementComponent, layoutElement, key);
+                    });
+                }
             }
 
-            return <ElementComponent key={i} className={`type-${e.type.toLowerCase()}`} binding={e.binding} options={e.options || {}} fieldRegistry={fieldRegistry}
-                description={e} data={data} {...elementComponentProps} />;
+            return;
         }
 
-        return <div key={i}>Unknown Element Type</div>;  //FIXME: this is displayed for debugging purposes only
+        const ElementComponent = fieldRegistry[e.type];
+        if(!ElementComponent) {
+            return pushUnknownElement(i);
+        }
+
+        if(e.condition && !e.condition.evaluate(data)) {
+            return null;
+        }
+
+        pushElement(ElementComponent, e, i);
     });
 
     return (
