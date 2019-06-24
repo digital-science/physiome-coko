@@ -304,23 +304,6 @@ const IdentityColumn = styled.td`
   }
 `;
 
-const UserChecksIconHolder = styled(Link)`
-
-  & {
-    color: initial;
-  }
-
-  &:visited {
-    color: initial;
-  }
-
-  > svg {
-    height: 20px;
-    width: 20px;
-    margin-right: 4px;
-  }
-`;
-
 
 
 const LineLimitedText = styled.div`
@@ -341,10 +324,6 @@ function ActiveSubmissionTableRow({submission, workflowDescription, claimSubmiss
     // Determine the current status to apply to the submission.
     const { tasks } = submission;
     const submissionTask = (tasks && tasks.length && tasks.find(task => task.formKey === "custom:submission"));
-    //const claimTask = (tasks && tasks.length && tasks.find(task => task.formKey === "custom:claim"));
-    //const checkTask = (tasks && tasks.length && tasks.find(task => task.formKey === "custom:checks"));
-
-    //const checksActionIcon = checkTask ? <UserChecksIconHolder to={`/details/${encodeURI(submission.id)}`}><FaUserCheck /></UserChecksIconHolder> : null;
 
     const deleteSubmission = () => {
         destroySubmission(submission.id, {phase:"Cancelled"}).then(() => {
@@ -382,6 +361,7 @@ function ActiveSubmissionTableRow({submission, workflowDescription, claimSubmiss
             <td className="small status">
                 <SubmissionStatusPill submission={submission} />
             </td>
+
             {/*<td className="authors">
                 {submission.authors && submission.authors instanceof Array && submission.authors.length ?
                     <AuthorListing>
