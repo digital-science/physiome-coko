@@ -66,6 +66,9 @@ const FormFieldKeywordsListing = styled(withFormField(_FormFieldKeywordsListing)
     color: white;
     border-radius: 5px;
   }
+  & ol li + li {
+    margin-left: 5px;
+  }
   div.empty {
     color: #b3b3b3;
   }
