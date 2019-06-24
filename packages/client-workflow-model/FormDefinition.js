@@ -5,8 +5,7 @@ class FormDefinition extends LayoutDefinition {
 
     constructor(definition, enumResolver, mappingResolver) {
 
-        super();
-        this.name = definition.form;
+        super(definition.form, definition, enumResolver, mappingResolver);
 
         if(definition.extend) {
             this.extends = definition.extend;
@@ -37,7 +36,6 @@ class FormDefinition extends LayoutDefinition {
             });
         });
 
-        this.elements = definition.elements ? definition.elements.map(elementDescription => new FormElement(elementDescription, enumResolver, mappingResolver)) : [];
     }
 
     findMatchingOutcome(outcomeType) {

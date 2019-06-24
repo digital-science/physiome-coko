@@ -1,6 +1,7 @@
 import Model from './Model';
 import FormDefinition from './FormDefinition';
 import ViewDefinition from './ViewDefinition';
+import LayoutDefinition from './LayoutDefinition';
 
 import pick from 'lodash/pick';
 
@@ -37,8 +38,16 @@ class InstanceDefinition {
             });
         }
 
+        const layouts = {};
+        if(taskDef.layouts) {
+            taskDef.layouts.forEach(l => {
+                layouts[l.layout.toLowerCase()] = new LayoutDefinition(l.layout, l, enumResolver, mappingResolver);
+            });
+        }
+
         this.forms = forms;
         this.views = views;
+        this.layouts = layouts;
 
         this.urlName = uppercaseCamelToLowercaseDashed(this.name);
     }
@@ -86,6 +95,11 @@ class InstanceDefinition {
 
     viewDefinitionForViewName(viewName) {
         return viewName ? this.views[viewName] : null;
+    }
+
+
+    layoutDefinitionForLayoutName(layoutName) {
+        return layoutName ? this.layouts[layoutName] : null;
     }
 
 }
