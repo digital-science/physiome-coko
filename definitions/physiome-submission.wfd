@@ -141,34 +141,72 @@ instance Submission {
         allow <administrator> [task]
     }
 
+    layout "submission-editor" {
+
+        { SelectValue => kind, label:"Manuscript Type", options:mapping("DisplayedSubmissionKind"), placeholder:"Please select a Manuscript type" }
+
+        { TextArea => title, label:"Title", rows:2 }
+
+        { TextArea => abstract, label:"Abstract", rows:6 }
+
+        { ArticleCitation => primaryPapers, label:"Primary Paper" }
+
+        { AuthorsEditor => authors, label:"Authors" }
+
+        { SelectValue => iupsCommission, label:"Commission Type", options:mapping("DisplayedIUPSCommissionKinds"), placeholder:"Please select a Commission" }
+
+        { KeywordsEditor => keywords, label:"Keywords", placeholder:"Enter Manuscript keywords" }
+
+        { FundingEditor => funding, label:"Funding Acknowledgements" }
+
+        { Text => pmrWorkspace, label:"Associated PMR Workspace" }
+
+        { FileUploader => articleFiles, label:"Manuscript" }
+
+        { FileUploader => supplementaryFiles, label:"Supplementary Files",
+            fileLabels:true, fileTypes:mapping("DisplayedSupplementaryFileTypes") }
+    }
+
+
+    layout "submission-view" {
+
+        { StaticText => kind, label:"Article Type", mapping:mapping("DisplayedSubmissionKind") }
+
+        { StaticText => title, label:"Title" }
+
+        { StaticText => abstract, label:"Abstract" }
+
+        { AuthorsListing => authors, label:"Authors" }
+
+        { ArticleCitation => primaryPapers, label:"Primary Paper", readOnly:true }
+
+        { StaticText => iupsCommission, label:"Commission Type", mapping:mapping("DisplayedIUPSCommissionKinds") }
+
+        { KeywordsListing => keywords, label:"Keywords" }
+
+        { FundingListing => funding, label:"Funding Acknowledgements" }
+
+        { StaticText => pmrWorkspace, label:"Associated PMR Workspace" }
+
+        { FilesListing => articleFiles, label:"Manuscript Files" }
+
+        { FilesListing => supplementaryFiles, label:"Supplementary Files" }
+    }
+
 
     view "details" extend "MasterDetailEditor" {
 
         elements: {
 
-            { MasterPanel, heading:"Manuscript Details", children:{
+            { MasterPanel, children:{
 
-                { StaticText => kind, label:"Article Type", mapping:mapping("DisplayedSubmissionKind") }
+                { ViewerEditorLayout, heading:"Manuscript Details", viewLabel:"View Submission", editLabel:"Edit Submission", children:{
 
-                { StaticText => title, label:"Title" }
+                    { Layout, layout:"submission-view" }
 
-                { StaticText => abstract, label:"Abstract" }
+                    { Layout, layout:"submission-editor" }
 
-                { AuthorsListing => authors, label:"Authors" }
-
-                { ArticleCitation => primaryPapers, label:"Primary Paper", readOnly:true }
-
-                { StaticText => iupsCommission, label:"Commission Type", mapping:mapping("DisplayedIUPSCommissionKinds") }
-
-                { KeywordsListing => keywords, label:"Keywords" }
-
-                { FundingListing => funding, label:"Funding Acknowledgements" }
-
-                { StaticText => pmrWorkspace, label:"Associated PMR Workspace" }
-
-                { FilesListing => articleFiles, label:"Manuscript Files" }
-
-                { FilesListing => supplementaryFiles, label:"Supplementary Files" }
+                } }
 
             } }
 
@@ -243,6 +281,7 @@ instance Submission {
     }
 
 
+
     form "submission" extend "SideBySideHeroPanels" {
 
         outcomes: [
@@ -274,28 +313,7 @@ instance Submission {
 
             { Panel, children:{
 
-                { SelectValue => kind, label:"Manuscript Type", options:mapping("DisplayedSubmissionKind"), placeholder:"Please select a Manuscript type" }
-
-                { TextArea => title, label:"Title", rows:2 }
-
-                { TextArea => abstract, label:"Abstract", rows:6 }
-
-                { ArticleCitation => primaryPapers, label:"Primary Paper" }
-
-                { AuthorsEditor => authors, label:"Authors" }
-
-                { SelectValue => iupsCommission, label:"Commission Type", options:mapping("DisplayedIUPSCommissionKinds"), placeholder:"Please select a Commission" }
-
-                { KeywordsEditor => keywords, label:"Keywords", placeholder:"Enter Manuscript keywords" }
-
-                { FundingEditor => funding, label:"Funding Acknowledgements" }
-
-                { Text => pmrWorkspace, label:"Associated PMR Workspace" }
-
-                { FileUploader => articleFiles, label:"Manuscript" }
-
-                { FileUploader => supplementaryFiles, label:"Supplementary Files",
-                    fileLabels:true, fileTypes:mapping("DisplayedSupplementaryFileTypes") }
+                { Layout, layout:"submission-editor" }
 
                 { HeroCheckbox => priceAcknowledged, heading:"Conditions of Submission",
                     label: "I understand that there is an article processing charge (APC) of $300 USD associated with the successful acceptance of this manuscript." }
