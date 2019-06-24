@@ -175,7 +175,14 @@ const FundingListing = styled( ({className, funding}) => {
 
                 return (
                     <FunderRow key={index}>
-                        {funder.organization.name} {funder.organization.country && funder.organization.country.country_code ? <span> ({funder.organization.country.country_code})</span> : null}
+                        {funder.organization ?
+                            <React.Fragment>
+                                {funder.organization.name}
+                                {funder.organization.country && funder.organization.country.country_code ? <span> ({funder.organization.country.country_code})</span> : null}
+                            </React.Fragment> 
+                            :
+                            <React.Fragment>No funder specified</React.Fragment>
+                        }
                         { grants ?
                             <ol>
                                 {grants.map((g, i) => <li key={i}>{g.projectNumber}</li>)}
