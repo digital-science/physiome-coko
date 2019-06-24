@@ -1,6 +1,7 @@
 extend type Mutation {
 
     claimSubmission(id:ID) : Boolean
-    
+    unclaimSubmission(id:ID) : Boolean
+
     restartRejectedSubmission(id:ID) : Boolean
 }

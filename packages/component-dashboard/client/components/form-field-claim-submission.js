@@ -3,6 +3,7 @@ import styled from 'styled-components';
 
 import { withFormField, useFormValueBinding, fetchFields } from 'component-task-form/client';
 import useClaimSubmissionMutation from './../mutations/claimSubmission';
+import useUnclaimSubmissionMutation from './../mutations/unclaimSubmission';
 import AuthenticatedUserContext from "component-authentication/client/AuthenticatedUserContext";
 
 import { BlockLabel } from 'ds-awards-theme/components/label';
@@ -14,10 +15,17 @@ function FormFieldSubmissionStatusPill({data, binding, instanceId, instanceType,
 
     const [identity] = useFormValueBinding(data, binding, null);
     const claimSubmission = useClaimSubmissionMutation(instanceType.name);
+    const unclaimSubmission = useUnclaimSubmissionMutation(instanceType.name);
     const currentUser = useContext(AuthenticatedUserContext);
 
     const handleClaimSubmission = () => {
         claimSubmission(instanceId).then(r => {
+            refetchData();
+        });
+    };
+
+    const handleUnclaimSubmission = () => {
+        unclaimSubmission(instanceId).then(r => {
             refetchData();
         });
     };
@@ -31,7 +39,11 @@ function FormFieldSubmissionStatusPill({data, binding, instanceId, instanceType,
                 {identity ?
                     <React.Fragment>
                         <StaticText>{identity.displayName}</StaticText>
-                        {!isAssignedToCurrentUser ? <span> &mdash; <SmallInlineButton bordered={true} onClick={handleClaimSubmission}>Re-assign to me</SmallInlineButton></span> : null}
+                        {!isAssignedToCurrentUser ?
+                            <span> &mdash; <SmallInlineButton bordered={true} onClick={handleClaimSubmission}>Assign Myself</SmallInlineButton></span>
+                            :
+                            <span> &mdash; <SmallInlineButton bordered={true} onClick={handleUnclaimSubmission}>Unassign Myself</SmallInlineButton></span>
+                        }
                     </React.Fragment>
                     :
                     (<SmallInlineButton bordered={true} onClick={handleClaimSubmission}>Assign to me</SmallInlineButton>)

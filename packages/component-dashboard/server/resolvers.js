@@ -31,6 +31,35 @@ module.exports = {
             return true;
         },
 
+        unclaimSubmission: async (instance, args, context, info) => {
+
+            // FIXME: apply ACL security checks onto this request to modify a submission
+
+            const userId = context.user;
+            if(!userId) {
+                return false;
+            }
+
+            const submissionId = args.id;
+            if(!submissionId) {
+                return false;
+            }
+
+            const submission = await Submission.find(submissionId);
+            if(!submission) {
+                return false;
+            }
+
+            if(submission.curatorId === userId) {
+
+                submission.curatorId = null;
+                await submission.save();
+                await Submission.instanceResolver.publishInstanceWasModified(submissionId);
+            }
+
+            return true;
+        },
+
         restartRejectedSubmission: async (instance, args, context, info) => {
 
             // FIXME: apply ACL security checks onto this request to modify a submission
