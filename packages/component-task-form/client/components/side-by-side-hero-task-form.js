@@ -20,9 +20,10 @@ export default function SideBySideHeroTaskForm({ instanceId, taskId, taskName, i
 
     const fd = useFormInstanceData({instanceId, taskId, taskName, instanceType, formDefinition, workflowDescription, wasSubmitted,
                                     autoSave, displayIsSavingMessage, removeIsSavingMessage});
-    const {instance, error, loading, resolvedTaskId, submitTaskOutcome, formData, refetchFormData, fieldRegistry} = fd;
+    const {instance, error, loading, resolvedTaskId, submitTaskOutcome, formData, formValidator, refetchFormData, fieldRegistry} = fd;
 
-    const fieldListingProps = {fieldRegistry, data:formData, refetchData:refetchFormData, instanceId, instanceType, taskId:resolvedTaskId, submitTaskOutcome};
+    const fieldListingProps = {fieldRegistry, data:formData, refetchData:refetchFormData, formValidator, instanceId,
+                               instanceType, taskId:resolvedTaskId, formDefinition, submitTaskOutcome};
 
     return (
         <StyledSideBySideHeroLayout elements={formDefinition.elements} data={formData} loading={loading} error={error}

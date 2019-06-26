@@ -2,7 +2,7 @@ import useCompleteInstanceTask from './../mutations/completeInstanceTask';
 import useDestroyInstance from './../mutations/destroyInstance';
 
 
-export default  function useSubmitTaskOutcome(instanceId, formDefinition, instanceType, saveInstanceData, wasSubmitted) {
+export default  function useSubmitTaskOutcome(instanceId, formDefinition, instanceType, saveInstanceData, validateForm, wasSubmitted) {
 
     const completeInstanceTask = useCompleteInstanceTask(instanceType);
     const destroyInstance = useDestroyInstance(instanceType);
@@ -29,6 +29,11 @@ export default  function useSubmitTaskOutcome(instanceId, formDefinition, instan
         // marked as being state variables within the tasks model definition.
 
         if(outcome.result === "Complete") {
+
+            if(validateForm && !validateForm()) {
+                console.log("form validation failed");
+                return;
+            }
 
             const state = instanceType.filterObjectToStateVariables(outcome._graphqlState || {});
 

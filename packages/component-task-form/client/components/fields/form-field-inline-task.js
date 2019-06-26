@@ -132,7 +132,7 @@ function FormFieldInlineTask({className, description, data, instanceId, instance
 
     const [formData, inlineSaveData] = useInlineFormData(instanceId, instanceType, data, saveData, topLevelFields);
 
-    const submitTaskOutcome = useSubmitTaskOutcome(instanceId, formDefinition, instanceType, inlineSaveData, () => {
+    const submitTaskOutcome = useSubmitTaskOutcome(instanceId, formDefinition, instanceType, inlineSaveData, null, () => {
         if(refetchData) {
             refetchData();
         }

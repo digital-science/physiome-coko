@@ -9,6 +9,7 @@ import resolveFieldsForFormElements from './../utils/resolveFieldsForFormElement
 
 import FieldRegistry from './../components/registry';
 import TaskFormData from "../utils/TaskFormData";
+import FormValidator from '../utils/FormValidator';
 
 import pick from "lodash/pick";
 import debounce from "lodash/debounce";
@@ -36,7 +37,11 @@ export default function useFormInstanceData({instanceId, taskId, taskName, insta
     const updateInstance = useUpdateInstance(instanceType);
 
     const [formData, setFormData] = useState(null);
+    const [formValidator] = useState(new FormValidator());
 
+    function _validateForm() {
+        return formData ? formValidator.validate(formData) : true;
+    }
 
     function _updateInstanceFromFormData() {
 
@@ -66,7 +71,7 @@ export default function useFormInstanceData({instanceId, taskId, taskName, insta
         ]);
     }
 
-    const submitTaskOutcome = useSubmitTaskOutcome(instanceId, formDefinition, instanceType, _updateInstanceFromFormData, wasSubmitted);
+    const submitTaskOutcome = useSubmitTaskOutcome(instanceId, formDefinition, instanceType, _updateInstanceFromFormData, _validateForm, wasSubmitted);
 
     const refetchFormData = () => {
         return refetch();
@@ -153,6 +158,7 @@ export default function useFormInstanceData({instanceId, taskId, taskName, insta
 
         submitTaskOutcome,
         formData,
+        formValidator,
         refetchFormData,
 
         fieldRegistry:FieldRegistry
