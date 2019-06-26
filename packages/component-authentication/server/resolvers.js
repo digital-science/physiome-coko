@@ -19,7 +19,7 @@ module.exports = {
                 if(!identity) {
                     return null;
                 }
-                return {id:identity.id, username:identity.displayName};
+                return {id:identity.id, username:identity.displayName, groups:["administrator"]}; // FIXME: hard-coded for testing purposes currently
             });
         }
     }

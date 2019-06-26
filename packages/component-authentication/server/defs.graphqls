@@ -1,6 +1,7 @@
 type CurrentUser {
     id: String
     username: String
+    groups: [String!]
 }
 
 extend type Query {

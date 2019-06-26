@@ -21,6 +21,7 @@ query {
   currentUser {
     id
     username
+    groups
   }
 }`;
 
