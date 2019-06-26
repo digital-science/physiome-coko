@@ -141,6 +141,18 @@ instance Submission {
         allow <administrator> [task]
     }
 
+
+    validations "initial-submission" {
+
+        { kind => (hasValue(kind)), "A manuscript type is required. Please select one." },
+
+        { title => (length(title) > 0), "A manuscript title is required. Please enter one." }
+
+        { abstract => (length(abstract) > 0), "A manuscript abstract is required. Please enter one." }
+
+    }
+
+
     layout "submission-editor" {
 
         { SelectValue => kind, label:"Manuscript Type", options:mapping("DisplayedSubmissionKind"), placeholder:"Please select a Manuscript type" }
@@ -198,7 +210,7 @@ instance Submission {
 
         elements: {
 
-            { MasterPanel, children:{
+            { MasterPanel, <administrator>, children:{
 
                 { ViewerEditorLayout, heading:"Manuscript Details", viewLabel:"View Submission", editLabel:"Edit Submission", children:{
 
@@ -210,7 +222,13 @@ instance Submission {
 
             } }
 
-            { MasterPanel, (phase == SubmissionPhase.Published), heading:"Published Article", children:{
+            { MasterPanel, <not:administrator>, children:{
+
+                { Layout, layout:"submission-view" }
+
+            } }
+
+            { MasterPanel, <administrator>, (phase == SubmissionPhase.Published), heading:"Published Article", children:{
 
                 { FishareArticleEmbed => figshareArticleId }
 
@@ -227,12 +245,12 @@ instance Submission {
 
                 { StaticText => publishDate, (phase == SubmissionPhase.Published), label:"Published Date" }
 
-                { TextArea => curationNotes, label:"Notes" }
+                { TextArea => curationNotes, <administrator>, label:"Notes" }
 
-                { Checkbox => hidden, (phase in [SubmissionPhase.Submitted, SubmissionPhase.Decision]), label:"Place submission on-hold" }
+                { Checkbox => hidden, <administrator>, (phase in [SubmissionPhase.Submitted, SubmissionPhase.Decision]), label:"Place submission on-hold" }
             } }
 
-            { DetailPanel, (phase == SubmissionPhase.Submitted), heading:"Curation Checks", children:{
+            { DetailPanel, <administrator>, (phase == SubmissionPhase.Submitted), heading:"Curation Checks", children:{
 
                 { Checkbox => primaryPaperExists, label: "Primary paper exists",
                     help:"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." }
@@ -254,7 +272,8 @@ instance Submission {
 
             } }
 
-            { DetailPanel, (phase in [SubmissionPhase.Decision, SubmissionPhase.Publish, SubmissionPhase.Reject, SubmissionPhase.Published]), heading:"Curation Checks", children:{
+            { DetailPanel, <administrator>, (phase in [SubmissionPhase.Decision, SubmissionPhase.Publish, SubmissionPhase.Reject, SubmissionPhase.Published]),
+                    heading:"Curation Checks", children:{
 
                 { Checkbox => primaryPaperExists, label: "Primary paper exists", readOnly:true }
 
@@ -269,7 +288,8 @@ instance Submission {
                 { Checkbox => modelAnnotated, label: "Model is fully annotated", readOnly:true }
             } }
 
-            { DetailPanel, (phase in [SubmissionPhase.Submitted, SubmissionPhase.Decision, SubmissionPhase.Reject]), heading:"Decisions", children:{
+            { DetailPanel, <administrator>, (phase in [SubmissionPhase.Submitted, SubmissionPhase.Decision, SubmissionPhase.Reject]),
+                    heading:"Decisions", children:{
 
                 { InlineTaskForm, form:"decisions", tasks:[ "final-decision", "checks" ] }
 
@@ -281,8 +301,9 @@ instance Submission {
     }
 
 
-
     form "submission" extend "SideBySideHeroPanels" {
+
+        validation: [ "initial-submission" ]
 
         outcomes: [
             {
@@ -372,7 +393,7 @@ instance Submission {
             { Button, (phase == SubmissionPhase.Decision), outcome:"resume-checks", label:"Resume Quality Checks"}
 
             { Button, (phase == SubmissionPhase.Decision), outcome:"publish", label:"Publish Article",
-                confirmation:"Are you sure you want to reject this manuscript submission?", confirmationHeading:"Publish Manuscript to Figshare",
+                confirmation:"Are you sure you want to publish this manuscript submission through into figshare?", confirmationHeading:"Publish Manuscript to Figshare",
                 confirmationAffirmativeLabel: "Publish Manuscript", confirmationNegativeLabel: "Cancel"}
 
             { Button, (phase != SubmissionPhase.Reject), outcome:"reject", label:"Reject Article",
