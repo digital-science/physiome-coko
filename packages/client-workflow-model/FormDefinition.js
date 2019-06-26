@@ -1,4 +1,3 @@
-import FormElement from './FormElement';
 import LayoutDefinition from './LayoutDefinition';
 
 class FormDefinition extends LayoutDefinition {
@@ -36,10 +35,42 @@ class FormDefinition extends LayoutDefinition {
             });
         });
 
+        this._validations = definition.validations;
     }
 
     findMatchingOutcome(outcomeType) {
         return this.outcomes.find(outcome => outcome.type === outcomeType) || null;
+    }
+
+    findMatchingValidations(formElement) {
+
+        if(!this.validations || !this.validations.length) {
+            return null;
+        }
+
+        if(!formElement.binding) {
+            return null;
+        }
+
+        const m = this.validations.filter(v => v.target === formElement.binding);
+        return m.length ? m : null;
+    }
+
+    _resolveValidations(validations) {
+
+        const sets = (this._validations || []).map(name => validations[name]).filter(v => !!v);
+        const allEntries = [];
+
+        sets.forEach(set => {
+            (set.entries || []).forEach(entry => {
+                if(allEntries.indexOf(entry) === -1) {
+                    allEntries.push(entry);
+                }
+            });
+        });
+
+        this.validations = allEntries;
+        delete this._validations;
     }
 }
 

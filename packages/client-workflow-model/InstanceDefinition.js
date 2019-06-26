@@ -2,6 +2,7 @@ import Model from './Model';
 import FormDefinition from './FormDefinition';
 import ViewDefinition from './ViewDefinition';
 import LayoutDefinition from './LayoutDefinition';
+import ValidationDefinition from './ValidationDefinition';
 
 import pick from 'lodash/pick';
 
@@ -45,9 +46,19 @@ class InstanceDefinition {
             });
         }
 
+        const validations = {};
+        if(taskDef.validations) {
+            taskDef.validations.forEach(v => {
+                validations[v.name.toLowerCase()] = new ValidationDefinition(v, enumResolver, mappingResolver);
+            });
+        }
+
         this.forms = forms;
         this.views = views;
         this.layouts = layouts;
+        this.validations = validations;
+
+        Object.values(forms).forEach(form => form._resolveValidations(validations));
 
         this.urlName = uppercaseCamelToLowercaseDashed(this.name);
     }
