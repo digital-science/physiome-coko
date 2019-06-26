@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
+
+import AuthenticatedUserContext from "component-authentication/client/AuthenticatedUserContext";
 
 import { FormFieldHolder } from './fields/withFormField';
 
@@ -10,6 +12,7 @@ function _FormFieldListing({ className, elements, fieldRegistry, data, binding, 
         return null;
     }
 
+    const currentUser = useContext(AuthenticatedUserContext);
     const items = [];
 
     const pushElement = (ElementComponent, e, key) => {
@@ -25,6 +28,10 @@ function _FormFieldListing({ className, elements, fieldRegistry, data, binding, 
 
     /*const items = */
     elements.forEach((e, i) => {
+
+        if(!e.userIsTargetOfElement(currentUser)) {
+            return;
+        }
 
         if(e.type === "Layout") {
 

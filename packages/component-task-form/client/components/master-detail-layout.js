@@ -1,15 +1,19 @@
-import React, {Fragment, useMemo} from 'react';
+import React, { useMemo, useContext } from 'react';
 import styled from 'styled-components';
 
 import FieldListing from './field-listing';
 import { FormFieldHolder } from './fields/withFormField';
 import { FormFieldViewerEditorLayoutHolder } from './fields/form-field-viewer-editor-layout';
 
+import AuthenticatedUserContext from "component-authentication/client/AuthenticatedUserContext";
+
 import Spinner from 'ds-awards-theme/components/spinner';
 import { InlineButton, SmallInlineButton } from 'ds-awards-theme/components/inline-button';
 
 
 export default function MasterDetailLayout({ className, elements, data, loading, error, instance, fieldListingProps }) {
+
+    const currentUser = useContext(AuthenticatedUserContext);
 
     const [masterPanels, detailPanels] = useMemo(() => {
 
@@ -53,6 +57,9 @@ export default function MasterDetailLayout({ className, elements, data, loading,
             <div>
                 <MasterHolder>
                     {masterPanels.map((panel, index) => {
+                        if(!panel.userIsTargetOfElement(currentUser)) {
+                            return null;
+                        }
                         if(panel.condition && !panel.condition.evaluate(data)) {
                             return null;
                         }
@@ -67,6 +74,9 @@ export default function MasterDetailLayout({ className, elements, data, loading,
 
                 <DetailHolder>
                     {detailPanels.map((panel, index) => {
+                        if(!panel.userIsTargetOfElement(currentUser)) {
+                            return null;
+                        }
                         if(panel.condition && !panel.condition.evaluate(data)) {
                             return null;
                         }
