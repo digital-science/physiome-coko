@@ -128,7 +128,7 @@ function FormFieldAuthorsEditor({ className, data, binding, instanceId, instance
                 </DragDropContext>
 
                 <div style={{"padding": "8px"}}>
-                    <InlineButton icon={<FaPlus />} bordered={true} onClick={addAuthor}>Add Additional Author</InlineButton>
+                    <InlineButton icon={<FaPlus />} bordered={true} onClick={addAuthor}>Add Author</InlineButton>
                 </div>
 
             </AuthorEditorCardHolder>

@@ -39,6 +39,7 @@ export default function SideBySideHeroLayout({ className, elements, data, loadin
     }
 
     return (data && !loading) ? (
+
         <SideBySideHeroHolder className={className}>
             <PanelHolder>
                 {panels.map((panel, index) =>
