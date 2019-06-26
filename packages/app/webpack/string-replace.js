@@ -1,6 +1,6 @@
 // replace "PUBSWEET_COMPONENTS" string in pubsweet-client
 
-const components = require('../config/components.json')
+const components = require('../config/components.json');
 
 const requireComponentsString = components
     .filter(name => {

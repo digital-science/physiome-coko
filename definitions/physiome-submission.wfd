@@ -2,6 +2,8 @@ enum SubmissionPhase {
     Pending => "pending",
     Submitted => "submitted",
     Decision => "decision",
+    Payment => "payment",
+    Paid => "paid",
     Publish => "publish",
     Reject => "reject",
     Published => "published",
@@ -94,7 +96,10 @@ instance Submission {
         articleFiles: [File] <set>,
         supplementaryFiles: [File] <set, file-labels, file-types>,
 
-        figshareArticleId: String
+        figshareArticleId: String <input:exclude>,
+
+        paymentSessionId: String <input:exclude>,
+        paymentCompleted: Boolean <input:exclude>
     }
 
 
@@ -144,7 +149,7 @@ instance Submission {
 
     validations "initial-submission" {
 
-        { kind => (hasValue(kind)), "A manuscript type is required. Please select one." },
+        { kind => (hasValue(kind)), "A manuscript type is required. Please select one." }
 
         { title => (length(title) > 0), "A manuscript title is required. Please enter one." }
 
@@ -210,6 +215,12 @@ instance Submission {
 
         elements: {
 
+            { HeaderPanel, (phase == SubmissionPhase.Payment), children:{
+
+                { RequestPaymentBanner }
+
+            } }
+
             { MasterPanel, <administrator>, children:{
 
                 { ViewerEditorLayout, heading:"Manuscript Details", viewLabel:"View Submission", editLabel:"Edit Submission", children:{
@@ -272,7 +283,9 @@ instance Submission {
 
             } }
 
-            { DetailPanel, <administrator>, (phase in [SubmissionPhase.Decision, SubmissionPhase.Publish, SubmissionPhase.Reject, SubmissionPhase.Published]),
+            { DetailPanel, <administrator>,
+                    (phase in [SubmissionPhase.Decision, SubmissionPhase.Payment, SubmissionPhase.Paid,
+                        SubmissionPhase.Publish, SubmissionPhase.Reject, SubmissionPhase.Published]),
                     heading:"Curation Checks", children:{
 
                 { Checkbox => primaryPaperExists, label: "Primary paper exists", readOnly:true }
@@ -288,10 +301,10 @@ instance Submission {
                 { Checkbox => modelAnnotated, label: "Model is fully annotated", readOnly:true }
             } }
 
-            { DetailPanel, <administrator>, (phase in [SubmissionPhase.Submitted, SubmissionPhase.Decision, SubmissionPhase.Reject]),
+            { DetailPanel, <administrator>, (phase in [SubmissionPhase.Submitted, SubmissionPhase.Decision, SubmissionPhase.Payment, SubmissionPhase.Paid, SubmissionPhase.Reject]),
                     heading:"Decisions", children:{
 
-                { InlineTaskForm, form:"decisions", tasks:[ "final-decision", "checks" ] }
+                { InlineTaskForm, form:"decisions", tasks:[ "checks", "payment-decision", "payment", "publish-decision" ] }
 
                 { ResumeRejectedSubmission, (phase == SubmissionPhase.Reject) }
 
@@ -361,6 +374,12 @@ instance Submission {
 
         outcomes: [
             {
+                "payment" => Complete,
+                state: {
+                    phase: SubmissionPhase.Payment
+                }
+            },
+            {
                 "publish" => Complete,
                 state: {
                     phase: SubmissionPhase.Publish
@@ -392,7 +411,11 @@ instance Submission {
 
             { Button, (phase == SubmissionPhase.Decision), outcome:"resume-checks", label:"Resume Quality Checks"}
 
-            { Button, (phase == SubmissionPhase.Decision), outcome:"publish", label:"Publish Article",
+            { Button, (phase == SubmissionPhase.Decision), outcome:"payment", label:"Approve for Payment",
+                confirmation:"Are you sure you want to approve this submission for payment? The submitter will be asked to pay the article processing charge.",
+                confirmationHeading:"Approve Manuscript for APC Payment", confirmationAffirmativeLabel: "Request Payment", confirmationNegativeLabel: "Cancel"}
+
+            { Button, (phase == SubmissionPhase.Paid), outcome:"publish", label:"Publish Article",
                 confirmation:"Are you sure you want to publish this manuscript submission through into figshare?", confirmationHeading:"Publish Manuscript to Figshare",
                 confirmationAffirmativeLabel: "Publish Manuscript", confirmationNegativeLabel: "Cancel"}
 
