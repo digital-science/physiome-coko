@@ -1239,7 +1239,7 @@ validations "validation set"
 	= ws "validations" ws name:string
     begin_object
     first:ValidationEntry
-    rest:(value_separator e:ValidationEntry {return e;})*
+    rest:(value_separator? e:ValidationEntry {return e;})*
     end_object
     {
     	const r = {type:"validations", name};
