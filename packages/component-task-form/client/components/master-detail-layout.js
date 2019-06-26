@@ -15,7 +15,7 @@ export default function MasterDetailLayout({ className, elements, data, loading,
 
     const currentUser = useContext(AuthenticatedUserContext);
 
-    const [masterPanels, detailPanels] = useMemo(() => {
+    const [masterPanels, detailPanels, headerPanels] = useMemo(() => {
 
         if(!elements) {
             return null;
@@ -23,6 +23,7 @@ export default function MasterDetailLayout({ className, elements, data, loading,
 
         const masterPanelsSet = [];
         const detailPanelsSet = [];
+        const headerPanelsSet = [];
 
         elements.forEach(element => {
 
@@ -31,11 +32,13 @@ export default function MasterDetailLayout({ className, elements, data, loading,
                     masterPanelsSet.push(element);
                 } else if(element.type === "DetailPanel") {
                     detailPanelsSet.push(element);
+                } else if(element.type === "HeaderPanel") {
+                    headerPanelsSet.push(element);
                 }
             }
         });
 
-        return [masterPanelsSet, detailPanelsSet];
+        return [masterPanelsSet, detailPanelsSet, headerPanelsSet];
 
     }, [elements]);
 
@@ -48,13 +51,31 @@ export default function MasterDetailLayout({ className, elements, data, loading,
         return <div>Instance Not Found</div>
     }
 
+    // FIXME: we should probably try and cache the user targets and condition evaluations (would need to observe data changes potentially though)
 
-
-    // FIXME: if a panel has a condition on it, we need to evaluate it before including the panel below
     return (data && !loading) ? (
 
         <MasterDetailHolder className={className}>
-            <div>
+
+            <HeaderHolder>
+                {headerPanels.map((panel, index) => {
+                    if(!panel.userIsTargetOfElement(currentUser)) {
+                        return null;
+                    }
+                    if(panel.condition && !panel.condition.evaluate(data)) {
+                        return null;
+                    }
+                    return (
+                        <HeaderPanel key={index}>
+                            {panel.options && panel.options.heading ? <PanelHeading heading={panel.options.heading} /> : null}
+                            <FieldListing elements={panel.children} {...fieldListingProps} />
+                        </HeaderPanel>
+                    );
+                })}
+            </HeaderHolder>
+
+            <MasterDetailContentHolder>
+
                 <MasterHolder>
                     {masterPanels.map((panel, index) => {
                         if(!panel.userIsTargetOfElement(currentUser)) {
@@ -88,7 +109,7 @@ export default function MasterDetailLayout({ className, elements, data, loading,
                         );
                     })}
                 </DetailHolder>
-            </div>
+            </MasterDetailContentHolder>
         </MasterDetailHolder>
 
     ) : (
@@ -103,18 +124,35 @@ export default function MasterDetailLayout({ className, elements, data, loading,
 const MasterDetailHolder = styled.div`
   display: flex;
   justify-content: center;
-  
+  flex-wrap: wrap;
+
   &.loading {
     text-align: center;
   }
   
   & > div {
+    flex-basis: 100%;
+  }
+`;
+
+const HeaderHolder = styled.div`
+    box-sizing: border-box;
+    max-width: 1000px;
+    width: 100%;
+    padding-left: 20px;
+    padding-right: 20px;
+    
+    & ${FieldListing} {
+      max-width: unset;
+    }
+`;
+
+const MasterDetailContentHolder = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: center;
     max-width: 1000px;
     width: 100%;
-  }
 `;
 
 
@@ -155,6 +193,9 @@ const Panel = styled.div`
   }
 
 `;
+
+
+const HeaderPanel = styled(Panel)``;
 
 const MasterPanel = styled(Panel)``;
 
