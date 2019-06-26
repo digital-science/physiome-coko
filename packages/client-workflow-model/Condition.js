@@ -1,4 +1,27 @@
 
+// Condition functions
+// ---
+
+const ConditionFunctions = {};
+
+ConditionFunctions.length = v => {
+    if(v instanceof Array) {
+        return v.length;
+    }
+
+    if(typeof v === "string") {
+        return v.length;
+    }
+    return undefined;
+};
+
+
+ConditionFunctions.hasValue = v => {
+    return !!v;
+};
+
+
+
 class Condition {
 
     constructor(condition, enumResolver, mappingResolver) {
@@ -17,25 +40,26 @@ class Condition {
             return v.split(".")[1];
         }
 
+        function _resolveEnumsOnValue(value) {
+            if(!value) {
+                return;
+            }
+            if(value.type === "enum") {
+                value.value = _enumResolve(value.value);
+            } else if(value.type === "enum-set") {
+                value.value = value.value.map(v => _enumResolve(v));
+            }
+        }
+
         function _resolveEnums(expression) {
 
             _addBindings(expression.lhs);
             _addBindings(expression.rhs);
+            _addBindings(expression.argument);
 
-            if(expression.lhs) {
-                if(expression.lhs.type === "enum") {
-                    expression.lhs.value = _enumResolve(expression.lhs.value);
-                } else if(expression.lhs.type === "enum-set") {
-                    expression.lhs.value = expression.lhs.value.map(v => _enumResolve(v));
-                }
-            }
-            if(expression.rhs) {
-                if(expression.rhs.type === "enum") {
-                    expression.rhs.value = _enumResolve(expression.rhs.value);
-                } else if(expression.rhs.type === "enum-set") {
-                    expression.rhs.value = expression.rhs.value.map(v => _enumResolve(v));
-                }
-            }
+            _resolveEnumsOnValue(expression.lhs);
+            _resolveEnumsOnValue(expression.rhs);
+            _resolveEnumsOnValue(expression.argument);
 
             if(expression.expression) {
                 if(expression.expression instanceof Array) {
@@ -64,8 +88,19 @@ class Condition {
         function _resolveValue(v) {
             if(v.type === "model") {
                 return data.getFieldValue(v.value);
+            } else if(v.type === "function") {
+                const arg = v.argument ? _resolveValue(v.argument) : undefined;
+                return _resolveFunction(v.function, arg);
             }
             return v.value;
+        }
+
+        function _resolveFunction(fnName, v) {
+
+            if(ConditionFunctions.hasOwnProperty(fnName)) {
+                return ConditionFunctions[fnName](v);
+            }
+            return undefined;
         }
 
         function _reduceExpressionList(expressions) {
@@ -97,7 +132,13 @@ class Condition {
                 return _reduceExpressionList(e);
             }
 
-            if(e.op === "!=" || e.op === "==" || e.op === "in") {
+            if(e.op === "function") {
+
+                const arg = _resolveValue(e.argument);
+                return  _resolveFunction(e.function, arg);
+
+            } else if(e.op === "!=" || e.op === "==" || e.op === "in" ||
+                        e.op === ">=" || e.op === "<=" || e.op === ">" || e.op === "<" ) {
 
                 const lhs = _resolveValue(e.lhs);
                 const rhs = _resolveValue(e.rhs);
@@ -107,6 +148,16 @@ class Condition {
                     return lhs !== rhs;
                 case "==":
                     return lhs === rhs;
+
+                case ">=":
+                    return lhs >= rhs;
+                case "<=":
+                    return lhs <= rhs;
+                case ">":
+                    return lhs > rhs;
+                case "<":
+                    return lhs < rhs;
+
                 case "in":
                     return (rhs instanceof Array ? rhs : [rhs]).indexOf(lhs) !== -1;
                 }
