@@ -1,14 +1,15 @@
 import React from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import BorderedElement from './bordered-element'
 import { th } from '../src/index';
 
 
-const _TextArea = ({children=null, ...rest}) => {
+const _TextArea = ({children=null, issue, ...rest}) => {
     return <textarea{...rest}>{children}</textarea>
 };
 
 const TextArea = BorderedElement(_TextArea);
+
 
 export default styled(TextArea)`
     width: 100%;

@@ -14,9 +14,23 @@ const SmallBorderStyle = css`
     border: ${th('borderedElement.small.borderWidth')} ${th('borderedElement.small.borderStyle')} ${th('borderedElement.small.borderColor')};
 `;
 
+const IssueBorder = css`
+    border-color: #d00e00;
+    box-shadow: 1px 1px 2px 2px #d00e0024;
+`;
 
-const BorderedElement = (element) => styled(element)`${BorderStyle}`;
-const SmallBorderedElement = (element) => styled(element)`${SmallBorderStyle}`;
+
+
+const BorderedElement = (Element) => styled(({className, issue, ...rest}) => <Element className={className} {...rest} /> )`
+    ${BorderStyle}
+    ${props => props.issue ? IssueBorder : ''}
+`;
+
+const SmallBorderedElement = (Element) => styled(({className, issue, ...rest}) => <Element className={className} {...rest} /> )`
+    ${SmallBorderStyle}
+    ${props => props.issue ? IssueBorder : ''}
+`;
+
 
 export default BorderedElement;
 export { BorderedElement, SmallBorderedElement, BorderStyle, SmallBorderStyle };
