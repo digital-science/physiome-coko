@@ -9,9 +9,9 @@ const Card = styled(({Tag = "div", className, reorderingGrabber, children}) => {
     return (
         <Tag className={`${className || ""} ${reorderingGrabber ? "reorder" : ""}`}>
             <div className="reorder-grabber" />
-            <div className="content">
+            <CardContent className="content">
                 {children}
-            </div>
+            </CardContent>
         </Tag>
     )
 
@@ -44,6 +44,8 @@ const Card = styled(({Tag = "div", className, reorderingGrabber, children}) => {
   
 `;
 
+const CardContent = styled.div`
+`;
 
 const CardRemoveButton = styled(({className, onClick}) => {
 
@@ -75,4 +77,4 @@ const CardRemoveButton = styled(({className, onClick}) => {
 
 
 export default Card;
-export { CardRemoveButton };
+export { CardContent, CardRemoveButton };

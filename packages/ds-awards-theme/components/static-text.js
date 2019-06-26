@@ -14,10 +14,15 @@ const StaticText = styled(_StaticText)`
     word-break: break-word;
 `;
 
+const LargeStaticText = styled(StaticText)`
+    font-size: 16px;
+`;
+
+
 export default StaticText;
 
 const DisabledStaticText = styled(StaticText)`
     color: #b3b3b3;
 `;
 
-export { DisabledStaticText };
+export { LargeStaticText, DisabledStaticText };

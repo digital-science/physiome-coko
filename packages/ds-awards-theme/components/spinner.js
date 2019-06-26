@@ -22,9 +22,9 @@ const MessageHolder = styled.div`
   }
 `;
 
-const _Spinner = ({className, center, small, message}) => {
+const _Spinner = ({className, center, small, message, clear}) => {
 
-    const cn = `loader ${small ? 'loader-small small' : 'loader-normal'} ${center ? 'center' : ''}`;
+    const cn = `loader ${small ? 'loader-small small' : 'loader-normal'} ${center ? 'center' : ''} ${clear ? 'clear' : ''}`;
 
     if(message) {
         return (
