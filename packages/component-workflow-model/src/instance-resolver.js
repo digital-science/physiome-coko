@@ -597,6 +597,11 @@ InstanceResolver.prototype.restart = async function restart(instance, startAfter
 
         await this.publishInstanceWasModified(instance.id);
         return data;
+
+    }).catch((err) => {
+
+        logger.error("BPM engine request failed due to: " + err.toString());
+        return Promise.reject(new Error("Unable to restart instance due to business engine error."));
     });
 };
 
@@ -650,10 +655,53 @@ InstanceResolver.prototype.getTasks = async function getTasks(instanceID, contex
 
     }).catch((err) => {
 
-        console.error("BPM engine request failed due to: " + err.toString());
+        logger.error("BPM engine request failed due to: " + err.toString());
         return Promise.reject(new Error("Unable to fetch tasks for instance due to business engine error."));
     });
+};
 
+
+InstanceResolver.prototype.tasksForInstance = async function(instance) {
+
+    const taskOpts = {processInstanceBusinessKey:instance.id};
+
+    return taskService.list(taskOpts).then((data) => {
+
+        return data._embedded.tasks || data._embedded.task;
+
+    }).catch((err) => {
+
+        logger.error("BPM engine request failed due to: " + err.toString());
+        return Promise.reject(new Error("Unable to fetch tasks for instance due to business engine error."));
+    });
+};
+
+
+InstanceResolver.prototype.completeTaskForInstance = async function(instance, taskId, stateChanges) {
+
+    const completeTaskOpts = {id: taskId};
+    let didModify = false;
+    const newVars = {};
+
+    Object.keys(stateChanges).forEach(key => {
+
+        const value = stateChanges[key];
+
+        if(typeof(value) === "string" || typeof(value) === "number" || value === null) {
+            newVars[key] = {value: value};
+        }
+    });
+
+    completeTaskOpts.variables = newVars;
+    if(didModify) {
+        await instance.save();
+    }
+
+    return taskService.complete(completeTaskOpts).catch((err) => {
+
+        logger.error(`Unable to complete business process engine task due to error: ${err.toString()}`);
+        throw new Error("Unable to complete task for instance due to business engine error.");
+    });
 };
 
 
@@ -781,7 +829,6 @@ InstanceResolver.prototype.publishInstanceWasModified = async function(instanceI
 
 InstanceResolver.prototype.asyncIteratorWasCreated = async function() {
 
-    console.log(`!!!! **** !!!! asyncIteratorWasCreated was called `);
     const pubSub = await pubsubManager.getPubsub();
     return pubSub.asyncIterator(`${this.taskDef.name}.created`);
 };

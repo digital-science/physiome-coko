@@ -166,6 +166,15 @@ function createModelForTask(task, enums, lookupModel) {
             }
 
 
+            tasksForInstance() {
+                return this.constructor.instanceResolver.tasksForInstance(this);
+            }
+
+            completeTaskForInstance(taskId, stateChanges) {
+                return this.constructor.instanceResolver.completeTaskForInstance(this, taskId, stateChanges);
+            }
+
+
             static get relationMappings() {
 
                 if(this._cachedRelationMapping) {
