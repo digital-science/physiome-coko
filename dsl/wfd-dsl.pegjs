@@ -287,6 +287,14 @@ task
             });
         }
 
+        const validations =  content.filter(c => c.type === "validations");
+        if(validations.length) {
+            m.validations = validations.map(v => {
+                delete v.type;
+                return v;
+            });
+        }
+
         const acls = content.filter(c => c.type === "acl");
         if(acls.length) {
 
@@ -312,7 +320,7 @@ task
       return m;
     }
 
-taskContent = (taskSpecificModel / enum / form / view / layout / taskOptions / taskListingAccessor / acl)*
+taskContent = (taskSpecificModel / enum / form / view / layout / validations / taskOptions / taskListingAccessor / acl)*
 
 // Task options
 taskOptions = ws "processKey" name_separator processKey:string? {return {type:"options", processKey}}
@@ -703,6 +711,9 @@ form
         if(content.outcomes) {
         	m.outcomes = content.outcomes;
         }
+        if(content.validations) {
+        	m.validations = content.validations;
+        }
         if(content.options && Object.keys(content.options).length) {
         	m.options = content.options;
         }
@@ -719,11 +730,12 @@ formExtends
     }
 
 formContent
-	= content:(formOptions / formElements / formOutcomes)*
+	= content:(formOptions / formElements / formOutcomes / formValidations)*
     {
     	const opts = content ? content.filter(t => t.type === "options") : null;
     	const outcomes = content ? content.filter(t => t.type === "outcomes") : null;
     	const elements = content ? content.filter(t => t.type === "elements" && t.elements.length) : null;
+    	const validations = content ? content.filter(t => t.type === "validations") : null;
         const r = {};
 
         if(outcomes && outcomes.length) {
@@ -732,6 +744,14 @@ formContent
             if(consolidatedOutcomes.length) {
             	r.outcomes = consolidatedOutcomes;
             }
+        }
+
+        if(validations && validations.length) {
+           const allValidations = [];
+           validations.forEach(v =>
+               allValidations.push.apply(allValidations, v.validations)
+           );
+           r.validations = allValidations;
         }
 
         if(opts && opts.length) {
@@ -748,6 +768,19 @@ formContent
             }
         }
        	return r;
+    }
+
+formValidations
+	= ws "validation" name_separator ws validations:(formValidationsMultiple / string)
+    {
+    	const v = typeof validations === "string" ? [validations] : validations;
+    	return {type:"validations", validations:v};
+    }
+
+formValidationsMultiple
+	= "[" ws first:string rest:(ws "," ws s:string {return s;})* ws "]"
+    {
+    	return [first, ...rest];
     }
 
 formOptions
@@ -855,6 +888,7 @@ formElement
 	= begin_object
     type:propName
     binding:formElementBinding?
+    targets:(value_separator t:formElementTargetUserList {return t;})?
     condition:(value_separator c:Condition {return c;})?
     options:formElementExtendedOptions?
     end_object
@@ -865,6 +899,9 @@ formElement
         }
         if(condition) {
         	r.condition = condition;
+        }
+        if(targets && targets.length) {
+        	r.targets = targets;
         }
         if(options) {
         	if(options.children) {
@@ -884,6 +921,12 @@ formElementBinding
 
 formElementSimpleBinding
 	= (ws "=>" ws modelTarget:targetModelName {return modelTarget;})
+
+formElementTargetUserList
+	= ws targetUserList:GroupList ws
+    {
+    	return targetUserList;
+    }
 
 formElementExtendedOptions
 	= extendedOptions:(formElementChildren / formElementOption)*
@@ -929,7 +972,6 @@ formElementOptionValue
 
 // ---- Conditions
 
-
 Condition
 	= ws "(" ws expression:ConditionalGroup ws ")" ws
     {
@@ -959,16 +1001,29 @@ ConditionalContinuation
     }
 
 ConditionalExpression
-	= ws lhs:ConditionModelTargetValue ws operation:ConditionOperation ws rhs:ConditionValue
+	= (ConditionalComparisonExpression / ConditionalFunctionEval)
+
+ConditionalComparisonExpression
+	= ws lhs:(ConditionalFunctionValue / ConditionModelTargetValue)
+      ws operation:ConditionOperation
+      ws rhs:ConditionValue
     {
     	return {op:operation, lhs:lhs, rhs:rhs};
     }
 
+ConditionalFunctionEval
+	= ws fnName:propName "(" arg:ConditionModelTargetValue ")" ws
+    { return {op:"function", function:fnName, argument:arg}; }
+
 ConditionOperation
-	= ("!=" / "==" / "in")
+	= ("!=" / "==" / "in" / "<=" / ">=" / "<" / ">")
 
 ConditionValue
 	= (ConditionEnumSetValue / ConditionEnumValue / ConditionSimpleValue)
+
+ConditionalFunctionValue
+	= ws fnName:propName "(" arg:ConditionModelTargetValue ")" ws
+    { return {type:"function", function:fnName, argument:arg}; }
 
 ConditionModelTargetValue
 	= value:targetModelName
@@ -995,8 +1050,6 @@ ConditionEnumValue
     {
     	return {type:"enum", value:value};
     }
-
-
 
 
 // ---- ACL
@@ -1117,7 +1170,8 @@ aclCondition "acl condition"
     }
 
 
-// Mapping
+// -----  Mapping
+// --
 
 mapping "mapping"
 	= ws "mapping" ws mappingName:string ws "on" ws enumType:propName
@@ -1141,3 +1195,122 @@ mappingEntry "mapping entry"
     {
     	return {enumValue:name, value};
     }
+
+
+// ----- Access Group Lists
+// --
+
+GroupList "access group list"
+	= ws "<"
+    first:GroupEntry
+    rest:("," entry:GroupEntry {return entry;})*
+    ">" ws
+    {
+    	const grps = [first];
+        if(rest && rest.length) {
+        	grps.push.apply(grps, rest);
+        }
+    	return grps;
+    }
+
+GroupEntry "access group entry"
+	= ws not:"not:"? grpName:GroupName ws
+    {
+    	const r = {group:grpName};
+        if(not) {
+        	r.invert = true;
+        }
+    	return r;
+    }
+
+GroupName "access group name"
+	= chars:[A-Za-z0-9-]*
+    {
+        return chars.join("");
+    }
+
+
+
+
+// ---- Validations
+// --
+
+validations "validation set"
+	= ws "validations" ws name:string
+    begin_object
+    first:ValidationEntry
+    rest:(value_separator e:ValidationEntry {return e;})*
+    end_object
+    {
+    	const r = {type:"validations", name};
+    	const validations = [first];
+        if(rest && rest.length) {
+        	validations.push.apply(validations, rest);
+        }
+        r.entries = validations;
+    	return r;
+    }
+
+
+ValidationEntry "validation entry"
+	= begin_object
+    target:propName
+    ws "=>" ws
+    condition:Condition
+    "," ws warning:(ValidationWarning / ValidationEvaluatedString)
+   	options:ValidationOptionSet?
+    end_object
+    {
+    	const r = {target, warning, condition};
+        if(options) {
+        	r.options = options;
+        }
+    	return r;
+    }
+
+ValidationWarning "validation warning (static)"
+ 	= warning:string
+    { return warning; }
+
+ValidationEvaluatedString "validation warning (evaluated)"
+ 	= "`" parts:(ValidationEvalStringToken / ValidationEvalStringNonToken)* "`"
+    {
+    	const r = {type:"evaluated", parts};
+        const values = parts.filter(v => typeof v !== "string");
+
+        if(values.length) {
+        	const tokens = {};
+            values.forEach(v => tokens[v.token] = true);
+            r.tokens = Object.keys(tokens);
+        } else {
+        	return parts.join("");
+        }
+      	return r;
+    }
+
+ValidationEvalStringNonToken = p:(!"${" !"`" c:. { return c; })+
+	{ return p.filter(v => !!v).join(""); }
+
+ValidationEvalStringToken "eval token"
+	= "${" p:(!"}" !"`" c:. {return c;})* "}"
+    { return { token:p.join("") } }
+
+
+ValidationOptionSet
+	= options:(ValidationOption)*
+    {
+    	const r = {};
+        options.forEach(v => Object.assign(r, v));
+        return r;
+    }
+
+ValidationOption
+    = value_separator key:propName name_separator value:ValidationOptionValue
+    {
+    	const r = {};
+        r[key] = value;
+    	return r;
+    }
+
+ValidationOptionValue
+ 	= value
