@@ -1,0 +1,7 @@
+{
+  "name": "stripe-apc-service",
+  "version": "1.0.0",
+  "dependencies": {
+    "stripe": "^7.3.0"
+  }
+}

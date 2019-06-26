@@ -6,5 +6,6 @@
   "component-task-form",
   "component-workflow-physiome-tasks",
   "component-workflow-model",
-  "dimensions-lookup-service"
+  "dimensions-lookup-service",
+  "stripe-apc-service"
 ]

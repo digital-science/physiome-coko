@@ -22,7 +22,7 @@ const getDbConfig = () => {
 
 const values = {
     // Public keys are copied into webpack build (i.e. go client-side)
-    publicKeys: ['pubsweet-client', 'authsome', 'validations', 'orcid-paths'],
+    publicKeys: ['pubsweet-client', 'authsome', 'validations', 'orcid-paths', 'stripe-publishable-key'],
 
     authsome: {
         mode: path.resolve(__dirname, 'authsome-mode.js'),
@@ -124,6 +124,11 @@ const values = {
         apiBaseUrl: process.env.FIGSHARE_API_BASE,
         apiToken: process.env.FIGSHARE_API_TOKEN
     },
+    stripe: {
+        testing: (process.env.STRIPE_IS_PRODUCTION && process.env.STRIPE_IS_PRODUCTION.toString() !== "false"),
+        secretKey: process.env.STRIPE_SECRET_KEY,
+        publishableKey: process.env.STRIPE_PUBLISHABLE_KEY
+    },
     logging: {
         debugAclRules: true
     }
@@ -135,5 +140,7 @@ values['orcid-paths'] = {
     authenticatePath: values.orcid.authenticatePath,
     associatePath: values.orcid.associatePath
 };
+
+values['stripe-publishable-key'] = (values.stripe && values.stripe.publishableKey) || null;
 
 module.exports = values;

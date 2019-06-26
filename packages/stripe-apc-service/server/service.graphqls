@@ -1,0 +1,14 @@
+enum SubmissionCheckoutStatus {
+    Success
+    AlreadyPaid
+}
+
+type SubmissionCheckoutSession {
+    status: SubmissionCheckoutStatus!
+    sessionId: String
+}
+
+extend type Query {
+
+    checkoutSessionForSubmission(submissionId: ID!) : SubmissionCheckoutSession!
+}
