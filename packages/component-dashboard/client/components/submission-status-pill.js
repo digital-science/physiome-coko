@@ -9,8 +9,10 @@ const SubmissionStatus = {
     Pending: 'Pending',
     Submitted: 'Submitted',
     Checking: 'Checking',
-    Publish: 'Publish',
     Decision: 'Decision',
+    Payment: 'Payment',
+    Paid: 'Paid',
+    Publish: 'Publish',
     Reject: 'Reject',
     Published: 'Published',
     Cancelled: 'Cancelled'
@@ -34,6 +36,16 @@ SubmissionStatusMapping[SubmissionStatus.Checking] = {
 SubmissionStatusMapping[SubmissionStatus.Decision] = {
     text:"Decision",
     className: "decision"
+};
+
+SubmissionStatusMapping[SubmissionStatus.Payment] = {
+    text:"Payment",
+    className: "payment"
+};
+
+SubmissionStatusMapping[SubmissionStatus.Paid] = {
+    text:"Paid",
+    className: "paid"
 };
 
 SubmissionStatusMapping[SubmissionStatus.Publish] = {
@@ -104,7 +116,15 @@ const SubmissionStatusPill = styled(_SubmissionStatusPill)`
     &.checking {
         background-color: #8dc56d;
     }
+        
+    &.payment {
+        background-color: #ada600;
+    }
     
+    &.paid {
+        background-color: #00acad;
+    }
+
     &.publish {
         background-color: #adadad;
     }

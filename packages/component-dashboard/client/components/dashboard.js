@@ -146,6 +146,8 @@ function Dashboard(props) {
             "Pending",
             "Submitted",
             "Decision",
+            "Payment",
+            "Paid",
             "Publish",
             "Reject",
             "Published"
