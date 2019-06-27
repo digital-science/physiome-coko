@@ -1,6 +1,9 @@
 const { models } = require('component-workflow-model/model');
 const { Submission } = models;
 
+const express = require('express');
+const bodyParser = require('body-parser');
+
 const { ConflictError, AuthorizationError, NotFoundError } = require('@pubsweet/errors');
 const logger = require("workflow-utils/logger-with-prefix")('stripe-apc-service');
 const { transaction } = require('objection');
@@ -349,4 +352,56 @@ exports.handleSuccessUrl = function handleSuccessUrl(request, response) {
         return response.status(500).send("Server Error");
     })
 
+};
+
+
+
+
+exports.handleCancelUrl = function() {
+
+
+};
+
+
+
+exports.registerCheckoutCompletedWebhookHandler = (app, urlPath = '/payments/webhooks') => {
+
+    const webhookSecret = config.get('stripe.webhookSecretKey');
+
+    app.post(urlPath, bodyParser.raw({type: 'application/json'}), (request, response) => {
+
+        const sig = request.headers['stripe-signature'];
+        let event;
+
+        try {
+            event = stripe.webhooks.constructEvent(request.body, sig, webhookSecret);
+        } catch (err) {
+            return response.status(400).send(`Webhook Error: ${err.message}`);
+        }
+
+        if (event.type === 'checkout.session.completed') {
+
+            logger.debug(`starting handling of Stripe webhook event: checkout.session.completed`);
+
+            const session = event.data.object;
+
+            console.log(JSON.stringify(session, null, 4));
+
+            // Fulfill the purchase...
+            //handleCheckoutSession(session);
+
+            return response.json({received: true});
+        }
+
+        return response.status(400).send(`Unknown webhook event type received.`);
+    });
+
+    if(!app._router || !app._router.stack || !app._router.stack.length || app._router.stack.length < 3) {
+        logger.error(`register webhook failed, unable to access express router stack to modify ordering`);
+        process.exit(1);
+        return;
+    }
+
+    const layer = app._router.stack.pop();
+    app._router.stack.splice(2, 0, layer);
 };

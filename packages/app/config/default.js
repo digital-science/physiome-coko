@@ -127,7 +127,8 @@ const values = {
     stripe: {
         testing: (process.env.STRIPE_IS_PRODUCTION && process.env.STRIPE_IS_PRODUCTION.toString() !== "false"),
         secretKey: process.env.STRIPE_SECRET_KEY,
-        publishableKey: process.env.STRIPE_PUBLISHABLE_KEY
+        publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
+        webhookSecretKey: process.env.STRIPE_WEBHOOK_SECRET_KEY
     },
     logging: {
         debugAclRules: true
