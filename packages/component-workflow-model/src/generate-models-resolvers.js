@@ -165,6 +165,9 @@ function createModelForTask(task, enums, lookupModel) {
                 this._instanceResolver = v;
             }
 
+            get instanceResolver() {
+                return this.constructor.instanceResolver;
+            }
 
             tasksForInstance() {
                 return this.constructor.instanceResolver.tasksForInstance(this);
