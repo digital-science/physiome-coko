@@ -706,10 +706,30 @@ InstanceResolver.prototype.completeTaskForInstance = async function(instance, ta
 
 
 
-InstanceResolver.prototype.completeTask = async function completeTask({id, taskId, state}, context) {
+InstanceResolver.prototype.completeTask = async function completeTask({id, taskId, form, outcome, state}, context) {
 
-    if(!id || !taskId) {
-        throw new UserInputError("Complete Task requires an id and taskId to be supplied");
+    if(!id || !taskId || !form || !outcome) {
+        throw new UserInputError("Complete Task requires an instance id, task id, form and outcome to be supplied");
+    }
+
+    console.log("form : " + form);
+    console.log("outcome : " + outcome);
+
+    const formDefinition = this.taskDef.forms ? this.taskDef.forms.find(f => f.form === form) : null;
+    if(!formDefinition) {
+        throw new Error("Form is not defined for this instance type.");
+    }
+
+    const outcomeDefinition = formDefinition.outcomes ? formDefinition.outcomes.find(o => o.type === outcome) : null;
+    if(!outcomeDefinition) {
+        throw new Error("Outcome is not defined within form definition for this instance type.");
+    }
+
+    console.dir(formDefinition);
+    console.dir(outcomeDefinition);
+
+    if(outcomeDefinition.result !== 'Complete') {
+        throw new Error('Form outcome result type is not a complete task type.');
     }
 
     const taskOpts = {processInstanceBusinessKey:id};
@@ -761,10 +781,46 @@ InstanceResolver.prototype.completeTask = async function completeTask({id, taskI
     }
 
     const allowedKeys = this.stateFields ? this.stateFields.map(e => e.field) : [];
-    const filteredState = (state && allowedKeys && allowedKeys.length) ? _.pick(state, allowedKeys) : null;
+    const filteredState = (state && allowedKeys && allowedKeys.length) ? _.pick(state, allowedKeys) : {};
     const completeTaskOpts = {id: taskId};
 
-    // If we have a state update to apply then we can do this here and now.
+
+    // We can now overlay the forced state changes that maybe present within the outcome definition.
+    // Any state changes that are mandated in the workflow definitions are applied over top of the front-end
+    // supplied state changes (which have already been filtered based on what they are allowed access to via ACLs).
+
+    if(outcomeDefinition.state) {
+
+        const overriddenValues = {};
+
+        Object.keys(outcomeDefinition.state).forEach(key => {
+
+            const v = outcomeDefinition.state[key];
+            if(!v) {
+                return;
+            }
+
+            if(v.type === 'enum') {
+                const enumParts = v.value.split('.');
+                if(enumParts.length === 2) {
+                    const resolvedEnumValue = this.resolveEnum(enumParts[0], enumParts[1]);
+                    if(resolvedEnumValue) {
+                        overriddenValues[key] = resolvedEnumValue;
+                    }
+                }
+            } else if(v.type === 'simple' && v.hasOwnProperty('value')) {
+
+                overriddenValues[key] = v.value;
+            }
+        });
+
+        Object.assign(filteredState, overriddenValues);
+    }
+
+    // If we have a state update to apply to the instance, then we can do this here and now.
+    // The final state changes here are the user supplied states changes filtered down to fields which are marked
+    // as state, which the user has access to and then any forced state changes applied over top.
+
     if(filteredState && Object.keys(filteredState).length) {
 
         let didModify = false;

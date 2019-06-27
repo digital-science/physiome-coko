@@ -133,10 +133,10 @@ extend type Mutation {
     }
 
     if(stateElements && stateElements.length) {
-        mutation += tab + `completeTaskFor${taskDef.name}(id:ID, taskId:ID, state:${stateInputTypeName}) : Boolean\n`;
+        mutation += tab + `completeTaskFor${taskDef.name}(id:ID!, taskId:ID!, form:String!, outcome:String!, state:${stateInputTypeName}) : Boolean\n`;
         mutation += tab + `destroy${taskDef.name}(id:ID, state:${stateInputTypeName}) : Boolean\n`;
     } else {
-        mutation += tab + `completeTaskFor${taskDef.name}(id:ID, taskId:ID) : Boolean\n`;
+        mutation += tab + `completeTaskFor${taskDef.name}(id:ID!, taskId:ID!, form:String!, outcome:String!) : Boolean\n`;
         mutation += tab + `destroy${taskDef.name}(id:ID) : Boolean\n`;
     }
 
