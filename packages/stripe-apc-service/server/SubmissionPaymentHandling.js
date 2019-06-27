@@ -71,7 +71,7 @@ async function createCheckoutSession(submissionId, emailAddress = null) {
     const checkoutDetails = {
         client_reference_id: `${submissionId}`,
         success_url: `${config.get('pubsweet-client.baseUrl')}/payment/${encodeURI(submissionId)}/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${config.get('pubsweet-client.baseUrl')}/payment/${encodeURI(submissionId)}cancel?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${config.get('pubsweet-client.baseUrl')}/payment/${encodeURI(submissionId)}/cancel`,
         payment_method_types: ["card"],
         submit_type: "pay",
         line_items: [{
@@ -156,8 +156,7 @@ exports.generateCheckoutSessionForSubmission = async function generateCheckoutSe
 };
 
 
-
-function _retrieveCheckoutSessionAndPaymentIntentForSessionId(checkoutSessionId) {
+function _retrieveCheckoutSession(checkoutSessionId) {
 
     return stripe.checkout.sessions.retrieve(checkoutSessionId).catch(err => {
 
@@ -165,10 +164,15 @@ function _retrieveCheckoutSessionAndPaymentIntentForSessionId(checkoutSessionId)
             return null;
         }
 
-        logger.error("Retrieval of checkout submission from Stripe failed due to: " + err.toString());
+        logger.error("retrieval of checkout submission from Stripe failed due to: " + err.toString());
         return Promise.reject(err);
+    });
+}
 
-    }).then(session => {
+
+function _retrieveCheckoutSessionAndPaymentIntentForSession(checkoutSessionId, session) {
+
+    return (session ? Promise.resolve(session) : _retrieveCheckoutSession(checkoutSessionId)).then(session => {
 
         return stripe.paymentIntents.retrieve(session.payment_intent).then(paymentIntention => {
 
@@ -180,18 +184,17 @@ function _retrieveCheckoutSessionAndPaymentIntentForSessionId(checkoutSessionId)
                 return {session, paymentIntention:null};
             }
 
-            logger.error("Retrieval of checkout submission from Stripe failed due to: " + err.toString());
+            logger.error("retrieval of checkout submission from Stripe failed due to: " + err.toString());
             return Promise.reject(err);
         });
     });
-
 }
 
 
-async function processSuccessfulPayment(submissionId, checkoutSessionId) {
+async function processSuccessfulPayment(submissionId, checkoutSessionId, session=null) {
 
     const p = Promise.all([
-        _retrieveCheckoutSessionAndPaymentIntentForSessionId(checkoutSessionId),
+        _retrieveCheckoutSessionAndPaymentIntentForSession(checkoutSessionId, session),
         Submission.find(submissionId)
     ]);
 
@@ -312,6 +315,8 @@ async function processSuccessfulPayment(submissionId, checkoutSessionId) {
                         return Promise.reject(err);
                     }
 
+                    await submission.instanceResolver.publishInstanceWasModified(submissionId);
+
                 }).catch(async err => {
 
                     await trx.rollback();
@@ -325,6 +330,12 @@ async function processSuccessfulPayment(submissionId, checkoutSessionId) {
 
         })
     });
+}
+
+
+async function processCancelledPayment(submissionId) {
+
+    return Promise.resolve(true);
 }
 
 
@@ -349,17 +360,33 @@ exports.handleSuccessUrl = function handleSuccessUrl(request, response) {
 
     }).catch(err => {
 
+        logger.error(`payment success handler failed, processing payment as successful failed due to: ${err.toString()}`);
         return response.status(500).send("Server Error");
-    })
-
+    });
 };
 
 
+exports.handleCancelUrl = function(request, response) {
 
+    // On cancel we will want to remove the current checkout session id (if the payment hasn't been processed??)
 
-exports.handleCancelUrl = function() {
+    const { submissionId } = request.params;
+    const checkoutSessionId = request.query['session_id'];
 
+    if(!submissionId) {
+        logger.error("payment cancel handler failed, no submission id present");
+        return response.status(400).send("Invalid Request");
+    }
 
+    processCancelledPayment(submissionId, checkoutSessionId).then(() => {
+
+        return response.redirect(302, `/details/${encodeURI(submissionId)}`);
+
+    }).catch(err => {
+
+        logger.error(`payment cancel handler failed, processing payment as cancelled failed due to: ${err.toString()}`);
+        return response.status(500).send("Server Error");
+    });
 };
 
 
@@ -381,16 +408,35 @@ exports.registerCheckoutCompletedWebhookHandler = (app, urlPath = '/payments/web
 
         if (event.type === 'checkout.session.completed') {
 
-            logger.debug(`starting handling of Stripe webhook event: checkout.session.completed`);
+            logger.debug(`stripe webhook, starting handling of Stripe webhook event: checkout.session.completed`);
 
             const session = event.data.object;
 
-            console.log(JSON.stringify(session, null, 4));
+            if(!session) {
+                logger.error(`stripe webhook, provided data doesn't have the session present`);
+                return response.status(400).send(`Webhook Error: session not present`);
+            }
 
-            // Fulfill the purchase...
-            //handleCheckoutSession(session);
+            if(!session.client_reference_id || !session.payment_intent) {
+                logger.error(`stripe webhook, session from webhook is missing required data`);
+                return response.status(400).send(`Webhook Error: session missing required details`);
+            }
 
-            return response.json({received: true});
+            const { client_reference_id:submissionId } = session;
+
+            processSuccessfulPayment(submissionId, session.id, session).then(result => {
+
+                logger.debug(`stripe webhook, successfully completed handling of Stripe webhook event: `
+                                    + `checkout.session.completed (result = ${result ? 'marked as paid' : 'processed earlier'})`);
+                return response.json({received: true});
+
+            }).catch(err => {
+
+                logger.error(`stripe webhook, error while processing successful payment: ${err.toString()}`);
+                return response.status(500).send(`Server error while processing payment.`);
+            });
+
+            return;
         }
 
         return response.status(400).send(`Unknown webhook event type received.`);
