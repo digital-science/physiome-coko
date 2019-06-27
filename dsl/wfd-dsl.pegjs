@@ -535,7 +535,7 @@ modelElementAccessType
     	return (type === "rw" || type === "read-write") ? "read-write" : "read";
     }
 
-modelElementOptions = (modelElementExclusions / modelElementJoinToDetails /
+modelElementOptions = (modelElementExclusions / modelElementJoinToDetails / modelElementIdSequence/
 						modelElementDefaultStringValue / modelElementDefaultEnumValue /
                         modelElementJoinDetails / modelElementState / modelElementAccessors /
                         modelElementInitialOwner / modelElementListingFilterMultiple /
@@ -572,6 +572,12 @@ modelElementAccessors
         }
 
     	return r;
+    }
+
+modelElementIdSequence
+	= "id-sequence:" field:string
+    {
+    	return {type:"options", idSequence:field};
     }
 
 modelElementJoinDetails
@@ -813,6 +819,7 @@ formOutcome
     result:(ws "=>" ws result:propName {return result;})?
     state:formOutcomeStateSet?
     idAssign:formOutcomeIdentityAssignment?
+    sequence:formOutcomeSequenceAssignment*
     propList:propertyList?
     end_object
     {
@@ -831,11 +838,14 @@ formOutcome
         if(idAssign) {
         	r.identityAssignment = idAssign.destination;
         }
+        if(sequence && sequence.length) {
+            r.sequenceAssignment = sequence.map(v => v.destination);
+        }
         return r;
     }
 
 formOutcomeStateSet
- 	= ws "," ws "state" ws ":"
+ 	= ws ","? ws "state" ws ":"
     begin_object
     first:formOutcomeStateKeyValuePair?
     rest:("," value:formOutcomeStateKeyValuePair {return value})*
@@ -872,8 +882,15 @@ formOutcomeStateEnumValue
     	return {type:"enum", value:value};
     }
 
+formOutcomeSequenceAssignment
+	= ws ","? ws "sequence" ws "=>" ws dest:propName
+    {
+    	return {type:"sequence-assign", destination:dest};
+    }
+
+
 formOutcomeIdentityAssignment
-	= ws "identity" ws "=>" ws dest:propName
+	= ws ","? ws "identity" ws "=>" ws dest:propName
     {
     	return {type:"identity-assign", destination:dest};
     }
