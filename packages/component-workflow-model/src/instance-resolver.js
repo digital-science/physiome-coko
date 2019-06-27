@@ -712,9 +712,6 @@ InstanceResolver.prototype.completeTask = async function completeTask({id, taskI
         throw new UserInputError("Complete Task requires an instance id, task id, form and outcome to be supplied");
     }
 
-    console.log("form : " + form);
-    console.log("outcome : " + outcome);
-
     const formDefinition = this.taskDef.forms ? this.taskDef.forms.find(f => f.form === form) : null;
     if(!formDefinition) {
         throw new Error("Form is not defined for this instance type.");
@@ -724,9 +721,6 @@ InstanceResolver.prototype.completeTask = async function completeTask({id, taskI
     if(!outcomeDefinition) {
         throw new Error("Outcome is not defined within form definition for this instance type.");
     }
-
-    console.dir(formDefinition);
-    console.dir(outcomeDefinition);
 
     if(outcomeDefinition.result !== 'Complete') {
         throw new Error('Form outcome result type is not a complete task type.');
