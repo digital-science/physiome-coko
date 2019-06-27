@@ -1,7 +1,7 @@
 const { Identity } = require('./../shared-model/identity');
 const { filterModelElementsForRelations, filterModelElementsForOwnerFields,
         filterModelElementsForStates, filterModelElementsForListingFilters,
-        filterModelElementsForListingSortable } = require('./utils');
+        filterModelElementsForListingSortable, filterModelElementsForIdSequenceFields } = require('./utils');
 
 const { processInstanceService, processDefinitionService, taskService } = require('camunda-workflow-service');
 
@@ -56,6 +56,8 @@ function InstanceResolver(modelClass, taskDefinition, enums) {
     this.stateFields = filterModelElementsForStates(this.modelDef.elements, enums);
     this.listingFilterFields = filterModelElementsForListingFilters(this.modelDef.elements, enums);
     this.listingSortableFields = filterModelElementsForListingSortable(this.modelDef.elements, enums);
+
+    this.idSequenceFields = filterModelElementsForIdSequenceFields(this.modelDef.elements, enums);
 
     this.logPrefix = `[InstanceResolver/${taskDefinition.name}] `;
 }
@@ -679,6 +681,9 @@ InstanceResolver.prototype.tasksForInstance = async function(instance) {
 
 InstanceResolver.prototype.completeTaskForInstance = async function(instance, taskId, stateChanges) {
 
+    // Note: this complete task method is not hooked to a form definition, therefore any enforced state changes
+    // or submission ID assignment will not occur.
+
     const completeTaskOpts = {id: taskId};
     let didModify = false;
     const newVars = {};
@@ -811,13 +816,45 @@ InstanceResolver.prototype.completeTask = async function completeTask({id, taskI
         Object.assign(filteredState, overriddenValues);
     }
 
+
+    // If the outcome definition includes id sequence applications, then we apply those now as well. We iterate all id sequence fields
+    // and find matching fields associated with the outcome. For each we determine if the instance is missing a value for field, and
+    // of they are, we perform a raw SQL statement to generate a new ID from a defined sequence,
+
+    let didModify = false;
+
+    if(this.idSequenceFields && this.idSequenceFields.length
+        && outcomeDefinition.sequenceAssignment && outcomeDefinition.sequenceAssignment.length) {
+
+        const idSequencesToAssign = this.idSequenceFields.filter(f => {
+            return outcomeDefinition.sequenceAssignment.indexOf(f.field) !== -1 && !instance[f.field];
+        });
+
+        if(idSequencesToAssign.length) {
+
+            const allSequences = idSequencesToAssign.map(assignment => {
+
+                return instance.$knex().raw(`SELECT TO_CHAR(nextval('${assignment.idSequence}'::regclass),'"S"fm000000') as id;`).then(resp => {
+                    return {field:assignment.field, value:resp.rows[0].id};
+                });
+            });
+
+            const r = await Promise.all(allSequences);
+
+            r.forEach(a => {
+                instance[a.field] = a.value;
+                didModify = true;
+            });
+        }
+    }
+
+
     // If we have a state update to apply to the instance, then we can do this here and now.
     // The final state changes here are the user supplied states changes filtered down to fields which are marked
     // as state, which the user has access to and then any forced state changes applied over top.
 
     if(filteredState && Object.keys(filteredState).length) {
 
-        let didModify = false;
         const newVars = {};
 
         Object.keys(filteredState).forEach(key => {
@@ -835,9 +872,13 @@ InstanceResolver.prototype.completeTask = async function completeTask({id, taskI
         });
 
         completeTaskOpts.variables = newVars;
-        if(didModify) {
-            await instance.save();
-        }
+    }
+
+    // Save any changes to the instance itself from the above processes (client state changes, overlaid forced
+    // state changes and id sequence application).
+
+    if(didModify) {
+        await instance.save();
     }
 
     return taskService.complete(completeTaskOpts).then(data => {

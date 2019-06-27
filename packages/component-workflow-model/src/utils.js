@@ -72,6 +72,17 @@ exports.filterModelElementsForOwnerFields = function _filterModelElementsForOwne
 };
 
 
+exports.filterModelElementsForIdSequenceFields = function _filterModelElementsForIdSequenceFields(elements) {
+
+    return elements.filter(element => {
+        return (element.idSequence);
+    });
+};
+
+
+
+
+
 
 function lowerCaseFirstLetter(string) {
     return string.charAt(0).toLowerCase() + string.slice(1);
