@@ -6,24 +6,27 @@ import { useMemo } from 'react';
 function _generateGraphQL(instanceType) {
     const instanceTypeName = instanceType.name;
     return gql`
-        mutation CompleteInstanceTask($id:ID, $taskId:ID, $state:${instanceTypeName}StateInput) {
-          complete: completeTaskFor${instanceTypeName}(id:$id, taskId:$taskId, state:$state)
+        mutation CompleteInstanceTask($id:ID!, $taskId:ID!, $form:String!, $outcome:String!, $state:${instanceTypeName}StateInput) {
+          complete: completeTaskFor${instanceTypeName}(id:$id, taskId:$taskId, form:$form, outcome:$outcome, state:$state)
         }
     `;
 }
 
+//form:String!, outcome:String!
 
 export default (instanceType, opts = {}) => {
 
     const completeInstanceTaskMutation = useMemo(() => _generateGraphQL(instanceType), [instanceType, instanceType.name]);
     const mutation = useMutation(completeInstanceTaskMutation);
 
-    return function wrappedCompleteInstanceTaskMutation(id, taskId, state) {
+    return function wrappedCompleteInstanceTaskMutation(id, taskId, form, outcome, state) {
 
         const combinedOpts = Object.assign({}, opts);
         combinedOpts.variables = {
             id,
             taskId,
+            form,
+            outcome,
             state: state || {}
         };
 

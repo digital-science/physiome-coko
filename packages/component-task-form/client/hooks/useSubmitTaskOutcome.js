@@ -42,7 +42,7 @@ export default  function useSubmitTaskOutcome(instanceId, formDefinition, instan
 
             return saveInstanceData().then(() => {
 
-                return completeInstanceTask(instanceId, taskId, state);
+                return completeInstanceTask(instanceId, taskId, formDefinition.name, outcome.type, state);
 
             }).then(result => {
 
