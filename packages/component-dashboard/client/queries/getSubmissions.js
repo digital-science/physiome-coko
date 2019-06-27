@@ -20,6 +20,7 @@ export default (filter, sorting, opts = {}) => {
 query GetSubmissions($filter:SubmissionListingFilterInput, $sorting:SubmissionListingSortingInput) {
   submissions: submissions(filter:$filter, sorting:$sorting) {
     id
+    manuscriptId
     title
     authors
     phase

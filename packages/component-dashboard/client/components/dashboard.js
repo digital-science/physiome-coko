@@ -103,6 +103,10 @@ const DashboardTable = styled.table`
     .status {
         width: 110px;
     }
+    
+    .manuscript_id {
+        width: 60px;
+    }
 
 `;
 
@@ -180,6 +184,7 @@ function Dashboard(props) {
             <DashboardTable>
                 <thead>
                     <tr className="heading">
+                        <th className="small manuscript_id">ID</th>
                         <th>Submission Title</th>
                         <th className="small">Date</th>
                         <th className="small status">Status</th>
@@ -192,7 +197,7 @@ function Dashboard(props) {
                 <tbody>
                     {loading ? (
                         <tr>
-                            <td colSpan={5}>
+                            <td colSpan={6}>
                                 <Spinner center={true} />
                             </td>
                         </tr>) : null
@@ -200,7 +205,7 @@ function Dashboard(props) {
 
                     {error ? (
                         <tr>
-                            <td colSpan={5}>
+                            <td colSpan={6}>
                                 An error occurred while loading the active award submissions.
                             </td>
                         </tr>) : null
@@ -299,6 +304,16 @@ const TitleColumn = styled.td`
 `;
 
 
+const ManuscriptIDColumn = styled.td`
+  > a {
+      color: initial;
+  }
+  > a:visited {
+      color: initial;
+  }
+`;
+
+
 const IdentityColumn = styled.td`
   > span.no-identity {
       font-style: italic;
@@ -339,19 +354,21 @@ function ActiveSubmissionTableRow({submission, workflowDescription, claimSubmiss
         });
     };
 
-    const title = submission.title ? <LineLimitedText>{submission.title}</LineLimitedText> : <span>No title supplied</span>;
+    const title = submission.title ? <LineLimitedText>{submission.title}</LineLimitedText> : <React.Fragment><span>No title supplied</span></React.Fragment>;
     let linkedTitle;
 
-    if(submissionTask) {
-        linkedTitle = <Link to={`/submission/${submission.id}`}>{title}</Link>;
-    } else {
-        linkedTitle = <Link to={`/details/${submission.id}`}>{title}</Link>;
-    }
+    const linkElement = (el) => {
+        return submissionTask ? <Link to={`/submission/${submission.id}`}>{el}</Link> : <Link to={`/details/${submission.id}`}>{el}</Link>;
+    };
+
 
     return (
         <SubmissionRow>
+            <ManuscriptIDColumn className="small manuscript_id">
+                {linkElement(submission.manuscriptId ? submission.manuscriptId : <span>-</span>)}
+            </ManuscriptIDColumn>
             <TitleColumn className={`title ${!submission.title ? "no-title" : ""}`}>
-                {linkedTitle}
+                {linkElement(title)}
                 {submission.authors && submission.authors instanceof Array && submission.authors.length ?
                     <AuthorListing>
                         {(submission.authors.map((a, i) => <li key={i}>{a.name}</li>))}
