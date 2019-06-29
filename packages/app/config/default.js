@@ -25,17 +25,10 @@ const values = {
     publicKeys: ['pubsweet-client', 'authsome', 'validations', 'orcid-paths', 'stripe-publishable-key'],
 
     authsome: {
-        mode: path.resolve(__dirname, 'authsome-mode.js'),
-        teams: {
-            handlingEditor: {
-                name: 'Handling Editors'
-            },
-            reviewer: {
-                name: 'Reviewer'
-            }
-        }
+        mode: path.resolve(__dirname, 'authsome-mode.js')
     },
     validations: path.resolve(__dirname, 'validations.js'),
+    
     pubsweet: {
         components
     },
@@ -58,6 +51,9 @@ const values = {
         baseUrl: process.env.CLIENT_BASE_URL || 'http://localhost:3000',
         'login-redirect': '/',
         theme: process.env.PUBSWEET_THEME
+    },
+    identity: {
+        validationTokenExpireDays: 15
     },
     orcid: {
         clientID: process.env.ORCID_CLIENT_ID,
@@ -109,10 +105,10 @@ const values = {
         prefix: '[DEV] ',
         templateDirectory: `${__dirname}/../../../definitions/email-templates`,
         restrictedEmailAddresses: [
-            'j.watts@digital-science.com',
-            's.porter@digital-science.com',
-            't.kuznetsova@digital-science.com',
-            's.grimme@digital-science.com'
+            "jaredwatts@gmail.com",
+            /^.+@digital-science\.com$/i,
+            /^.+@auckland\.ac\.nz$/i,
+            /^.+@coko\.foundation/i
         ]
     },
     dimensions: {
