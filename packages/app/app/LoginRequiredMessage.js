@@ -53,6 +53,7 @@ const LoginToBeginHolder = styled.div`
   margin: auto auto;
   background: white;
   padding: 40px;
+  box-shadow: 3px 3px 8px 2px #00000026;
   
   > p {
     font-family: QuicksandRegular, sans-serif;
