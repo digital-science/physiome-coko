@@ -96,3 +96,40 @@ const SmallInlineButton = styled(InlineButton)`
 `;
 
 export { InlineButton, SmallInlineButton };
+
+
+
+const PrimaryInlineButton = styled(InlineButton)`
+
+  &.bordered { 
+    font-size: 16px;
+    padding: 8px 14px;
+    background: #1397ff;
+    color: white;
+    border-color: #3ba8ff;
+  }
+  
+  &.bordered :hover {
+    background: #1377d5;
+  }
+`;
+
+const SmallPrimaryInlineButton = styled(SmallInlineButton)`
+
+  &.bordered { 
+    font-size: 14px;
+    padding: 6px 12px;
+    background: #1397ff;
+    color: white;
+    border-color: #3ba8ff; 
+  }
+  
+  &.bordered:hover {
+    background: #1377d5;
+  }
+`;
+
+
+
+
+export { PrimaryInlineButton, SmallPrimaryInlineButton };
