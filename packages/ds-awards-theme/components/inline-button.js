@@ -109,7 +109,7 @@ const PrimaryInlineButton = styled(InlineButton)`
     border-color: #3ba8ff;
   }
   
-  &.bordered :hover {
+  &.bordered:hover {
     background: #1377d5;
   }
 `;
