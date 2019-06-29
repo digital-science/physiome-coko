@@ -9,8 +9,19 @@ type CurrentUser {
     emailValidationTokenExpire: DateTime
 }
 
+enum CurrentUserEmailValidationOutcome {
+    Successful
+    InvalidToken
+    ExpiredToken
+}
+
+type CurrentUserResult {
+    user: CurrentUser
+    emailValidationTokenOutcome: CurrentUserEmailValidationOutcome
+}
+
 extend type Query {
-    currentUser : CurrentUser
+    currentUser(emailValidationToken: String) : CurrentUserResult
 }
 
 extend type Mutation {

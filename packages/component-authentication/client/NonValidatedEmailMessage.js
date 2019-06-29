@@ -1,35 +1,30 @@
 import React, { useState } from "react";
 import styled from 'styled-components';
 
-import { SmallInlineButton } from 'ds-awards-theme/components/inline-button';
+import UserMessageHolder from './UserMessageHolder';
+
+import { SmallPrimaryInlineButton } from 'ds-awards-theme/components/inline-button';
 import { SmallTextInput } from 'ds-awards-theme/components/text-input';
 
 
 const _NonValidatedEmailAddressMessage = ({className}) => {
 
     return (
-        <div className={className}>
-            <div>Your email address has not been validated yet. Please check your emails for a validation code/link.</div>
+        <UserMessageHolder className={className}>
+            <div>Your email address has not been validated yet. Please check your email for a validation link.</div>
             <div>
-                <div className="validation">
+                {/*<div className="validation">
                     <SmallTextInput></SmallTextInput>
-                    <SmallInlineButton bordered={true}>Validate</SmallInlineButton>
-                </div>
+                    <SmallPrimaryInlineButton bordered={true}>Validate</SmallPrimaryInlineButton>
+                </div>*/}
 
-                <SmallInlineButton bordered={true}>Resend Code</SmallInlineButton>
+                <SmallPrimaryInlineButton bordered={true}>Resend Code</SmallPrimaryInlineButton>
             </div>
-        </div>
+        </UserMessageHolder>
     );
 };
 
-const NonValidatedEmailAddressMessage = styled(_NonValidatedEmailAddressMessage)`
-  font-family: QuicksandRegular,sans-serif;
-  background: white;
-  padding: 10px 15px;
-  box-shadow: 0 4px 4px 4px #0000000d;
-  border-top: 1px solid #ebebeb;
-  font-size: 16px;
-    
+const NonValidatedEmailAddressMessage = styled(_NonValidatedEmailAddressMessage)`    
   display: flex;
   flex-wrap: nowrap;
   justify-content: space-between;
@@ -43,18 +38,6 @@ const NonValidatedEmailAddressMessage = styled(_NonValidatedEmailAddressMessage)
     margin-left: 15px;
   }
     
-  & ${SmallInlineButton} {
-    font-size: 14px;
-    padding: 6px 12px;
-    background: #1397ff;
-    color: white;
-    border-color: #3ba8ff;
-  }
-  
-  & ${SmallInlineButton}:hover {
-    background: #1377d5;
-  }
-  
   & > div > div.validation {
     margin-right: 15px;
     display: flex;

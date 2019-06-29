@@ -2,9 +2,19 @@ const { models } = require('component-workflow-model/model');
 const { Identity } = models;
 const config = require('config');
 
+const { createEmailValidationForIdentity } = require('./emailValidation');
+
 async function lookupIdentity(userId) {
     return await Identity.findOneByField('id', userId);
 }
+
+const CurrentUserEmailValidationOutcome = {
+    Successful: 'Successful',
+    InvalidToken: 'InvalidToken',
+    ExpiredToken: 'ExpiredToken'
+};
+
+
 
 module.exports = {
 
@@ -16,36 +26,74 @@ module.exports = {
                 return null;
             }
 
-            return lookupIdentity(context.user).then(identity => {
+            return lookupIdentity(context.user).then(async identity => {
 
                 if(!identity) {
                     return null;
                 }
 
-                const r = {
+                console.dir(identity);
+
+
+                let emailValidationTokenOutcome = null;
+                const user = {
                     id:identity.id,
                     username:identity.displayName,
                     groups:["administrator"],  // FIXME: hard-coded for testing purposes currently
 
                     email:identity.email,
-                    emailIsValidated:!!identity.emailIsValidated,
+                    emailIsValidated:!!identity.isValidatedEmail,
                     hasPendingEmailValidation: false
                 };
 
-                if(!r.emailIsValidated && identity.emailValidationToken && identity.emailValidationTokenExpire) {
+                if(!user.emailIsValidated && identity.emailValidationToken && identity.emailValidationTokenExpire) {
 
                     const expireDate = new Date(identity.emailValidationTokenExpire);
                     const currentDate = new Date();
 
-                    r.hasPendingValidation = currentDate.getTime() < expireDate.getTime();
-                    r.emailValidationTokenExpire = identity.emailValidationTokenExpire;
+                    user.hasPendingValidation = currentDate.getTime() < expireDate.getTime();
+                    user.emailValidationTokenExpire = identity.emailValidationTokenExpire;
 
                 } else {
 
-                    r.emailValidationTokenExpire = null;
+                    user.emailValidationTokenExpire = null;
                 }
 
-                return r;
+                const { emailValidationToken } = args;
+
+                if(user.emailIsValidated !== true && emailValidationToken && emailValidationToken.length
+                    && typeof emailValidationToken === 'string' && emailValidationToken.match(/^[0-9]+$/)) {
+
+                    if(`${identity.emailValidationToken}` === emailValidationToken) {
+
+                        if(user.hasPendingValidation) {
+
+                            user.emailIsValidated = true;
+                            user.hasPendingValidation = false;
+
+                            identity.isValidatedEmail = true;
+                            identity.emailValidationToken = null;
+                            identity.emailValidationTokenExpire = null;
+
+                            await identity.save();
+
+                            emailValidationTokenOutcome = CurrentUserEmailValidationOutcome.Successful;
+
+                        } else {
+
+                            // What do we do in this situation, automatically create a new token and re-send it?
+                            emailValidationTokenOutcome = CurrentUserEmailValidationOutcome.ExpiredToken;
+                            await createEmailValidationForIdentity(identity);
+                        }
+
+                    } else {
+
+                        emailValidationTokenOutcome = CurrentUserEmailValidationOutcome.InvalidToken;
+                        await createEmailValidationForIdentity(identity);
+                    }
+                }
+
+                return {user, emailValidationTokenOutcome};
             });
         }
     },
@@ -65,15 +113,8 @@ module.exports = {
                 }
 
                 identity.email = args.email;
-                identity.isValidatedEmail = false;
-                identity.emailValidationToken = `${Math.floor(100000 + Math.random() * 900000)}`;
-                identity.emailValidationTokenExpire = new Date((new Date()).getTime() + (config.get('identity.validationTokenExpireDays') || 15) * 86400000 );
-
-                await identity.save();
-
-                // send an email off which has a link included for the token...
-
-                return false;
+                await createEmailValidationForIdentity(identity);
+                return true;
             });
         }
     }

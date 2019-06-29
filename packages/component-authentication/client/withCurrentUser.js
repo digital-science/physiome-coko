@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import gql from 'graphql-tag';
 import { useQuery } from 'react-apollo-hooks';
 
-export default (active, opts = {}) => {
+export default (emailValidationToken = null, opts = {}) => {
 
     const queryOptions = {
         suspend: false
@@ -12,20 +12,23 @@ export default (active, opts = {}) => {
     Object.assign(queryOptions, opts);
     Object.assign(queryOptions, {
         variables: {
-            active
+            emailValidationToken
         }
     });
 
     const getCurrentUser = gql`
-query {
-  currentUser {
-    id
-    username
-    groups
-    email
-    emailIsValidated
-    hasPendingEmailValidation
-    emailValidationTokenExpire
+query CurrentUser($emailValidationToken:String) {
+  currentUser(emailValidationToken:$emailValidationToken) {
+    user {
+      id
+      username
+      groups
+      email
+      emailIsValidated
+      hasPendingEmailValidation
+      emailValidationTokenExpire
+    }
+    emailValidationTokenOutcome
   }
 }`;
 
@@ -45,8 +48,9 @@ query {
         };
     });
 
-    if(r.data) {
-        r.currentUser = r.data.currentUser;
+    if(r.data && r.data.currentUser) {
+        r.currentUser = r.data.currentUser.user;
+        r.emailValidationTokenOutcome = r.data.currentUser.emailValidationTokenOutcome || null;
     }
     return r;
 };

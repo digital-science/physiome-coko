@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 import { BlockLabel } from 'ds-awards-theme/components/label';
 import { TextInput } from 'ds-awards-theme/components/text-input';
-import { InlineButton } from 'ds-awards-theme/components/inline-button';
+import { PrimaryInlineButton } from 'ds-awards-theme/components/inline-button';
 
 import withConfirmCurrentUserEmail from 'component-authentication/client/withConfirmCurrentUserEmail';
 
@@ -39,7 +39,7 @@ const LoginEmailRequiredMessage = styled(({className, currentUser, refetchUser})
                     <TextInput value={emailAddress} onChange={onChangeEmail} />
                 </div>
                 <div className="confirm">
-                    <InlineButton bordered={true} onClick={confirmEmailAddress}>Confirm Email Address</InlineButton>
+                    <PrimaryInlineButton bordered={true} onClick={confirmEmailAddress}>Confirm Email Address</PrimaryInlineButton>
                 </div>
             </ProvideEmailMessageHolder>
         </EmailRequiredHolder>
@@ -82,18 +82,6 @@ const ProvideEmailMessageHolder = styled.div`
   & > div.confirm {
     margin-top: 30px;
     text-align: center;
-  }
-  
-  & ${InlineButton} {
-    font-size: 16px;
-    padding: 8px 14px;
-    background: #1397ff;
-    color: white;
-    border-color: #3ba8ff;
-  }
-  
-  & ${InlineButton}:hover {
-    background: #1377d5;
   }
 `;
 
