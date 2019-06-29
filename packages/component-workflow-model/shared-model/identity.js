@@ -17,67 +17,22 @@ class Identity extends BaseModel {
                 displayName: { type: ['string', 'null'] },
                 displayAffiliation: { type: ['string', 'null'] },
 
-                accessToken: { type: ['string', 'null'] },
-                refreshToken: { type: ['string', 'null'] },
-                accessScope: { type: ['string', 'null'] },
-                accessTokenExpire: { type: ['integer', 'null'] },
+                email: { type: ['string', 'null'] },
+                isValidatedEmail: { type: ['boolean', 'null'] },
+                emailValidationToken: { type: ['string', 'null'] },
+                emailValidationTokenExpire: { type:['string', 'object', 'null'], format:'date-time' },
 
-                groups: { type:['object', 'null'] }
+                tokens: { type:['object', 'null'] },
+                groups: { type:['object', 'null'] },
+
+                lastLoginDate: { type:['string', 'object', 'null'], format:'date-time' }
             }
         };
     }
 }
 
 
-
-async function createIdentity(context, { input }) {
-
-    const identity = new Identity({
-        created: new Date().toISOString(),
-        updated: new Date().toISOString(),
-        ...input
-    });
-
-    await identity.save();
-
-    return identity.id;
-}
-
-async function updateIdentity(context, { input }) {
-
-    if(!input.id) {
-        return false;
-    }
-
-    const identity = await Identity.find(input.id);
-    if(!identity) {
-        return false;
-    }
-
-    Object.keys(input).forEach(key => {
-        if(key !== 'id') {
-            identity[key] = input[key];
-        }
-    });
-
-    await identity.save();
-    return true;
-}
-
-async function getIdentity(context, { id }) {
-
-    return await Identity.find(id);
-}
-
-
 exports.resolvers = {
-    Query: {
-        getIdentity
-    },
-    Mutation: {
-        createIdentity,
-        updateIdentity
-    },
     IdentityType: {
         ORCiDIdentityType: "orcid"
     }

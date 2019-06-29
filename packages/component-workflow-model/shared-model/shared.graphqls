@@ -161,39 +161,10 @@ type Identity {
     displayName: String
     displayAffiliation: String
 
-    accessToken: String
-    refreshToken: String
-    accessScope: String
-    accessTokenExpire: Int
+    email: String
+    emailIsValidated: Boolean
+    emailValidationToken: String
+    emailValidationTokenExpire: DateTime
 
     groups: JSON
-}
-
-input CreateIdentityInput {
-    type: IdentityType
-
-    identityId: String
-
-    displayName: String
-    displayAffiliation: String
-
-    accessToken: String
-    refreshToken: String
-    accessScope: String
-    accessTokenExpire: Int
-}
-
-input UpdateIdentityInput {
-    id: ID!
-    displayName: String
-    displayAffiliation: String
-}
-
-extend type Query {
-    getIdentity(id: ID) : Identity
-}
-
-extend type Mutation {
-    createIdentity(input:CreateIdentityInput) : ID
-    updateIdentity(input:UpdateIdentityInput) : Boolean
 }
