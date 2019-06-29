@@ -22,6 +22,10 @@ query {
     id
     username
     groups
+    email
+    emailIsValidated
+    hasPendingEmailValidation
+    emailValidationTokenExpire
   }
 }`;
 
