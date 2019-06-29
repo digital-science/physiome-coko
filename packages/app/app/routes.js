@@ -6,39 +6,36 @@ import Index from './Index';
 import SubmissionTaskForm from './SubmissionTaskForm';
 import SubmissionDetailsPage from './SubmissionDetails';
 
-import LoginRequiredRoute from './LoginRequiredRoute';
+import LoginRequiredRoute from 'component-authentication/client/LoginRequiredRoute';
 
+
+const renderAppDefault = (children) => <SubmissionApp>{children}</SubmissionApp>;
+const renderAppHideSidebar = (children) => <SubmissionApp hideSidebar={true}>{children}</SubmissionApp>;
 
 const Routes = () => (
 
     <Switch>
         <Route path="/submission/:instanceId" render={props=> {
             return (
-                <SubmissionApp hideSidebar={true}>
-                    <LoginRequiredRoute message="You must login before being able to finish submitting details of your in-progress submission. Login using your ORCID credentials.">
-                        <SubmissionTaskForm {...props} />
-                    </LoginRequiredRoute>
-                </SubmissionApp>
-            )
+                <LoginRequiredRoute message="You must login before being able to finish submitting details of your in-progress submission. Login using your ORCID credentials." renderApplication={renderAppHideSidebar}>
+                    <SubmissionTaskForm {...props} />
+                </LoginRequiredRoute>
+            );
         }} />
 
         <Route path="/details/:instanceId" render={props=> {
             return (
-                <SubmissionApp>
-                    <LoginRequiredRoute message="You must login to be able to view details of the requested submission. Login using your ORCID credentials.">
-                        <SubmissionDetailsPage {...props} />
-                    </LoginRequiredRoute>
-                </SubmissionApp>
-            )
+                <LoginRequiredRoute message="You must login to be able to view details of the requested submission. Login using your ORCID credentials." renderApplication={renderAppDefault}>
+                    <SubmissionDetailsPage {...props} />
+                </LoginRequiredRoute>
+            );
         }} />
 
         <Route path="/" render={props => {
             return (
-                <SubmissionApp>
-                    <LoginRequiredRoute message="To start a new submission please login using your ORCID ID.">
-                        <Index history={props.history} />
-                    </LoginRequiredRoute>
-                </SubmissionApp>
+                <LoginRequiredRoute message="To start a new submission please login using your ORCID ID." renderApplication={renderAppDefault}>
+                    <Index history={props.history} />
+                </LoginRequiredRoute>
             );
         }} />
 

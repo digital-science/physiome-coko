@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
 
 import PersonIcon from 'ds-awards-theme/static/person.svg';
 
 import useCurrentUser from 'component-authentication/client/withCurrentUser';
+import AuthenticatedUserContext from 'component-authentication/client/AuthenticatedUserContext';
 
 
 const Header = styled.header`
@@ -60,15 +61,9 @@ const BaseHeader = ({children}) => {
 
 export default ({hideUser=false}) => {
 
-    const { currentUser, error, loading } = useCurrentUser();
+    const currentUser = useContext(AuthenticatedUserContext);
 
     if(hideUser) {
-        return (
-            <BaseHeader />
-        );
-    }
-
-    if(error || loading) {
         return (
             <BaseHeader />
         );
