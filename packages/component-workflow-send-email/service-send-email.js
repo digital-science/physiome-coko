@@ -50,22 +50,26 @@ class EmailSendService {
             }
 
             const restrictedTo = this.restrictedSendToAddress;
-            const isRestrictedEmail = function(email) {
+            const isUnrestrictedEmail = function(email) {
                 const e = email.toLowerCase();
                 for(let i = 0; i < restrictedTo.length; i++) {
 
                     const restriction = restrictedTo[i];
+                    const emailParts = e.trim().match(/^.+\<(.*)\>$/);
 
                     if(restriction instanceof RegExp) {
-                        return !!e.match(restriction);
+
+                        return emailParts ? emailParts[1].match(restriction) : !!e.match(restriction);
+
                     } else if(typeof restriction === "string") {
-                        return e === restriction;
+
+                        return emailParts ? emailParts[1] === restriction : e === restriction;
                     }
                 }
                 return false;
             };
 
-            newOpts.to = newOpts.to.filter(email => isRestrictedEmail(email));
+            newOpts.to = newOpts.to.filter(email => isUnrestrictedEmail(email));
             if(!newOpts.to.length) {
                 return Promise.reject(new Error("Unable to send email, as all addresses being sent to are not allowed."));
             }
