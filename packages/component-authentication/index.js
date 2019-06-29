@@ -9,7 +9,7 @@ module.exports = {
     resolvers,
     server: () => configurePassport,
     typeDefs: fs.readFileSync(
-        path.join(__dirname, '/server/defs.graphqls'),
+        path.join(__dirname, '/server/service.graphqls'),
         'utf8',
     ),
 };

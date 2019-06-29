@@ -85,6 +85,13 @@ async function _findOrCreateUser(profile) {
         return existingIdentity;
     }
 
+    const orcidTokens = {
+        accessToken: profile.accessToken,
+        refreshToken: profile.refreshToken,
+        accessScope: profile.scope,
+        accessTokenExpire: profile.expiry
+    };
+
     const newIdentity = new Identity({
         created: new Date().toISOString(),
         updated: new Date().toISOString(),
@@ -93,10 +100,13 @@ async function _findOrCreateUser(profile) {
         identityId: profile.orcid,
         displayName: profile.name,
 
-        accessToken: profile.accessToken,
-        refreshToken: profile.refreshToken,
-        accessScope: profile.scope,
-        accessTokenExpire: profile.expiry
+        email: null,
+        isValidatedEmail: false,
+        emailValidationToken: null,
+        emailValidationTokenExpire: null,
+
+        groups: null,
+        tokens: orcidTokens
     });
 
     try {

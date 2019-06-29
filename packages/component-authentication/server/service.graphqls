@@ -1,0 +1,18 @@
+type CurrentUser {
+    id: String
+    username: String
+    groups: [String!]
+
+    email: String
+    emailIsValidated: Boolean!
+    hasPendingEmailValidation: Boolean!
+    emailValidationTokenExpire: DateTime
+}
+
+extend type Query {
+    currentUser : CurrentUser
+}
+
+extend type Mutation {
+    confirmCurrentUserEmail(email: String!) : Boolean
+}
