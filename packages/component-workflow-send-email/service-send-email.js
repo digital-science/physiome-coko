@@ -53,8 +53,13 @@ class EmailSendService {
             const isRestrictedEmail = function(email) {
                 const e = email.toLowerCase();
                 for(let i = 0; i < restrictedTo.length; i++) {
-                    if(e.indexOf(restrictedTo[i]) !== -1) {
-                        return true;
+
+                    const restriction = restrictedTo[i];
+
+                    if(restriction instanceof RegExp) {
+                        return !!e.match(restriction);
+                    } else if(typeof restriction === "string") {
+                        return e === restriction;
                     }
                 }
                 return false;
