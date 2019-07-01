@@ -25,8 +25,10 @@ function WorkflowTaskFormHero({ match, history, children }) {
 
     return (
         <WorkflowTaskFormHeroHolder>
-            <WorkflowHeroPageHeadingHolder>
+            <WorkflowHeroPageHeadingHolder className="message-holder">
                 {children}
+            </WorkflowHeroPageHeadingHolder>
+            <WorkflowHeroPageHeadingHolder>
                 {heading ? <WorkflowHeroHeading>{heading}</WorkflowHeroHeading> : null}
             </WorkflowHeroPageHeadingHolder>
 
@@ -46,6 +48,10 @@ const WorkflowTaskFormHeroHolder = styled.div`
   background: white;
   min-height: calc(100vh - 68px);
   box-sizing: border-box;
+  
+  & > ${WorkflowTaskFormHeroHolder}:first-child {
+      border-top: 2px solid #ebebeb;
+  }
 `;
 
 const WorkflowHeroHeading = styled.div`
@@ -61,8 +67,13 @@ const WorkflowHeroHeading = styled.div`
 `;
 
 const WorkflowHeroPageHeadingHolder = styled.div`
-  border-top: 2px solid #ebebeb;
   margin: -20px -20px 20px;
+  
+  &.message-holder {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
 `;
 
 
