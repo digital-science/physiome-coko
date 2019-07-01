@@ -325,7 +325,9 @@ instance Submission {
                 state: {
                     phase: SubmissionPhase.Submitted
                 },
-                sequence => manuscriptId
+                sequence => manuscriptId,
+
+                requiresValidatedSubmitter: true
             },
 
             { "save-for-later" => Save },
@@ -334,10 +336,7 @@ instance Submission {
                 "cancel" => Destroy,
                 state: {
                     phase: SubmissionPhase.Cancelled
-                },
-
-                confirmation:true,
-                message:"Are you sure you want to cancel this submission?"
+                }
             }
         ]
 
