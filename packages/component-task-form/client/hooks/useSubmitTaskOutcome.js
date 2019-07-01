@@ -1,12 +1,27 @@
+import React, { useContext } from 'react';
 import useCompleteInstanceTask from './../mutations/completeInstanceTask';
 import useDestroyInstance from './../mutations/destroyInstance';
+import AuthenticatedUserContext from 'component-authentication/client/AuthenticatedUserContext';
 
 
-export default  function useSubmitTaskOutcome(instanceId, formDefinition, instanceType, saveInstanceData, validateForm, wasSubmitted) {
+const SubmitTaskFailureReason = {
+    RequiresValidatedSubmitter: 'RequiresValidatedSubmitter',
+    FormValidationFailed: 'FormValidationFailed'
+};
+
+
+
+export default  function useSubmitTaskOutcome(instanceId, formDefinition, instanceType, saveInstanceData, validateForm, submitDidFail, wasSubmitted) {
 
     const completeInstanceTask = useCompleteInstanceTask(instanceType);
     const destroyInstance = useDestroyInstance(instanceType);
+    const currentUser = useContext(AuthenticatedUserContext);
 
+    const _submitDidFail = (reason) => {
+        return submitDidFail && submitDidFail(reason);
+    };
+
+    
     return (taskId, outcomeType, options) => {
 
         console.log("------");
@@ -30,10 +45,15 @@ export default  function useSubmitTaskOutcome(instanceId, formDefinition, instan
 
         if(outcome.result === "Complete") {
 
+            if(outcome.requiresValidatedSubmitter === true && (!currentUser || !currentUser.emailIsValidated)) {
+                return _submitDidFail(SubmitTaskFailureReason.RequiresValidatedSubmitter);
+            }
+
             if(validateForm && !validateForm()) {
                 console.log("form validation failed");
-                return;
+                return _submitDidFail(SubmitTaskFailureReason.FormValidationFailed);
             }
+
 
             const state = instanceType.filterObjectToStateVariables(outcome._graphqlState || {});
 
@@ -83,3 +103,5 @@ export default  function useSubmitTaskOutcome(instanceId, formDefinition, instan
         }
     };
 }
+
+export { SubmitTaskFailureReason };

@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 
-import useSubmitTaskOutcome from './useSubmitTaskOutcome';
+import useSubmitTaskOutcome, { SubmitTaskFailureReason } from './useSubmitTaskOutcome';
 
 import useGetInstanceQuery from './../queries/getInstance';
 import useUpdateInstance from './../mutations/updateInstance';
@@ -24,9 +24,9 @@ import debounce from "lodash/debounce";
  * */
 
 
-export default function useFormInstanceData({instanceId, taskId, taskName, instanceType, formDefinition, workflowDescription, wasSubmitted,
-                                             enableAutoSave=true, displayIsSavingMessage=null, removeIsSavingMessage=null}) {
-
+export default function useFormInstanceData({instanceId, taskId, taskName, instanceType, formDefinition, workflowDescription,
+                                             submitDidFail, wasSubmitted, enableAutoSave=true, displayIsSavingMessage=null,
+                                             removeIsSavingMessage=null}) {
 
     const { fetchFields, topLevelFields } = useMemo(() => {
         return resolveFieldsForFormElements(formDefinition.elements, instanceType, FieldRegistry);
@@ -71,7 +71,7 @@ export default function useFormInstanceData({instanceId, taskId, taskName, insta
         ]);
     }
 
-    const submitTaskOutcome = useSubmitTaskOutcome(instanceId, formDefinition, instanceType, _updateInstanceFromFormData, _validateForm, wasSubmitted);
+    const submitTaskOutcome = useSubmitTaskOutcome(instanceId, formDefinition, instanceType, _updateInstanceFromFormData, _validateForm, submitDidFail, wasSubmitted);
 
     const refetchFormData = () => {
         return refetch();
@@ -90,7 +90,7 @@ export default function useFormInstanceData({instanceId, taskId, taskName, insta
 
     useEffect(() => {
 
-        if(!formData) {
+        if(!formData || enableAutoSave !== true) {
             return;
         }
 
@@ -164,3 +164,5 @@ export default function useFormInstanceData({instanceId, taskId, taskName, insta
         fieldRegistry:FieldRegistry
     };
 };
+
+export { SubmitTaskFailureReason };
