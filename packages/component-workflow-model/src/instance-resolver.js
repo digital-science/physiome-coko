@@ -30,6 +30,13 @@ const AclActions = {
     Task: "task"
 };
 
+const CompleteTaskOutcome = {
+    Success: 'Success',
+    ValidatedEmailRequired: 'ValidatedEmailRequired'
+};
+
+
+
 const AdditionalAllowedGetFields = ['id', 'created', 'updated', 'tasks', 'restrictedFields'];
 
 let InstanceResolverContextLookupUniqueId = 1;
@@ -777,6 +784,20 @@ InstanceResolver.prototype.completeTask = async function completeTask({id, taskI
         }
     }
 
+
+    if(outcomeDefinition.requiresValidatedSubmitter === true) {
+
+        if(!user) {
+            throw new AuthorizationError("Task completion requires a validated submitter, no user authenticated.");
+        }
+
+        if(user.isValidatedEmail !== true) {
+            logger.debug(`unable to complete task as identity didn't have validated email address (instanceId = ${id}, taskId = ${id}, userId = ${user.id})`);
+            return CompleteTaskOutcome.ValidatedEmailRequired;
+        }
+    }
+
+
     const filteredTasks = (tasksAclMatch && tasksAclMatch.allowedTasks) ? tasks.filter(t => tasksAclMatch.allowedTasks.indexOf(t.taskDefinitionKey) !== -1) : tasks;
     if(!filteredTasks.length) {
         throw new AuthorizationError("You do not have access to the task associated with the instance.");
@@ -895,6 +916,7 @@ InstanceResolver.prototype.completeTask = async function completeTask({id, taskI
         completeTaskOpts.variables = newVars;
     }
 
+
     // Save any changes to the instance itself from the above processes (client state changes, overlaid forced
     // state changes and id sequence application).
 
@@ -908,7 +930,7 @@ InstanceResolver.prototype.completeTask = async function completeTask({id, taskI
 
     }).then(data => {
 
-        return true;
+        return CompleteTaskOutcome.Success;
 
     }).catch((err) => {
 

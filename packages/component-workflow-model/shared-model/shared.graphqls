@@ -39,6 +39,10 @@ input CompleteTaskVariableInput {
     value: JSON
 }
 
+enum CompleteTaskOutcome {
+    Success
+    ValidatedEmailRequired
+}
 
 
 #
