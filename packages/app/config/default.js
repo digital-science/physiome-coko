@@ -20,7 +20,9 @@ const getDbConfig = () => {
     return {};
 };
 
+
 const values = {
+
     // Public keys are copied into webpack build (i.e. go client-side)
     publicKeys: ['pubsweet-client', 'authsome', 'validations', 'orcid-paths', 'stripe-publishable-key'],
 
@@ -52,24 +54,6 @@ const values = {
         'login-redirect': '/',
         theme: process.env.PUBSWEET_THEME
     },
-    identity: {
-        validationTokenExpireDays: 15
-    },
-    orcid: {
-        clientID: process.env.ORCID_CLIENT_ID,
-        clientSecret: process.env.ORCID_CLIENT_SECRET,
-
-        orcidUrl: 'sandbox.orcid.org',
-        orcidDisplayUrl: 'orcid.org',
-
-        authenticatePath: '/orcid/authenticate',
-        callbackPath: '/orcid/callback',
-
-        associatePath: '/orcid/link',
-        associateCallbackPath: '/orcid/associate',
-
-        successPath: '/'
-    },
     'mail-transport': {
         sendmail: true
     },
@@ -89,10 +73,12 @@ const values = {
         secretKey: process.env.AWS_SES_SECRET_KEY,
         region: process.env.AWS_SES_REGION
     },
+
     workflow: {
         apiUri: process.env.WORKFLOW_API_URI || 'http://127.0.0.1:8080/engine-rest',
         deploymentName: 'physiome-submission'
     },
+
     'workflow-files': {
         fileIdentifierDomain: "physiome-submission-dev.ds-innovation-experiments.com",
         secretAccessKey: process.env.AWS_S3_SECRET_KEY,
@@ -100,9 +86,10 @@ const values = {
         region: process.env.AWS_S3_REGION,
         bucket: process.env.AWS_S3_BUCKET
     },
+
     'workflow-send-email' : {
-        from: 'jaredwatts@gmail.com',
-        prefix: '[DEV] ',
+        from: `Jared Watts <jaredwatts@gmail.com>`,
+        prefix: '[DEV] Physiome Journal - ',
         templateDirectory: `${__dirname}/../../../definitions/email-templates`,
         restrictedEmailAddresses: [
             "jaredwatts@gmail.com",
@@ -111,25 +98,54 @@ const values = {
             /^.+@coko\.foundation/i
         ]
     },
+
+    identity: {
+        validationTokenExpireDays: 15,
+        maximumEmailValidationsPerDay: 5
+    },
+
+    orcid: {
+        clientID: process.env.ORCID_CLIENT_ID,
+        clientSecret: process.env.ORCID_CLIENT_SECRET,
+
+        orcidUrl: 'sandbox.orcid.org',
+        orcidDisplayUrl: 'orcid.org',
+
+        authenticatePath: '/orcid/authenticate',
+        callbackPath: '/orcid/callback',
+
+        associatePath: '/orcid/link',
+        associateCallbackPath: '/orcid/associate',
+
+        successPath: '/'
+    },
+
     dimensions: {
         apiBaseUrl: process.env.DIMENSIONS_API_BASE || "https://app.dimensions.ai/api",
         apiUserName: process.env.DIMENSIONS_API_USERNAME,
         apiUserPassword: process.env.DIMENSIONS_API_PASSWORD
     },
+
     figshare: {
         apiBaseUrl: process.env.FIGSHARE_API_BASE,
         apiToken: process.env.FIGSHARE_API_TOKEN
     },
+
     stripe: {
         testing: (process.env.STRIPE_IS_PRODUCTION && process.env.STRIPE_IS_PRODUCTION.toString() !== "false"),
         secretKey: process.env.STRIPE_SECRET_KEY,
         publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
         webhookSecretKey: process.env.STRIPE_WEBHOOK_SECRET_KEY
     },
+
     logging: {
         debugAclRules: true
     }
 };
+
+
+// For values we want to expose to the front-end, which also happen to have private API keys defined as well
+// within the same config set, extract those into a completely separate config key area.
 
 values['orcid-paths'] = {
     orcidUrl: values.orcid.orcidUrl,
