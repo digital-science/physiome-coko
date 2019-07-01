@@ -41,9 +41,6 @@ module.exports = {
                     return null;
                 }
 
-                console.dir(identity);
-
-
                 let emailValidationTokenOutcome = null;
                 const user = {
                     id:identity.id,
@@ -149,9 +146,6 @@ function confirmUserEmailAddress(user, newEmailAddress = null) {
 
         // If the user is setting a  new email address and it doesn't match the minimal regex, reject it.
         if(newEmailAddress) {
-
-            console.log(newEmailAddress);
-            console.dir(newEmailAddress.match(MinimalEmailRegex));
 
             if(!(newEmailAddress.match(MinimalEmailRegex))) {
                 return CurrentUserEmailConfirmationOutcome.InvalidEmailAddress;

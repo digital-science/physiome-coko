@@ -67,10 +67,7 @@ exports.createEmailValidationForIdentity = async function(identity, resend = fal
         subject: "Email Address Confirmation",
         text: EmailValidationEmailTemplate.template({user:identity, validateLink, validationCode})
     };
-
-    console.log("email to send >>");
-    console.dir(email);
-
+    
     // Note: email is sent async
     const sendEmail = ServiceSendEmail.sendEmail(email).catch(err => {
 
