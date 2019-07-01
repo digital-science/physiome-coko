@@ -25,10 +25,6 @@ module.exports = function _setupEmailInitialSubmissionTask(client) {
             return;
         }
 
-        // FIXME: shift this into a task completion extra data stage...
-        submission.submissionDate = new Date();
-        await submission.save();
-
         const user = submission.submitter;
         const data = {submission, user};
 

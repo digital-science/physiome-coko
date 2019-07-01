@@ -111,11 +111,11 @@ instance Submission {
     	    kind, title, abstract, primaryPapers, authors, funding,
     	    pmrWorkspace, keywords, iupsCommission,
     	    articleFiles, supplementaryFiles,
-            priceAcknowledged, submissionDate
+            priceAcknowledged
         }
 
         fields "read-only" {
-            phase, manuscriptId
+            phase, manuscriptId, submissionDate
         }
 
         fields "curation" {
@@ -328,6 +328,7 @@ instance Submission {
                     phase: SubmissionPhase.Submitted
                 },
                 sequence => manuscriptId,
+                assign_date => submissionDate = current(),
 
                 requiresValidatedSubmitter: true
             },
