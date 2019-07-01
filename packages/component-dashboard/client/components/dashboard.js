@@ -148,6 +148,7 @@ function Dashboard(props) {
     const filter = {
         phase: [
             "Pending",
+            "Saved",
             "Submitted",
             "Decision",
             "Payment",

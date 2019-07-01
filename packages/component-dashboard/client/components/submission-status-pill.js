@@ -7,6 +7,7 @@ const SubmissionStatusMapping = {
 
 const SubmissionStatus = {
     Pending: 'Pending',
+    Saved: 'Saved',
     Submitted: 'Submitted',
     Checking: 'Checking',
     Decision: 'Decision',
@@ -21,6 +22,11 @@ const SubmissionStatus = {
 SubmissionStatusMapping[SubmissionStatus.Pending] = {
     text:"Pending",
     className: "pending"
+};
+
+SubmissionStatusMapping[SubmissionStatus.Saved] = {
+    text:"Saved for Later",
+    className: "saved"
 };
 
 SubmissionStatusMapping[SubmissionStatus.Submitted] = {
@@ -101,6 +107,7 @@ const SubmissionStatusPill = styled(_SubmissionStatusPill)`
     letter-spacing: 0.05em;
     
     &.pending,
+    &.saved,
     &.on-hold {
         border: 1px solid #505050;
         color: #505050;
