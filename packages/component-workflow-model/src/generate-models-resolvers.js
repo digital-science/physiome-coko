@@ -178,6 +178,12 @@ function createModelForTask(task, enums, lookupModel) {
             }
 
 
+            userToAclTargets(user) {
+                const [aclTargets, _] = this.constructor.instanceResolver.userToAclTargets(user, this);
+                return aclTargets;
+            }
+
+
             static get relationMappings() {
 
                 if(this._cachedRelationMapping) {
