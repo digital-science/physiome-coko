@@ -21,7 +21,7 @@ export default  function useSubmitTaskOutcome(instanceId, formDefinition, instan
         return submitDidFail && submitDidFail(reason);
     };
 
-    
+
     return (taskId, outcomeType, options) => {
 
         console.log("------");
