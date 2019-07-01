@@ -52,6 +52,7 @@ class EmailSendService {
             const restrictedTo = this.restrictedSendToAddress;
             const isUnrestrictedEmail = function(email) {
                 const e = email.toLowerCase();
+
                 for(let i = 0; i < restrictedTo.length; i++) {
 
                     const restriction = restrictedTo[i];
@@ -59,11 +60,15 @@ class EmailSendService {
 
                     if(restriction instanceof RegExp) {
 
-                        return emailParts ? emailParts[1].match(restriction) : !!e.match(restriction);
+                        if(emailParts ? emailParts[1].match(restriction) : !!e.match(restriction)) {
+                            return true;
+                        }
 
                     } else if(typeof restriction === "string") {
 
-                        return emailParts ? emailParts[1] === restriction : e === restriction;
+                        if(emailParts ? emailParts[1] === restriction : e === restriction) {
+                            return true;
+                        }
                     }
                 }
                 return false;
