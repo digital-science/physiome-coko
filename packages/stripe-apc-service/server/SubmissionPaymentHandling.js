@@ -93,9 +93,21 @@ async function createCheckoutSession(submissionId, emailAddress = null) {
 
 
 
-exports.generateCheckoutSessionForSubmission = async function generateCheckoutSessionForSubmission(submissionId) {
+exports.generateCheckoutSessionForSubmission = async function generateCheckoutSessionForSubmission(submissionId, identity) {
 
     const submission = await Submission.find(submissionId);
+    const aclTargets = submission.userToAclTargets(identity);
+
+    if(!submission) {
+        logger.debug(`unable to find submission to creaye checkout session (submissionId = ${submissionId}) `);
+        throw new NotFoundError('Submission was not found');
+    }
+
+    // FIXME: this should become an ACL that controls payment in general rather than limiting to owner/admin...
+    if(!aclTargets || (aclTargets.indexOf("owner") === -1 && aclTargets.indexOf("administrator") === -1)) {
+        logger.warn(`unable to generate checkout session as user is not owner/admin on submission (submissionId = ${submissionId}) `);
+        throw new AuthorizationError(`Submission is not owned by logged in user.`);
+    }
 
     // If the payment has already been completed then we don't generate a new checkout submission.
     if(submission.paymentCompleted === true) {
@@ -124,7 +136,7 @@ exports.generateCheckoutSessionForSubmission = async function generateCheckoutSe
         // Otherwise, we need to create a new session. After creating the new session we need to ensure that the same payment session we started with
         // is still in place.
 
-        return createCheckoutSession(submissionId).then(async session => {
+        return createCheckoutSession(submissionId, identity ? identity.email : null).then(async session => {
 
             logger.debug(`received new checkout session via Stripe API (submissionId = ${submissionId}, sessionId = ${session.id}) `);
 
