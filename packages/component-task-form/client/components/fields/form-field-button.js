@@ -22,6 +22,7 @@ const FormStyledButton = styled(Button)`
 
 const ConfirmationContent = styled.div`
   min-width: 400px;
+  max-width: 550px;
 `;
 
 const ConfirmationHeading = styled.div`

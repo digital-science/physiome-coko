@@ -9,11 +9,6 @@ import { th } from "ds-awards-theme";
 const BasicMessageContent = styled.div`
   min-width: 400px;
   max-width: 550px;
-  
-  & p.error {
-    
-    
-  }
 `;
 
 const BasicMessageErrorHolder = styled.div`
