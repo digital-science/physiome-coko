@@ -2,12 +2,13 @@ import LoginRequiredMessage from './LoginRequiredMessage';
 import LoginEmailRequiredMessage from './LoginEmailRequiredMessage';
 
 import NonValidatedEmailMessage from "./NonValidatedEmailMessage";
+import SuccessfullyValidatedEmailMessage from './SuccessfullyValidatedEmailMessage';
 
-import useCurrentUser from "./withCurrentUser";
+import useCurrentUser, { EmailValidationOutcome } from "./withCurrentUser";
 import AuthenticatedUserContext from "./AuthenticatedUserContext";
 import React from "react";
 
-export default ({message, renderApplication, children}) => {
+export default ({message, renderApplication, renderContent, children}) => {
 
     // If the URL hash includes an email validation code, we want to pass that onto the "current user" request.
 
@@ -25,9 +26,6 @@ export default ({message, renderApplication, children}) => {
         if(emailCode && emailCode.length === 1) {
             emailValidationCode = emailCode[0];
         }
-
-        console.log(typeof emailCode);
-        console.dir(emailCode);
     }
 
     const { currentUser, emailValidationTokenOutcome, error, loading, refetch } = useCurrentUser(emailValidationCode ? `${emailValidationCode}` : null);
@@ -59,14 +57,16 @@ export default ({message, renderApplication, children}) => {
         console.dir(emailValidationTokenOutcome);
     }
 
+    const loginRelatedContent = (
+        <React.Fragment>
+            {emailValidationTokenOutcome === EmailValidationOutcome.Successful ? <SuccessfullyValidatedEmailMessage currentUser={currentUser} /> : null}
+            {!currentUser.emailIsValidated ? <NonValidatedEmailMessage currentUser={currentUser} refetchUser={refetch} validationOutcome={emailValidationTokenOutcome} /> : null}
+        </React.Fragment>
+    );
+
     return (
         <AuthenticatedUserContext.Provider value={currentUser}>
-            {renderApplication(
-                <React.Fragment>
-                    {!currentUser.emailIsValidated ? <NonValidatedEmailMessage currentUser={currentUser} refetchUser={refetch} /> : null}
-                    {children}
-                </React.Fragment>
-            )}
+            {renderApplication(renderContent ? renderContent(loginRelatedContent) : <React.Fragment>{loginRelatedContent}{children}</React.Fragment>)}
         </AuthenticatedUserContext.Provider>
     );
 };
