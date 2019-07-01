@@ -66,10 +66,17 @@ export default  function useSubmitTaskOutcome(instanceId, formDefinition, instan
 
             }).then(result => {
 
-                console.log(`Completed task[${taskId}] for instance[${instanceId}]`);
+                // The server also enforces the requirement that a submitter may have to have an verified/validated email address.
+                if(result === 'ValidatedEmailRequired') {
 
-                if(wasSubmitted) {
-                    return wasSubmitted(outcome, state);
+                    return _submitDidFail(SubmitTaskFailureReason.RequiresValidatedSubmitter);
+
+                } else if(result === 'Success') {
+                    console.log(`Completed task[${taskId}] for instance[${instanceId}]`);
+
+                    if(wasSubmitted) {
+                        return wasSubmitted(outcome, state);
+                    }
                 }
             });
 
