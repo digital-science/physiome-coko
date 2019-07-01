@@ -4,7 +4,7 @@ import { taskFormForFormDefinition } from 'component-task-form/client'
 import styled from 'styled-components';
 
 
-function WorkflowTaskFormHero({ match, history }) {
+function WorkflowTaskFormHero({ match, history, children }) {
 
     const { instanceId, taskId, taskName, type } = match.params;
     const WorkflowDescription = useContext(WorkflowDescriptionContext);
@@ -25,7 +25,11 @@ function WorkflowTaskFormHero({ match, history }) {
 
     return (
         <WorkflowTaskFormHeroHolder>
-            {heading ? <WorkflowHeroHeading>{heading}</WorkflowHeroHeading> : null}
+            <WorkflowHeroPageHeadingHolder>
+                {children}
+                {heading ? <WorkflowHeroHeading>{heading}</WorkflowHeroHeading> : null}
+            </WorkflowHeroPageHeadingHolder>
+
             <TaskFormType instanceId={instanceId} instanceType={instanceType} taskId={taskId} taskName={taskName}
                 formDefinition={formDefinition} workflowDescription={WorkflowDescription}
                 wasSubmitted={wasSubmitted}>
@@ -33,6 +37,8 @@ function WorkflowTaskFormHero({ match, history }) {
         </WorkflowTaskFormHeroHolder>
     );
 }
+
+
 
 
 const WorkflowTaskFormHeroHolder = styled.div`
@@ -44,8 +50,6 @@ const WorkflowTaskFormHeroHolder = styled.div`
 
 const WorkflowHeroHeading = styled.div`
 
-  border-top: 2px solid #ebebeb;
-
   font-family: NovcentoSansWideNormal, sans-serif;
   text-transform: uppercase;
   text-align: center;
@@ -53,9 +57,12 @@ const WorkflowHeroHeading = styled.div`
   color: #828282;
   
   /*background: #ebebeb;*/
-  margin: -20px -20px 20px;
   padding: 20px;
-  
+`;
+
+const WorkflowHeroPageHeadingHolder = styled.div`
+  border-top: 2px solid #ebebeb;
+  margin: -20px -20px 20px;
 `;
 
 

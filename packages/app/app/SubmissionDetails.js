@@ -8,7 +8,7 @@ const SubmissionType = 'submission';
 const SubmissionDetailsViewName = "details";
 
 
-function SubmissionDetailsPage({match}) {
+function SubmissionDetailsPage({match, children}) {
 
     const { instanceId } = match.params;
     const WorkflowDescription = useContext(WorkflowDescriptionContext);
@@ -25,12 +25,18 @@ function SubmissionDetailsPage({match}) {
 
     return (
         <SubmissionDetailsPageHolder>
+            {children ? <SubmissionDetailsPageHeader>{children}</SubmissionDetailsPageHeader> : null}
             <SubmissionDetailsHeader>Submission Details</SubmissionDetailsHeader>
             <SubmissionDetails instanceId={instanceId} instanceType={instanceType}
                 viewDefinition={viewDefinition} workflowDescription={WorkflowDescription} />
         </SubmissionDetailsPageHolder>
     );
 }
+
+const SubmissionDetailsPageHeader = styled.div`
+    margin-left: -20px;
+    margin-right: -20px;
+`;
 
 
 const SubmissionDetailsPageHolder = styled.div`

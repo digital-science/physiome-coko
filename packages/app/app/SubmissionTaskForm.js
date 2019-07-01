@@ -1,7 +1,7 @@
 import React from 'react';
 import WorkflowTaskFormHero from './WorkflowTaskFormHero';
 
-function SubmissionTaskForm({ match, history }) {
+function SubmissionTaskForm({ match, history, children }) {
 
     // Hard-code the task and task name
 
@@ -11,7 +11,7 @@ function SubmissionTaskForm({ match, history }) {
     match.params.type = type;
     match.params.taskName = taskName;
 
-    return <WorkflowTaskFormHero match={match} history={history} />;
+    return <WorkflowTaskFormHero match={match} history={history} children={children} />;
 }
 
 export default SubmissionTaskForm;

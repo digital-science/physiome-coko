@@ -17,17 +17,15 @@ const Routes = () => (
     <Switch>
         <Route path="/submission/:instanceId" render={props=> {
             return (
-                <LoginRequiredRoute message="You must login before being able to finish submitting details of your in-progress submission. Login using your ORCID credentials." renderApplication={renderAppHideSidebar}>
-                    <SubmissionTaskForm {...props} />
-                </LoginRequiredRoute>
+                <LoginRequiredRoute message="You must login before being able to finish submitting details of your in-progress submission. Login using your ORCID credentials." renderApplication={renderAppHideSidebar}
+                    renderContent={children => <SubmissionTaskForm children={children} {...props} />} />
             );
         }} />
 
         <Route path="/details/:instanceId" render={props=> {
             return (
-                <LoginRequiredRoute message="You must login to be able to view details of the requested submission. Login using your ORCID credentials." renderApplication={renderAppDefault}>
-                    <SubmissionDetailsPage {...props} />
-                </LoginRequiredRoute>
+                <LoginRequiredRoute message="You must login to be able to view details of the requested submission. Login using your ORCID credentials." renderApplication={renderAppDefault}
+                    renderContent={children => <SubmissionDetailsPage children={children} {...props} />} />
             );
         }} />
 
