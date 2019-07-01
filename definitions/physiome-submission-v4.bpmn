@@ -197,7 +197,7 @@
     <bpmn:boundaryEvent id="BoundaryEvent_TimeoutSubmission" attachedToRef="Task_DetailsSubmission">
       <bpmn:outgoing>SequenceFlow_08z4o36</bpmn:outgoing>
       <bpmn:timerEventDefinition>
-        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">2D</bpmn:timeDuration>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P2D</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:boundaryEvent>
     <bpmn:sequenceFlow id="SequenceFlow_18aeltd" sourceRef="Task_1k578yp" targetRef="EndEvent_1g7oqr9" />
