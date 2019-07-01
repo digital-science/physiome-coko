@@ -4,7 +4,12 @@ const TaskEmailManuscriptRejection = require('./task-email-rejection');
 
 const TaskPublishArticle = require('./task-publish-article');
 
-const AllTaskSetups = [TaskEmailInitialSubmission, TaskEmailManuscriptAcceptance, TaskEmailManuscriptRejection, TaskPublishArticle];
+const TaskTimeoutSubmission = require('./task-time-out-submission');
+
+
+const AllTaskSetups = [TaskEmailInitialSubmission, TaskEmailManuscriptAcceptance, TaskEmailManuscriptRejection,
+    TaskPublishArticle, TaskTimeoutSubmission];
+
 
 module.exports = function initExternalTasks(client) {
     return Promise.all(AllTaskSetups.map(taskSetup => taskSetup(client)));
