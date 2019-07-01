@@ -49,7 +49,7 @@ export default  function useSubmitTaskOutcome(instanceId, formDefinition, instan
                 return _submitDidFail(SubmitTaskFailureReason.RequiresValidatedSubmitter);
             }
 
-            if(validateForm && !validateForm()) {
+            if(outcome.skipValidations !== true && validateForm && !validateForm()) {
                 console.log("form validation failed");
                 return _submitDidFail(SubmitTaskFailureReason.FormValidationFailed);
             }
