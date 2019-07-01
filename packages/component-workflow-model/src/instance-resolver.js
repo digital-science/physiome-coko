@@ -1,7 +1,8 @@
 const { Identity } = require('./../shared-model/identity');
 const { filterModelElementsForRelations, filterModelElementsForOwnerFields,
         filterModelElementsForStates, filterModelElementsForListingFilters,
-        filterModelElementsForListingSortable, filterModelElementsForIdSequenceFields } = require('./utils');
+        filterModelElementsForListingSortable, filterModelElementsForIdSequenceFields,
+        filterModelElementsForDateTimeFields } = require('./utils');
 
 const { processInstanceService, processDefinitionService, taskService } = require('camunda-workflow-service');
 
@@ -58,6 +59,7 @@ function InstanceResolver(modelClass, taskDefinition, enums) {
     this.listingSortableFields = filterModelElementsForListingSortable(this.modelDef.elements, enums);
 
     this.idSequenceFields = filterModelElementsForIdSequenceFields(this.modelDef.elements, enums);
+    this.dateTimeFields = filterModelElementsForDateTimeFields(this.modelDef.elements, enums);
 
     this.logPrefix = `[InstanceResolver/${taskDefinition.name}] `;
 }
@@ -731,6 +733,7 @@ InstanceResolver.prototype.completeTask = async function completeTask({id, taskI
         throw new Error('Form outcome result type is not a complete task type.');
     }
 
+
     const taskOpts = {processInstanceBusinessKey:id};
 
     const [instance, user, tasks] = await Promise.all([
@@ -846,6 +849,24 @@ InstanceResolver.prototype.completeTask = async function completeTask({id, taskI
                 didModify = true;
             });
         }
+    }
+
+
+    // Iterate any date time fields that need to be assigned an updated value based on the completion of this task. Currently,
+    // only "current" type updates are supported.
+
+    if(this.dateTimeFields && this.dateTimeFields.length && outcomeDefinition.dateAssignments && outcomeDefinition.dateAssignments.length) {
+
+        const dtFields = this.dateTimeFields.map(f => f.field);
+
+        const dateFieldsToAssign = outcomeDefinition.dateAssignments.filter(f => {
+            return dtFields.indexOf(f.field) !== -1;
+        });
+
+        dateFieldsToAssign.forEach(dateField => {
+            instance[dateField.field] = new Date();
+            didModify = true;
+        });
     }
 
 

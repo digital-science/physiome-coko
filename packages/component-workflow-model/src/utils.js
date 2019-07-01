@@ -82,6 +82,14 @@ exports.filterModelElementsForIdSequenceFields = function _filterModelElementsFo
 
 
 
+exports.filterModelElementsForDateTimeFields = function _filterModelElementsForStates(elements, enums) {
+
+    return elements.filter(element => {
+        return (element.type === "DateTime");
+    });
+};
+
+
 
 
 function lowerCaseFirstLetter(string) {
