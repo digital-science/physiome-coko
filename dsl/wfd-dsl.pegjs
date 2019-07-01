@@ -820,6 +820,8 @@ formOutcome
     state:formOutcomeStateSet?
     idAssign:formOutcomeIdentityAssignment?
     sequence:formOutcomeSequenceAssignment*
+    dated:formOutcomeDateAssignment*
+
     propList:propertyList?
     end_object
     {
@@ -840,6 +842,9 @@ formOutcome
         }
         if(sequence && sequence.length) {
             r.sequenceAssignment = sequence.map(v => v.destination);
+        }
+        if(dated && dated.length) {
+            r.dateAssignments = dated.map(v =>{ return {field:v.destination, value:"current"}; });
         }
         return r;
     }
@@ -888,6 +893,11 @@ formOutcomeSequenceAssignment
     	return {type:"sequence-assign", destination:dest};
     }
 
+formOutcomeDateAssignment
+	= ws ","? ws "assign_date" ws "=>" ws dest:propName ws "=" ws "current()"
+    {
+    	return {type:"date-assign", destination:dest};
+    }
 
 formOutcomeIdentityAssignment
 	= ws ","? ws "identity" ws "=>" ws dest:propName
