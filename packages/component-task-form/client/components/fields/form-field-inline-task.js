@@ -132,7 +132,8 @@ function FormFieldInlineTask({className, description, data, instanceId, instance
 
     const [formData, inlineSaveData] = useInlineFormData(instanceId, instanceType, data, saveData, topLevelFields);
 
-    const submitTaskOutcome = useSubmitTaskOutcome(instanceId, formDefinition, instanceType, inlineSaveData, null, () => {
+    // FIXME: correctly handle submitDidFail, showing an error reason if required
+    const submitTaskOutcome = useSubmitTaskOutcome(instanceId, formDefinition, instanceType, inlineSaveData, null, null,() => {
         if(refetchData) {
             refetchData();
         }
