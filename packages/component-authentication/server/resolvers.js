@@ -2,7 +2,7 @@ const { models } = require('component-workflow-model/model');
 const { Identity } = models;
 const config = require('config');
 
-const { createEmailValidationForIdentity } = require('./emailValidation');
+const { createEmailValidationForIdentity, TooManyValidationEmailsSentError } = require('./emailValidation');
 
 async function lookupIdentity(userId) {
     return await Identity.findOneByField('id', userId);
@@ -14,6 +14,15 @@ const CurrentUserEmailValidationOutcome = {
     ExpiredToken: 'ExpiredToken'
 };
 
+const CurrentUserEmailConfirmationOutcome = {
+    NoUserLoggedIn: 'NoUserLoggedIn',
+    AlreadyConfirmed: 'AlreadyConfirmed',
+    InvalidEmailAddress: 'InvalidEmailAddress',
+    ValidationSent: 'ValidationSent',
+    TooManyValidationAttempts: 'TooManyValidationAttempts'
+};
+
+const MinimalEmailRegex = /^\S+@\S+$/;
 
 
 module.exports = {
@@ -81,15 +90,12 @@ module.exports = {
 
                         } else {
 
-                            // What do we do in this situation, automatically create a new token and re-send it?
                             emailValidationTokenOutcome = CurrentUserEmailValidationOutcome.ExpiredToken;
-                            await createEmailValidationForIdentity(identity);
                         }
 
                     } else {
 
                         emailValidationTokenOutcome = CurrentUserEmailValidationOutcome.InvalidToken;
-                        await createEmailValidationForIdentity(identity);
                     }
                 }
 
@@ -102,20 +108,71 @@ module.exports = {
 
         confirmCurrentUserEmail: async (instance, args, context, info) => {
 
-            if(!context.user) {
-                return false;
+            if(!args.email) {
+                return CurrentUserEmailConfirmationOutcome.InvalidEmailAddress;
             }
 
-            return lookupIdentity(context.user).then(async identity => {
+            return confirmUserEmailAddress(context.user, args.email);
+        },
 
-                if(identity.email === args.email) {
-                    return false;
-                }
+        resendCurrentUserEmailValidation: async (instance, args, context, info) => {
 
-                identity.email = args.email;
-                await createEmailValidationForIdentity(identity);
-                return true;
-            });
+            return confirmUserEmailAddress(context.user);
         }
     }
 };
+
+
+
+
+function confirmUserEmailAddress(user, newEmailAddress = null) {
+
+    if(!user) {
+        return CurrentUserEmailConfirmationOutcome.NoUserLoggedIn;
+    }
+
+    return lookupIdentity(user).then(async identity => {
+
+        // If the user already has a confirmed email address we apply a different process depending on
+        // if the user has requested a re-send or provided a new email address.
+
+        if(identity.isValidatedEmail) {
+
+            if(!newEmailAddress && identity.email) {
+                return CurrentUserEmailConfirmationOutcome.AlreadyConfirmed;
+            }
+
+            if(newEmailAddress && identity.email === newEmailAddress) {
+                return CurrentUserEmailConfirmationOutcome.AlreadyConfirmed;
+            }
+        }
+
+        // If the user is setting a  new email address and it doesn't match the minimal regex, reject it.
+        if(newEmailAddress) {
+
+            console.log(newEmailAddress);
+            console.dir(newEmailAddress.match(MinimalEmailRegex));
+
+            if(!(newEmailAddress.match(MinimalEmailRegex))) {
+                return CurrentUserEmailConfirmationOutcome.InvalidEmailAddress;
+            }
+
+            identity.email = newEmailAddress;
+        }
+
+        return createEmailValidationForIdentity(identity, !newEmailAddress).then(r => {
+
+            return CurrentUserEmailConfirmationOutcome.ValidationSent;
+
+        }).catch(err => {
+
+            if(err instanceof TooManyValidationEmailsSentError) {
+                return CurrentUserEmailConfirmationOutcome.TooManyValidationAttempts;
+            }
+
+            return Promise.reject(err);
+        });
+    });
+
+
+}

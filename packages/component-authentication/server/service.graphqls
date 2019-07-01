@@ -20,10 +20,22 @@ type CurrentUserResult {
     emailValidationTokenOutcome: CurrentUserEmailValidationOutcome
 }
 
+
 extend type Query {
     currentUser(emailValidationToken: String) : CurrentUserResult
 }
 
+
+# Email Confirmation
+enum CurrentUserEmailConfirmationOutcome {
+    NoUserLoggedIn,
+    AlreadyConfirmed
+    InvalidEmailAddress
+    ValidationSent
+    TooManyValidationAttempts
+}
+
 extend type Mutation {
-    confirmCurrentUserEmail(email: String!) : Boolean
+    confirmCurrentUserEmail(email: String!) : CurrentUserEmailConfirmationOutcome!
+    resendCurrentUserEmailValidation(email: String) : CurrentUserEmailConfirmationOutcome!
 }

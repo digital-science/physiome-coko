@@ -5,25 +5,41 @@ import { BlockLabel } from 'ds-awards-theme/components/label';
 import { TextInput } from 'ds-awards-theme/components/text-input';
 import { PrimaryInlineButton } from 'ds-awards-theme/components/inline-button';
 
-import withConfirmCurrentUserEmail from 'component-authentication/client/withConfirmCurrentUserEmail';
+import { FaExclamationCircle } from 'react-icons/fa';
+
+import withConfirmCurrentUserEmail, { EmailConfirmationOutcome } from 'component-authentication/client/withConfirmCurrentUserEmail';
 
 
 const LoginEmailRequiredMessage = styled(({className, currentUser, refetchUser}) => {
 
-    const [emailAddress, setEmailAddress] = useState();
+    const [emailAddress, setEmailAddress] = useState("");
+    const [confirmError, setConfirmError] = useState(null);
     const confirmCurrentEmail = withConfirmCurrentUserEmail();
 
     const onChangeEmail = (e) => {
         setEmailAddress(e.target.value);
+        setConfirmError(null);
     };
 
     const confirmEmailAddress = () => {
 
         if(!emailAddress) {
+            setConfirmError("Please enter an email address to be used for submission related notifications.");
             return;
         }
 
         confirmCurrentEmail(emailAddress).then(result => {
+
+            if(result === EmailConfirmationOutcome.TooManyValidationAttempts) {
+                setConfirmError("Too many email address validation attempts have been attempted within the last 24 hours. Please wait 24 hours before trying again.");
+                return;
+            }
+
+            if(result === EmailConfirmationOutcome.InvalidEmailAddress) {
+                setConfirmError("The email address entered is invalid, please enter a valid email address.");
+                return;
+            }
+
             return refetchUser();
         });
     };
@@ -38,6 +54,7 @@ const LoginEmailRequiredMessage = styled(({className, currentUser, refetchUser})
                     <BlockLabel>Your Email Address:</BlockLabel>
                     <TextInput value={emailAddress} onChange={onChangeEmail} />
                 </div>
+                {confirmError ? <p className="error"><FaExclamationCircle/> {confirmError}</p> : null}
                 <div className="confirm">
                     <PrimaryInlineButton bordered={true} onClick={confirmEmailAddress}>Confirm Email Address</PrimaryInlineButton>
                 </div>
@@ -74,7 +91,27 @@ const ProvideEmailMessageHolder = styled.div`
     margin-top: 0;
     margin-bottom: 20px;
   }
-  
+    
+  & > p.error {
+    position: relative;
+    padding-left: 34px !important;
+
+    color: #b10c00;
+    font-size: 90%;
+    background: #a70b0021;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 20px;
+    margin-bottom: -10px;
+    line-height: 1.2;
+    
+    > svg {
+      position: absolute;
+      top: 13px;
+      left: 10px;
+    }
+  }
+
   & > div.email {
     margin-top: 40px;
   }

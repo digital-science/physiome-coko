@@ -2,6 +2,12 @@ import { useEffect } from 'react';
 import gql from 'graphql-tag';
 import { useQuery } from 'react-apollo-hooks';
 
+const EmailValidationOutcome = {
+    Successful: 'Successful',
+    InvalidToken: 'InvalidToken',
+    ExpiredToken: 'ExpiredToken'
+};
+
 export default (emailValidationToken = null, opts = {}) => {
 
     const queryOptions = {
@@ -55,3 +61,5 @@ query CurrentUser($emailValidationToken:String) {
     return r;
 };
 
+
+export { EmailValidationOutcome };

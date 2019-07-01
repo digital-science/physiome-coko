@@ -3,9 +3,18 @@ import { useMutation } from 'react-apollo-hooks';
 
 const confirmCurrentUserEmailMutation = gql`
     mutation ConfirmCurrentUserEmail($email : String!) {
-        confirmed: confirmCurrentUserEmail(email : $email)
+        result: confirmCurrentUserEmail(email : $email)
     }
 `;
+
+const EmailConfirmationOutcome = {
+    NoUserLoggedIn: 'NoUserLoggedIn',
+    AlreadyConfirmed: 'AlreadyConfirmed',
+    InvalidEmailAddress: 'InvalidEmailAddress',
+    ValidationSent: 'ValidationSent',
+    TooManyValidationAttempts: 'TooManyValidationAttempts'
+};
+
 
 export default (opts = {}) => {
 
@@ -17,7 +26,9 @@ export default (opts = {}) => {
         options.variables = {email};
 
         return mutation(options).then(result => {
-            return (result && result.data) ? result.data.confirmed : null;
+            return (result && result.data) ? result.data.result : null;
         });
     };
 };
+
+export { EmailConfirmationOutcome };
