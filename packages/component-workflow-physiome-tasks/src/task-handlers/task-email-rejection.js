@@ -1,16 +1,16 @@
 const { models } = require('component-workflow-model/model');
 const { Submission } = models;
-const logger = require('workflow-utils/logger-with-prefix')('external-task/initial-submission-email');
+const logger = require('workflow-utils/logger-with-prefix')('external-task/email-manuscript-rejection');
 const generateSendEmailHelper = require('../send-email-helper');
 
 
-module.exports = function _setupEmailInitialSubmissionTask(client) {
+module.exports = function _setupEmailRejectionTask(client) {
 
-    const sendInitialSubmissionEmail = generateSendEmailHelper('initial-submission');
+    const sendManuscriptRejectionEmail = generateSendEmailHelper('manuscript-rejection');
 
-    client.subscribe('initial-submission-email', async ({ task, taskService }) => {
+    client.subscribe('rejection-email', async ({ task, taskService }) => {
 
-        logger.debug(`send initial submission email is starting`);
+        logger.debug(`send manuscript rejection email is starting`);
 
         const submissionId = task.businessKey;
         if(!submissionId) {
@@ -25,21 +25,17 @@ module.exports = function _setupEmailInitialSubmissionTask(client) {
             return;
         }
 
-        // FIXME: shift this into a task completion extra data stage...
-        submission.submissionDate = new Date();
-        await submission.save();
-
         const user = submission.submitter;
         const data = {submission, user};
 
-        return sendInitialSubmissionEmail(user, 'Manuscript submission received', data).then(result => {
+        return sendManuscriptRejectionEmail(user, 'Manuscript rejected', data).then(result => {
 
-            logger.debug(`email for initial submission was sent, completing external task`);
+            logger.debug(`email for manuscript rejection was sent, completing external task`);
             return taskService.complete(task);
 
         }).catch(err => {
 
-            logger.error(`sending email for initial manuscript submission failed due to: ${err.toString()}`);
+            logger.error(`sending email for manuscript rejection failed due to: ${err.toString()}`);
         });
     });
 };
