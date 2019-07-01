@@ -21,6 +21,7 @@ class Identity extends BaseModel {
                 isValidatedEmail: { type: ['boolean', 'null'] },
                 emailValidationToken: { type: ['string', 'null'] },
                 emailValidationTokenExpire: { type:['string', 'object', 'null'], format:'date-time' },
+                emailValidationEmailSendTimes: { type:['array', 'null'] },
 
                 tokens: { type:['object', 'null'] },
                 groups: { type:['object', 'null'] },

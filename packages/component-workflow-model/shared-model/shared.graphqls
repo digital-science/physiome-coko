@@ -18,8 +18,6 @@ interface WorkflowObject {
 }
 
 
-
-
 #
 # Common Workflow Model: Task
 #
@@ -40,8 +38,6 @@ input CompleteTaskVariableInput {
     key: String
     value: JSON
 }
-
-
 
 
 
@@ -165,6 +161,7 @@ type Identity {
     emailIsValidated: Boolean
     emailValidationToken: String
     emailValidationTokenExpire: DateTime
+    emailValidationEmailSendTimes: [DateTime]
 
     groups: JSON
 }
