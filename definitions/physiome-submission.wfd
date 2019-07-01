@@ -1,5 +1,6 @@
 enum SubmissionPhase {
     Pending => "pending",
+    Saved => "saved",
     Submitted => "submitted",
     Decision => "decision",
     Payment => "payment",
@@ -127,7 +128,8 @@ instance Submission {
         }
 
         tasks "owner-submit" {
-    	    "Task_DetailsSubmission"
+    	    "Task_DetailsSubmission",
+    	    "Task_SavedForLater"
         }
 
         allow <user> [create]
@@ -136,9 +138,9 @@ instance Submission {
 
         allow <owner> [read] on "submit"
         allow <owner> [read] on "read-only"
-        allow <owner> [write] on "submit" where (phase == SubmissionPhase.Pending)
+        allow <owner> [write] on "submit" where (phase == SubmissionPhase.Pending || phase == SubmissionPhase.Saved)
         allow <owner> [task] on "owner-submit"
-        allow <owner> [destroy] where (phase == SubmissionPhase.Pending)
+        allow <owner> [destroy] where (phase == SubmissionPhase.Pending || phase == SubmissionPhase.Saved)
 
         allow <administrator> [write, read] on "submit"
         allow <administrator> [write, read] on "curation"
@@ -330,7 +332,14 @@ instance Submission {
                 requiresValidatedSubmitter: true
             },
 
-            { "save-for-later" => Save },
+            {
+                "save-for-later" => Complete,
+                 state: {
+                     phase: SubmissionPhase.Saved
+                 },
+
+                 skipValidations: true
+            },
 
             {
                 "cancel" => Destroy,
