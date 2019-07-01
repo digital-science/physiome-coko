@@ -12,6 +12,13 @@ const TypeToBackground = {
     'default' : '#eff8ff'
 };
 
+const TypeToBottomBorder = {
+    'success': '#e0e0e0',
+    'error': '#e0e0e0',
+    'warning': '#e0e0e0',
+    'default' : '#e0e0e0'
+};
+
 const TypeToBoxShadowColor = {
     'success': '#0000000d',
     'error': '#ff7a7a0d',
@@ -27,6 +34,7 @@ const TypeToTextColor = {
 };
 
 
+
 const UserMessageHolder = styled(({className, type, children, ...rest}) => {
 
     return <div className={`${className || ""} ${type || ''}`} {...rest}>{children}</div>
@@ -38,6 +46,7 @@ const UserMessageHolder = styled(({className, type, children, ...rest}) => {
   min-height: 28px;
   box-shadow: 0 2px 4px 2px ${({type}) => TypeToBoxShadowColor[type] || TypeToBoxShadowColor.default};
   border-top: 1px solid #ebebeb;
+  border-bottom: 1px solid ${({type}) => TypeToBottomBorder[type] || TypeToBottomBorder.default};
   font-size: 16px;
   color: ${({type}) => TypeToTextColor[type] || TypeToTextColor.default};
   position: relative;
