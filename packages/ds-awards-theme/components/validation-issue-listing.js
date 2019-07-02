@@ -26,6 +26,10 @@ const ValidationIssueList = styled(_ValidationIssueList)`
   list-style: none;
   padding: 0;
   margin: 5px 0;
+  
+  & li + li {
+    margin-top: 5px;
+  }
 `;
 
 
