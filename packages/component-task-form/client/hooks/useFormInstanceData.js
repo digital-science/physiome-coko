@@ -39,6 +39,11 @@ export default function useFormInstanceData({instanceId, taskId, taskName, insta
     const [formData, setFormData] = useState(null);
     const [formValidator] = useState(new FormValidator());
 
+    const allowedInputFields = useMemo(() => {
+        return instanceType ? instanceType.model.inputFields().map(f => f.field) : [];
+    }, [instanceType]);
+
+
     function _validateForm() {
         return formData ? formValidator.validate(formData) : true;
     }
@@ -54,13 +59,17 @@ export default function useFormInstanceData({instanceId, taskId, taskName, insta
             return formData.updateModifiedRelationshipsForInstance(instanceId, instanceType);
         }
 
-        const {data} = modifiedDataSet;
+        const { data } = modifiedDataSet;
+        const pickedData = pick(data, allowedInputFields);
+
         const input = {
             id: instanceId,
-            ...data
+            ...pickedData
         };
 
-        // FIXME: need to filter updated data based on the allowed input for the data type
+        if(!Object.keys(pickedData).length) {
+            return formData.updateModifiedRelationshipsForInstance(instanceId, instanceType);
+        }
 
         return Promise.all([
             updateInstance(input).then(() => {
