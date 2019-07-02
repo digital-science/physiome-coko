@@ -47,7 +47,6 @@ function useFormValidation(description, formDefinition, formValidator) {
     }, [formValidator, validations]);
 
     return [validationWarnings, () => setValidationWarnings(null)];
-
 }
 
 

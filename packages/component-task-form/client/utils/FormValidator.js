@@ -30,7 +30,12 @@ class FormValidator {
     validate(data) {
 
         let result = true;
-        this.interests.forEach(listener => result = result && listener.callback(data));
+        this.interests.forEach(listener => {
+            const r = listener.callback(data);
+            if(!r) {
+                result = false;
+            }
+        });
         return result;
     }
 
