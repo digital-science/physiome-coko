@@ -162,6 +162,9 @@ instance Submission {
 
         { iupsCommission => (hasValue(iupsCommission)), "A manuscript commission type is required. Please select one." }
 
+        { articleFiles => (length(articleFiles) > 0), "At least one manuscript file needs to be uploaded for your submission. Please upload a file." }
+
+
         { authors => (length(authors) > 0), "At least one author is required. Please add an author." }
 
         { authors => (length(authors) == 0 || correspondingAuthors(authors) > 0), "At least one corresponding author is required. Please mark an existing author as being a corresponding author or add an additional author who is marked as a corresponding author." }
