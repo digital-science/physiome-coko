@@ -3,9 +3,11 @@ import styled from 'styled-components';
 import { th } from 'ds-awards-theme';
 
 import useFormValueBinding from './../../hooks/useFormValueBinding';
+import useFormValidation from "../../hooks/useFormValidation";
 import withFormField from './withFormField'
 
 import Checkbox, { CheckboxLabel } from 'ds-awards-theme/components/checkbox-input';
+import ValidationIssueListing from 'ds-awards-theme/components/validation-issue-listing';
 import PopoverTrigger from '../popover';
 
 import { FaQuestionCircle } from 'react-icons/fa';
@@ -44,9 +46,10 @@ const HelpContent = styled.span`
     
 `;
 
-function FormFieldCheckbox({data, binding, options = {}}) {
+function FormFieldCheckbox({data, binding, description, formDefinition, formValidator, options = {}}) {
 
     const [value, _, handleInputChange] = useFormValueBinding(data, binding, "", (v) => v || "");
+    const [validationIssues, clearValidationIssues] = useFormValidation(description, formDefinition, formValidator);
     const [helpIsShown, setHelpIsShown] = useState(false);
 
     const help = useMemo(() => {
@@ -69,19 +72,22 @@ function FormFieldCheckbox({data, binding, options = {}}) {
         if(options.readOnly || helpIsShown) {
             return;
         }
+        clearValidationIssues();
         handleInputChange(e);
     };
 
     const input = <FormStyledCheckbox checked={value || false} disabled={options.readOnly || false} onChange={handleCheckedChange} />;
 
     return (
-        options.label ? (<FormStyledLabel>{input}<span>{options.label}{help}</span></FormStyledLabel>) : <React.Fragment>{input}{help}</React.Fragment>
+        <React.Fragment>
+            { options.label ?
+                (<FormStyledLabel>{input}<span>{options.label}{help}</span></FormStyledLabel>)
+                :
+                <React.Fragment>{input}{help}</React.Fragment>
+            }
+            { validationIssues ? <ValidationIssueListing issues={validationIssues} /> : null }
+        </React.Fragment>
     );
 }
 
 export default withFormField(FormFieldCheckbox);
-
-
-/*
-  display: flex;
- */

@@ -158,6 +158,9 @@ instance Submission {
 
         { abstract => (length(abstract) > 0), "A manuscript abstract is required. Please enter one." }
 
+        { priceAcknowledged => (priceAcknowledged == true), "You must acknowledge your acceptance of the associated curation fee associated with the submission." }
+
+        { iupsCommission => (hasValue(iupsCommission)), "A manuscript commission type is required. Please select one." }
     }
 
 

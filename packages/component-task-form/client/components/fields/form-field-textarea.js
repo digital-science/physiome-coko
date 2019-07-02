@@ -8,6 +8,7 @@ import withFormField from './withFormField'
 
 import Label from 'ds-awards-theme/components/label';
 import TextArea from 'ds-awards-theme/components/text-area';
+import ValidationIssueListing from 'ds-awards-theme/components/validation-issue-listing';
 
 
 const FormStyledTextArea = styled(TextArea)`
@@ -23,23 +24,23 @@ const FormStyledTextArea = styled(TextArea)`
 function FormFieldTextArea({data, binding, description, formDefinition, formValidator, options = {}}) {
 
     const [value, _, handleInputChange] = useFormValueBinding(data, binding, "", (v) => v || "");
-    const [validationWarnings, clearValidationWarnings] = useFormValidation(description, formDefinition, formValidator);
+    const [validationIssues, clearValidationIssues] = useFormValidation(description, formDefinition, formValidator);
 
     const handleInputChangeWithWarningsClear = (e) => {
-        clearValidationWarnings();
+        clearValidationIssues();
         handleInputChange(e);
     };
 
     const textInput = (
         <FormStyledTextArea value={value || ""} onChange={handleInputChangeWithWarningsClear}
-            rows={options.rows || 2} issue={validationWarnings && validationWarnings.length}  />
+            rows={options.rows || 2} issue={validationIssues && validationIssues.length}  />
     );
 
     return (
         <React.Fragment>
             {options.label ? <React.Fragment><Label>{options.label}</Label><br /></React.Fragment> : null}
             {textInput}
-            { validationWarnings ? validationWarnings.map((warning, index) => <div key={index}>{warning}</div>) : null }
+            { validationIssues ? <ValidationIssueListing issues={validationIssues} /> : null }
         </React.Fragment>
     );
 }
