@@ -4,10 +4,10 @@ import { FaTrashAlt } from 'react-icons/fa';
 import { th } from '../src/index';
 
 
-const Card = styled(({Tag = "div", className, reorderingGrabber, children}) => {
+const Card = styled(({Tag = "div", className, issue, reorderingGrabber, children}) => {
 
     return (
-        <Tag className={`${className || ""} ${reorderingGrabber ? "reorder" : ""}`}>
+        <Tag className={`${className || ""} ${reorderingGrabber ? "reorder" : ""} ${issue ? 'issue' : ''}`}>
             <div className="reorder-grabber" />
             <CardContent className="content">
                 {children}
@@ -42,6 +42,15 @@ const Card = styled(({Tag = "div", className, reorderingGrabber, children}) => {
     width: calc(100% - (${th('card.grabberWidth')} + ${th('card.grabberPadding')} * 2));
   }
   
+  &.issue {
+    border-color: #d10f00;
+    box-shadow: 0 6px 10px 1px #d10f0038;
+  }
+    
+  &.reorder.issue > .reorder-grabber {
+    background: #d10f00;
+  }
+
 `;
 
 const CardContent = styled.div`
