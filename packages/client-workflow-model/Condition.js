@@ -31,8 +31,17 @@ class Condition {
         this.expression = condition.expression;
 
         function _addBindings(e) {
-            if(e && e.type === "model" && allBindings.indexOf(e.value) === -1) {
+
+            if(!e) {
+                return;
+            }
+
+            if(e.type === "model" && allBindings.indexOf(e.value) === -1) {
                 allBindings.push(e.value);
+            }
+
+            if(e.type === "function" && e.argument) {
+                _addBindings(e.argument);
             }
         }
 
