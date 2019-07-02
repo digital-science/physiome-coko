@@ -10,10 +10,24 @@ import { useFormValueBindingForComplexObject } from '../../hooks/useFormValueBin
 import Label, { BlockLabel } from "ds-awards-theme/components/label";
 import InlineButton from "ds-awards-theme/components/inline-button";
 import { DisabledStaticText } from 'ds-awards-theme/components/static-text';
+import ValidationIssueListing from 'ds-awards-theme/components/validation-issue-listing';
 import { FaPlus } from 'react-icons/fa';
 
 
 import AuthorEditorCard from "../author-editor-card";
+import useFormValidation from "../../hooks/useFormValidation";
+
+import { registerConditionFunction } from 'client-workflow-model/Condition';
+
+
+
+registerConditionFunction('correspondingAuthors', v => {
+    if(!v || !v.length) {
+        return false;
+    }
+    return v.filter(a => a.isCorresponding === true).length > 0;
+});
+
 
 
 const AuthorsEditorHolder = styled.div`    
@@ -46,6 +60,11 @@ const AuthorEditorCardHolder = styled.div`
     & .drag-author:focus > ${AuthorEditorCard} {
         border-color: #2196F3;
     }
+    
+    &.issues {
+      box-shadow: inset 0 0 6px #d10f008c;
+      border-color: #d10f00;
+    }
 `;
 
 const DraggableAuthorCard = ({authorId, index, ...props}) => {
@@ -62,9 +81,11 @@ const DraggableAuthorCard = ({authorId, index, ...props}) => {
 };
 
 
-function FormFieldAuthorsEditor({ className, data, binding, instanceId, instanceType, options = {} }) {
+function FormFieldAuthorsEditor({ className, data, binding, description, formDefinition, formValidator, options = {} }) {
 
     const [authors, setAuthors] = useFormValueBindingForComplexObject(data, binding);
+    const [validationIssues, clearValidationIssues] = useFormValidation(description, formDefinition, formValidator);
+
 
     // Make sure all authors have a unique id associated.
     useEffect(() => {
@@ -79,16 +100,20 @@ function FormFieldAuthorsEditor({ className, data, binding, instanceId, instance
         const newAuthor = {id:nextUniqueIdInArray(authors)};
         const newAuthorsList = (authors || []).splice(0);
 
+        clearValidationIssues();
         newAuthorsList.push(newAuthor);
         setAuthors(newAuthorsList);
     };
 
     const removeAuthor = a => {
+        clearValidationIssues();
+
         const id = a.id;
         setAuthors(authors.splice(0).filter(a => a.id !== id));
     };
 
     const didModifyAuthor = (author) => {
+        clearValidationIssues();
         setAuthors(authors);
     };
 
@@ -110,7 +135,7 @@ function FormFieldAuthorsEditor({ className, data, binding, instanceId, instance
         <AuthorsEditorHolder className={className}>
             {options.label ? <Label>{options.label}</Label> : null}
 
-            <AuthorEditorCardHolder>
+            <AuthorEditorCardHolder className={validationIssues && validationIssues.length ? 'issues' : ''}>
 
                 <DragDropContext onDragEnd={onDragEnd}>
                     <Droppable droppableId="author-listing">
@@ -118,7 +143,10 @@ function FormFieldAuthorsEditor({ className, data, binding, instanceId, instance
                             <div ref={provided.innerRef}>
 
                                 {(authors || []).map((author, index) => {
-                                    return <DraggableAuthorCard key={author.id} authorId={author.id} index={index} author={author} didModifyAuthor={didModifyAuthor} removeAuthor={removeAuthor} />
+                                    return (
+                                        <DraggableAuthorCard key={author.id} authorId={author.id} index={index} author={author}
+                                            formValidator={formValidator} didModifyAuthor={didModifyAuthor} removeAuthor={removeAuthor} />
+                                    );
                                 })}
 
                                 {provided.placeholder}
@@ -132,6 +160,8 @@ function FormFieldAuthorsEditor({ className, data, binding, instanceId, instance
                 </div>
 
             </AuthorEditorCardHolder>
+
+            { validationIssues ? <ValidationIssueListing issues={validationIssues} /> : null }
 
         </AuthorsEditorHolder>
     );

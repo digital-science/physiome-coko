@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 
 import Card, { CardRemoveButton } from "ds-awards-theme/components/card";
@@ -10,9 +10,10 @@ import AffiliationEditor from './affiliation-editor';
 
 
 
-function useAuthorValueField(author, field, didModifyAuthor) {
+function useAuthorValueField(author, field, didModifyAuthor, includeValidation) {
 
     const [value, setValue] = useState(author[field] || "");
+    const [validationIssue, setValidationIssue] = includeValidation ? useState(false) : [null, null];
 
     const handleChange = (event) => {
         const v = event.target.value;
@@ -20,9 +21,10 @@ function useAuthorValueField(author, field, didModifyAuthor) {
         author[field] = v;
 
         didModifyAuthor(author);
+        setValidationIssue(false);
     };
 
-    return [value, setValue, handleChange];
+    return [value, setValue, handleChange, validationIssue, setValidationIssue];
 }
 
 function useAuthorCheckboxField(author, field, didModifyAuthor) {
@@ -43,15 +45,21 @@ function useAuthorCheckboxField(author, field, didModifyAuthor) {
 
 const AuthorFormGroup = styled.div`
   margin-bottom: 8px;
+  
+  & > ${SmallBlockLabel}.error {
+    margin-top: 4px;
+    color: #d10f00;
+  }
 `;
 
 
-const AuthorSimpleFormGroup = styled(({className, label, value, onChange, placeholder}) => {
+const AuthorSimpleFormGroup = styled(({className, label, value, onChange, issue, issueMessage, placeholder}) => {
 
     return (
         <AuthorFormGroup className={className}>
             <SmallBlockLabel>{label}</SmallBlockLabel>
-            <SmallTextInput value={value} onChange={onChange} placeholder={placeholder} />
+            <SmallTextInput value={value} onChange={onChange} placeholder={placeholder} issue={issue || false} />
+            {(issue && issueMessage) ? <SmallBlockLabel className="error">{issueMessage}</SmallBlockLabel> : null}
         </AuthorFormGroup>
     );
 
@@ -75,10 +83,10 @@ const AuthorAffiliationsFormGroup = styled(AuthorFormGroup)`
 const AuthorEditorRemove = ({className, author, removeAuthor}) => <CardRemoveButton className={className} onClick={() => removeAuthor(author)} />;
 
 
-function _AuthorEditorCard({className, author, removeAuthor, didModifyAuthor}) {
+function _AuthorEditorCard({className, author, removeAuthor, formValidator, didModifyAuthor}) {
 
-    const [name, setName, handleNameChange] = useAuthorValueField(author, "name", didModifyAuthor);
-    const [email, setEmail, handleEmailChange] = useAuthorValueField(author, "email", didModifyAuthor);
+    const [name, setName, handleNameChange, nameValidationIssue, setNameValidationIssue] = useAuthorValueField(author, "name", didModifyAuthor, true);
+    const [email, setEmail, handleEmailChange, emailValidationIssue, setEmailValidationIssue] = useAuthorValueField(author, "email", didModifyAuthor, true);
     const [orcid, setOrcid, handleOrcidChange] = useAuthorValueField(author, "orcid", didModifyAuthor);
     const [corresponding, setCorresponding, handleCorrespondingChange] = useAuthorCheckboxField(author, "isCorresponding", didModifyAuthor);
 
@@ -86,6 +94,47 @@ function _AuthorEditorCard({className, author, removeAuthor, didModifyAuthor}) {
     const [developedModel, setDevelopedModel, handleDevelopedModelChange] = useAuthorCheckboxField(author, "didDevelopModel", didModifyAuthor);
 
     const [affiliations, setAffiliations] = useState((author && author.affiliations) ? author.affiliations : []);
+
+    const doesHaveName = (name && name.trim().length);
+    const doesHaveValidEmail = (email && email.trim().length && email.match(/^\S+@\S+$/));
+
+
+    const validationCallback = useMemo(() => {
+
+        return (data) => {
+
+            let r = true;
+
+            if(!doesHaveName) {
+                setNameValidationIssue(true);
+                r = false;
+            }
+
+            if(corresponding && !doesHaveValidEmail) {
+                setEmailValidationIssue(true);
+                r = false;
+            }
+
+            return r;
+        };
+
+    }, [doesHaveName, doesHaveValidEmail, corresponding, setNameValidationIssue, setEmailValidationIssue]);
+
+    useEffect(() => {
+
+        if(!formValidator) {
+            return;
+        }
+
+        const interest = formValidator.createInterest(validationCallback);
+        formValidator.registerInterest(interest);
+
+        return () => {
+            formValidator.unregisterInterest(interest);
+            formValidator.destroyInterest(interest);
+        };
+
+    }, [formValidator, validationCallback]);
 
     const onAffiliationsChanged = (affiliations) => {
         if(affiliations && affiliations.length) {
@@ -99,22 +148,30 @@ function _AuthorEditorCard({className, author, removeAuthor, didModifyAuthor}) {
     };
 
     return (
-        <Card className={className} reorderingGrabber={true}>
-            <AuthorSimpleFormGroup label={"Name"} value={name} onChange={handleNameChange} />
-            <AuthorSimpleFormGroup label={"Email"} value={email} onChange={handleEmailChange} />
+        <Card className={className} reorderingGrabber={true} issue={nameValidationIssue || emailValidationIssue}>
+
+            <AuthorSimpleFormGroup label={"Name"} value={name} onChange={handleNameChange} issue={nameValidationIssue}
+                issueMessage="An author requires a name to be entered, please enter one." />
+            
+            <AuthorSimpleFormGroup label={"Email"} value={email} onChange={handleEmailChange} issue={emailValidationIssue}
+                issueMessage="Corresponding authors require a valid email address." />
+
             <AuthorSimpleFormGroup label={"ORCID"} value={orcid} onChange={handleOrcidChange} />
+
             <AuthorRelationshipFormGroup>
                 <SmallBlockLabel>Relationships</SmallBlockLabel>
                 <div className="holder">
                     <SmallCheckboxLabel><SmallCheckBox checked={corresponding} onChange={handleCorrespondingChange} />Corresponding Author</SmallCheckboxLabel>
                     <SmallCheckboxLabel><SmallCheckBox checked={primaryPaperAuthor} onChange={handlePrimaryPaperAuthorChange} />Author on Primary Paper</SmallCheckboxLabel>
-                    <SmallCheckboxLabel><SmallCheckBox checked={developedModel} onChange={handleDevelopedModelChange} />Developed Reproducible Model</SmallCheckboxLabel>
+                    <SmallCheckboxLabel><SmallCheckBox checked={developedModel} onChange={handleDevelopedModelChange} />Contributed to Reproducible Model</SmallCheckboxLabel>
                 </div>
             </AuthorRelationshipFormGroup>
+
             <AuthorAffiliationsFormGroup>
                 <SmallBlockLabel>Affiliations</SmallBlockLabel>
                 <AffiliationEditor value={affiliations} onChange={onAffiliationsChanged} />
             </AuthorAffiliationsFormGroup>
+
             <AuthorEditorRemove author={author} removeAuthor={removeAuthor} />
         </Card>
     )
