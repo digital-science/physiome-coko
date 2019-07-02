@@ -4,11 +4,13 @@ import styled from 'styled-components';
 import useCreateFileUploadSignedUrlMutation from './../../mutations/createFileUploadSignedUrl';
 import useConfirmUploadedFileMutation from './../../mutations/confirmUploadedFile';
 import useSetInstanceAssociatedFilesMutation from './../../mutations/setInstanceAssociatedFiles';
+import useFormValidation from "../../hooks/useFormValidation";
 import withFormField, { fetchFields } from './withFormField';
 
 import FileUploader from 'ds-awards-theme/components/file-uploader';
 import FileListing from 'ds-awards-theme/components/file-listing';
 import Label from 'ds-awards-theme/components/label';
+import ValidationIssueListing from 'ds-awards-theme/components/validation-issue-listing';
 
 
 const FileUploaderHolder = styled.div`
@@ -20,19 +22,27 @@ const FileUploaderHolder = styled.div`
         border-radius: 5px;
         padding: 5px;
     }
+    
+    > div.issues {
+      box-shadow: inset 0 0 4px #d10f008c;
+      border-color: #d10f00;
+    }
 `;
 
 
-function FormFieldFileUploader({ data, binding, instanceId, instanceType, options = {} }) {
+function FormFieldFileUploader({ data, binding, instanceId, instanceType, description, formDefinition, formValidator, options = {} }) {
 
     const setInstanceAssociatedFiles = useSetInstanceAssociatedFilesMutation(instanceType, binding);
     const createFileUploadSignedUrl = useCreateFileUploadSignedUrlMutation();
     const confirmFileUpload = useConfirmUploadedFileMutation();
     const [fileListing, setFileListing] = useState([]);
     const [filesModified, setFilesModified] = useState(false);
+    const [validationIssues, clearValidationIssues] = useFormValidation(description, formDefinition, formValidator);
 
-    const formDataWasChanged = function _formDataWasChanged(form, field, v) {
-        setFileListing(form.getFieldValue(field) || []);
+
+    const setFieldListingUpdatingFormData = (files) => {
+        data.setFieldValueForComplexObject(binding, files);
+        setFileListing(files);
     };
 
     useEffect(() => {
@@ -40,6 +50,10 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, option
         if(!data || !binding) {
             return;
         }
+
+        const formDataWasChanged = function _formDataWasChanged(form, field, v) {
+            setFileListing(form.getFieldValue(field) || []);
+        };
 
         data.on(`field.${binding}`, formDataWasChanged);
 
@@ -53,7 +67,7 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, option
             data.off(`field.${binding}`, formDataWasChanged);
         };
 
-    }, [data, binding]);
+    }, [data, binding, setFileListing, setFilesModified]);
 
     const { fileLabels, fileTypes } = options;
     const fileTypeOptions = useMemo(() => {
@@ -152,7 +166,8 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, option
             result.order = newFiles.length;
             newFiles.push(result);
 
-            setFileListing(newFiles);
+            setFieldListingUpdatingFormData(newFiles);
+            clearValidationIssues();
             return updateAssociatedFilesWithInstance(instanceId, newFiles);
         });
     }
@@ -160,6 +175,7 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, option
 
     function fileWasModified(file) {
         setFilesModified(true);
+        clearValidationIssues();
         data.relationshipWasModified(binding);
     }
 
@@ -171,17 +187,20 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, option
         console.dir(file);
 
         fileWasModified(file);
+        clearValidationIssues();
     }
 
     function changeFileType(file, newType) {
         file.type = newType;
         fileWasModified(file);
+        clearValidationIssues();
         return newType;
     }
 
     function changeFileLabel(file, newLabel) {
         file.label = newLabel;
         fileWasModified(file);
+        clearValidationIssues();
         return newLabel;
     }
 
@@ -193,7 +212,7 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, option
         newFileListing.splice(newIndex, 0, movedFile);
         newFileListing.forEach((f, index) => f.order = index);
 
-        setFileListing(newFileListing);
+        setFieldListingUpdatingFormData(newFileListing);
         fileWasModified(movedFile);
     }
 
@@ -207,7 +226,7 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, option
         <FileUploaderHolder className={"form-field-files"}>
             {options.label ? <Label>{options.label}</Label> : null}
 
-            <div className="inner-holder">
+            <div className={`inner-holder ${validationIssues && validationIssues.length ? 'issues' : ''}`}>
                 <FileUploader
                     s3Url={'https://ds-innovation-workflow-dev.s3.eu-west-2.amazonaws.com/'}
                     isImage={filename => { return false; }}
@@ -222,6 +241,9 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, option
                         changeFileType={changeFileType} changeFileLabel={changeFileLabel} reorderFile={reorderFile} removeFile={removeFile}
                         fileLabels={fileLabels} fileTypeOptions={fileTypeOptions} /> : null}
             </div>
+
+            { validationIssues ? <ValidationIssueListing issues={validationIssues} /> : null }
+
         </FileUploaderHolder>
     );
 }
