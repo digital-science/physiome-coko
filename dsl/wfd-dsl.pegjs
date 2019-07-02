@@ -1046,7 +1046,7 @@ ConditionOperation
 	= ("!=" / "==" / "in" / "<=" / ">=" / "<" / ">")
 
 ConditionValue
-	= (ConditionEnumSetValue / ConditionEnumValue / ConditionSimpleValue)
+	= (ConditionEnumSetValue / ConditionSimpleValue / ConditionEnumValue)
 
 ConditionalFunctionValue
 	= ws fnName:propName "(" arg:ConditionModelTargetValue ")" ws
