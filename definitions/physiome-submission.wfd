@@ -161,6 +161,11 @@ instance Submission {
         { priceAcknowledged => (priceAcknowledged == true), "You must acknowledge your acceptance of the associated curation fee associated with the submission." }
 
         { iupsCommission => (hasValue(iupsCommission)), "A manuscript commission type is required. Please select one." }
+
+        { authors => (length(authors) > 0), "At least one author is required. Please add an author." }
+
+        { authors => (length(authors) == 0 || correspondingAuthors(authors) > 0), "At least one corresponding author is required. Please mark an existing author as being a corresponding author or add an additional author who is marked as a corresponding author." }
+
     }
 
 
