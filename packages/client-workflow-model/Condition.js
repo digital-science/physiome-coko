@@ -12,13 +12,20 @@ ConditionFunctions.length = v => {
     if(typeof v === "string") {
         return v.length;
     }
-    return undefined;
+
+    return 0;
 };
 
 
 ConditionFunctions.hasValue = v => {
     return !!v;
 };
+
+function registerConditionFunction(name, method) {
+    ConditionFunctions[name] = method;
+}
+
+export { registerConditionFunction };
 
 
 
