@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { th } from '../src/index';
 
 
 const _Checkbox = ({...rest}) => {
@@ -21,14 +22,20 @@ const SmallCheckBox = _SizeSmall(StyledCheckbox);
 
 
 
-const _CheckboxLabel = ({children=null, ...rest}) => {
-    return <label {...rest}>{children}</label>
+const _CheckboxLabel = ({className, issues=false, children=null, ...rest}) => {
+    return <label className={`${className} ${issues ? 'issues' : ''}`} {...rest}>{children}</label>
 };
 
 const StyledCheckboxLabel = styled(_CheckboxLabel)`
     font-family: ProximaNovaLight,sans-serif;
     font-size: 14px;
-    color: black;  
+    color: black;
+    
+    &.issues {
+        background: ${th('validationIssue.background')};
+        border-radius: ${th('validationIssue.borderRadius')};
+        padding: ${th('validationIssue.padding')};
+    }
 `;
 
 const SmallCheckboxLabel = _SizeSmall(StyledCheckboxLabel);

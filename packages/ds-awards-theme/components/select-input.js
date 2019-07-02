@@ -2,9 +2,9 @@ import React from 'react';
 import styled from 'styled-components';
 import { th } from '../src/index';
 
-const _Select = ({className, options, value, placeholder, ...rest}) => {
+const _Select = ({className, options, value, placeholder, issue, ...rest}) => {
     return (
-        <select className={`${className} ${placeholder && !value ? 'placeholder-showing' : ''}`} value={value} {...rest}>
+        <select className={`${className} ${placeholder && !value ? 'placeholder-showing' : ''} ${issue ? 'issue' : ''}`} value={value} {...rest}>
             {placeholder ? <option value={""} disabled>{placeholder}</option> : null}
             {options.map((v, i) => <option key={i} value={v.value}>{v.display}</option> )}
         </select>
@@ -26,6 +26,12 @@ const Select = styled(_Select)`
         box-shadow: 0 0 2px 2px #2196F3;
         border-color: #2196F3;
         outline: 0;
+    }
+    
+    &.issue {
+        border-color: #d10d00;
+        color: ${th('validationIssue.textColor')};
+        background: ${th('validationIssue.background')};
     }
 `;
 

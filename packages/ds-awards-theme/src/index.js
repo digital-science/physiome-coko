@@ -172,6 +172,27 @@ const DSAwardsTheme = {
     tagInput: {
         fontFamily: ThemeBaseDefaults.InputFontFamily,
         fontSize: ThemeBaseDefaults.FontSizeSmall
+    },
+
+    // Validation Issue list
+    validationIssueList: {
+        fontFamily: ThemeBaseDefaults.LabelFontFamily,
+        textColor: '#a90c00',
+
+        default: {
+            fontSize: ThemeBaseDefaults.FontSizeDefault
+        },
+        small: {
+            fontSize: ThemeBaseDefaults.FontSizeSmall
+        }
+    },
+
+    // Validation Issue (generic)
+    validationIssue: {
+        textColor: '#a90c00',
+        background: "#ff000014",
+        borderRadius: "3px",
+        padding: "5px"
     }
 
 };
