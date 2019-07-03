@@ -4,19 +4,18 @@ const { Submission } = models;
 const { FigshareApi } = require('figshare-publish-service');
 const crypto = require('crypto');
 
-const logger = require("@pubsweet/logger");
-const LogPrefix = '[ExternalTask/PublishArticle]';
+const logger = require("workflow-utils/logger-with-prefix")('external-task/publish-article');
 
 
 module.exports = function _setupPublishArticleTask(client) {
 
     client.subscribe('publish-article', async ({ task, taskService }) => {
 
-        logger.debug(`${LogPrefix} publish article is starting {submission_id: ${task.businessKey}}`);
+        logger.debug(`publish article is starting {submission_id: ${task.businessKey}}`);
 
         const instanceId = task.businessKey;
         if(!instanceId) {
-            logger.error(`${LogPrefix} failed to process for submission due to missing business key (processInstanceId="${task.processInstanceId}")`);
+            logger.error(`failed to process for submission due to missing business key (processInstanceId="${task.processInstanceId}")`);
             return taskService.handleFailure(task, {
                 errorMessage: "Publish Article Failed",
                 errorDetails: `Publish article task had no valid business key associated with the external service task.`,
@@ -27,7 +26,7 @@ module.exports = function _setupPublishArticleTask(client) {
 
         const submission = await Submission.find(instanceId, ['articleFiles', 'submitter']);
         if(!submission) {
-            logger.warn(`${LogPrefix} unable to find submission instance for id (${instanceId})`);
+            logger.warn(`unable to find submission instance for id (${instanceId})`);
             return;
         }
 
@@ -39,12 +38,12 @@ module.exports = function _setupPublishArticleTask(client) {
 
         }).then(() => {
 
-            logger.debug(`${LogPrefix} publishing submission article to figshare has finished, completing external task`);
+            logger.debug(`publishing submission article to figshare has finished, completing external task`);
             return taskService.complete(task);
 
         }).catch(err => {
 
-            logger.error(`${LogPrefix} failed due to error: ${err.toString()}`);
+            logger.error(`failed due to error: ${err.toString()}`);
             /*return taskService.handleFailure(task, {
                 errorMessage: "Publish Award Failed",
                 errorDetails: `Unable to publish award due to: ${err.toString()}`,
@@ -185,7 +184,7 @@ function _publishToArticleId(articleId, submission) {
 
 function _uploadFileForArticle(articleId, submission, file) {
 
-    const s3Object = file.s3Object("Submission", submission.id);
+    const s3Object = file.s3Object(Submission, submission.id);
 
     return _md5ForS3File(s3Object).then(md5 => {
 
@@ -202,7 +201,7 @@ function _uploadFileForArticle(articleId, submission, file) {
             }
 
             const part = parts.shift();
-            const partStream = file.s3Object("Submission", submission.id, _s3ParametersForPartRange(part)).createReadStream();
+            const partStream = file.s3Object(Submission, submission.id, _s3ParametersForPartRange(part)).createReadStream();
 
             return new Promise((resolve, reject) => {
 
