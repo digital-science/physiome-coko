@@ -54,6 +54,7 @@ const Card = styled(({Tag = "div", className, issue, reorderingGrabber, children
 `;
 
 const CardContent = styled.div`
+    position: relative;
 `;
 
 const CardRemoveButton = styled(({className, onClick}) => {
