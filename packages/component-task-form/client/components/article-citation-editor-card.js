@@ -4,7 +4,7 @@ import { th } from 'ds-awards-theme';
 
 import ArticleCitation from './article-citation';
 
-import Card from "ds-awards-theme/components/card";
+import Card, { CardRemoveButton } from "ds-awards-theme/components/card";
 import { SmallBlockLabel } from "ds-awards-theme/components/label";
 import { SmallTextInput } from "ds-awards-theme/components/text-input";
 import { InlineButton, SmallInlineButton } from "ds-awards-theme/components/inline-button";
@@ -16,6 +16,14 @@ import useGetDetailsForDOI from 'dimensions-lookup-service/client/queries/getDet
 
 
 //// 10.3389/fphys.2018.00148    test DOI
+
+
+const RemoveButtonType = {
+    None: 'None',
+    Inline: 'Inline',
+    CardButton: 'CardButton'
+};
+export { RemoveButtonType };
 
 
 const FormattedCitationHolder = styled.div`
@@ -77,14 +85,33 @@ const ArticleCitationHolder = styled.div`
   }
 
   & ${SmallInlineButton} {
-    float: right;
+    /*float: right;*/
   }
   
   & ${SmallInlineButton} + ${SmallInlineButton}{
     margin-left: 5px;
   }
+  
+  &.cardbutton {
+    justify-content: flex-start;
+  }
+  
+  &.cardbutton div.button-group {
+    display: flex;
+    flex-direction: row-reverse;
+    
+    & ${SmallInlineButton} + ${SmallInlineButton}{
+      margin-right: 5px;
+      margin-left: 0;
+    }
+  }
+  
+  .spacer {
+    height: 10px;
+  }
 `;
 
+const ArticleCitationEditorCardRemoveButton = ({className, onClick}) => <CardRemoveButton className={className} onClick={onClick} />;
 
 
 function useManualCitationValueField(citation, field) {
@@ -107,19 +134,19 @@ function _citationHasContent(c) {
 }
 
 
-const _ArticleCitationEditorCard = ({className, citation, didModifyCitation}) => {
+const _ArticleCitationEditorCard = ({className, citation, didModifyCitation, removeCitation=null, removeButtonType=RemoveButtonType.None}) => {
 
     const citationHasContent = useMemo(() => {
         return (citation && _citationHasContent(citation));
     }, [citation]);
     const [editing, setEditing] = useState(!citationHasContent);
 
-    const [doi, setDoi] = useState((citation && citation.id && citation.doi) ? citation.doi : "");
+    const [doi, setDoi] = useState((citation && citation.pubId && citation.doi) ? citation.doi : "");
     const [isFindingDoi, setIsFindingDoi] = useState(false);
     const lookupGeneration = useRef(0);
 
-    const [isEditingManualCitation, setIsEditingManualCitation] = useState(false);
-    const [manualCitation] = useState(Object.assign({}, citation));
+    const [isEditingManualCitation, setIsEditingManualCitation] = useState( citation && _citationHasContent(citation) && !citation.pubId);
+    const [manualCitation] = useState(Object.assign({}, (citation && !citation.pubId) ? citation : {} ));
 
     const onDoiChange = (event) => {
         setDoi(event.target.value || "");
@@ -127,7 +154,7 @@ const _ArticleCitationEditorCard = ({className, citation, didModifyCitation}) =>
 
     const [debouncedDoi] = useDebounceValue(doi, 250, null, doi);
     const [performGetDOIDetails] = useGetDetailsForDOI();
-    const [doiLookupCitation, setDoiLookupCitation] = useState((citation && citation.id && citation.doi) ? citation : null);
+    const [doiLookupCitation, setDoiLookupCitation] = useState((citation && citation.pubId && citation.doi) ? citation : null);
 
     // Manual data entry
     const [title, handleTitleChange] = useManualCitationValueField(manualCitation, "title");
@@ -146,7 +173,7 @@ const _ArticleCitationEditorCard = ({className, citation, didModifyCitation}) =>
 
 
     const setCitation = (newCitation) => {
-        const d = Object.assign({}, newCitation);
+        const d = Object.assign({id:citation.id}, newCitation);
         didModifyCitation(d);
     };
 
@@ -164,20 +191,24 @@ const _ArticleCitationEditorCard = ({className, citation, didModifyCitation}) =>
         }
     };
 
-    const editCitation = () => {
+    const handleEditCitationClick = () => {
         setEditing(true);
     };
 
-    const removeCitation = () => {
-        didModifyCitation(null);
-        setEditing(true);
+    const handleRemoveCitationClick = () => {
+        if(removeCitation) {
+            removeCitation(citation);
+        } else {
+            didModifyCitation(citation);
+            setEditing(true);
+        }
     };
 
     useEffect(() => {
 
         setEditing(!citationHasContent);
 
-        if(citation && citation.id && citation.doi) {
+        if(citation && citation.pubId && citation.doi) {
             setDoiLookupCitation(citation);
             setDoi(citation.doi);
         }
@@ -201,7 +232,15 @@ const _ArticleCitationEditorCard = ({className, citation, didModifyCitation}) =>
 
         performGetDOIDetails(debouncedDoi).then(details => {
             if(generation >= lookupGeneration.current) {
-                setDoiLookupCitation(details);
+                if(details) {
+                    const newDetails = Object.assign({}, details);
+                    newDetails.pubId = newDetails.id;
+                    delete newDetails.id;
+
+                    setDoiLookupCitation(newDetails);
+                } else {
+                    setDoiLookupCitation(details);
+                }
             }
         }).finally(() => {
             if(generation >= lookupGeneration.current) {
@@ -234,16 +273,18 @@ const _ArticleCitationEditorCard = ({className, citation, didModifyCitation}) =>
                             {isFindingDoi ? <Spinner small={true} message="Finding details for DOI"/> : null}
 
                             {doiLookupCitation ? (
-                                <ArticleCitationHolder>
+                                <ArticleCitationHolder className={removeButtonType.toLowerCase()}>
                                     <PossibleCitationHolder onClick={selectLookupCitation}>
                                         <ArticleCitation citation={doiLookupCitation} />
                                     </PossibleCitationHolder>
-                                    {citationHasContent ? <SmallInlineButton bordered={true} onClick={() => setEditing(false)}>Cancel</SmallInlineButton> : null}
-                                    <SmallInlineButton bordered={true} onClick={selectLookupCitation}>Select Citation</SmallInlineButton>
+                                    <div className="button-group">
+                                        {citationHasContent ? <SmallInlineButton bordered={true} onClick={() => setEditing(false)}>Cancel</SmallInlineButton> : null}
+                                        {doiLookupCitation.pubId !== citation.pubId ? <SmallInlineButton bordered={true} onClick={selectLookupCitation}>Select Citation</SmallInlineButton> : null}
+                                    </div>
                                 </ArticleCitationHolder>
                             ) : (
-                                <ArticleCitationHolder>
-                                    {citationHasContent ? <SmallInlineButton bordered={true} onClick={() => setEditing(false)}>Cancel</SmallInlineButton> : null}
+                                <ArticleCitationHolder className={removeButtonType.toLowerCase()}>
+                                    {citationHasContent ? <SmallInlineButton bordered={true} onClick={() => setEditing(false)}>Cancel</SmallInlineButton> : <div className="spacer" />}
                                 </ArticleCitationHolder>
                             )}
                         </React.Fragment>
@@ -297,7 +338,7 @@ const _ArticleCitationEditorCard = ({className, citation, didModifyCitation}) =>
                             </ArticleCitationDataEditorHolder>
 
                             {/*fix me: only display a formatted citation when we have a citation to actually show*/}
-                            <ArticleCitationHolder>
+                            <ArticleCitationHolder className={removeButtonType.toLowerCase()}>
                                 <ManualCitationHolder onClick={saveManualCitation}>
                                     <ArticleCitation citation={manualCitation}>
                                         <span className="notice">Enter the citaton details in the fields above to generate your article citation.</span>
@@ -316,17 +357,20 @@ const _ArticleCitationEditorCard = ({className, citation, didModifyCitation}) =>
                 :
 
                 <React.Fragment>
-                    <ArticleCitationHolder>
+                    <ArticleCitationHolder className={removeButtonType.toLowerCase()}>
                         <FormattedCitationHolder>
                             <ArticleCitation citation={citation} />
                         </FormattedCitationHolder>
-                        <SmallInlineButton bordered={true} onClick={removeCitation}>Remove Citation</SmallInlineButton>
-                        <SmallInlineButton bordered={true} onClick={editCitation}>Modify Citation</SmallInlineButton>
+
+                        {removeButtonType === RemoveButtonType.Inline ?
+                            <SmallInlineButton bordered={true} onClick={handleRemoveCitationClick}>Remove Citation</SmallInlineButton> : null
+                        }
+                        <SmallInlineButton bordered={true} onClick={handleEditCitationClick}>Modify Citation</SmallInlineButton>
                     </ArticleCitationHolder>
                 </React.Fragment>
             }
 
-
+            {removeButtonType === RemoveButtonType.CardButton ? <ArticleCitationEditorCardRemoveButton onClick={handleRemoveCitationClick} /> : null}
 
         </Card>
     );
