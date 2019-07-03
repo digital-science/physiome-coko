@@ -51,6 +51,13 @@ const ArticleCitationEditorCardHolder = styled.div`
     & .button-holder {
         padding: 8px;
     }
+    
+        
+    &.issues {
+      box-shadow: inset 0 0 6px #d10f008c;
+      border-color: #d10f00;
+    }
+
 `;
 
 const DraggableArticleCitationEditorCard = ({citationId, index, ...props}) => {
@@ -77,6 +84,7 @@ function FormFieldArticleCitationListEditor({ className, data, binding, descript
         const newCitation = {id:nextUniqueIdInArray(citations)};
         const newCitationList = (citations || []).splice(0);
 
+        clearValidationIssues();
         newCitationList.push(newCitation);
         setCitations(newCitationList);
     };
@@ -84,6 +92,7 @@ function FormFieldArticleCitationListEditor({ className, data, binding, descript
     const removeCitation = c => {
         const id = c.id;
         setCitations(citations.splice(0).filter(citation => citation.id !== id));
+        clearValidationIssues();
     };
 
     const didModifyCitation = (citation) => {
@@ -92,6 +101,7 @@ function FormFieldArticleCitationListEditor({ className, data, binding, descript
             const newCitationList = citations.splice(0);
             newCitationList[index] = citation;
             setCitations(newCitationList);
+            clearValidationIssues();
         }
     };
 
@@ -114,10 +124,10 @@ function FormFieldArticleCitationListEditor({ className, data, binding, descript
     }
 
     return (
-        <ArticleCitationListEditorHolder className={className}>
+        <ArticleCitationListEditorHolder className={className} >
             {options.label ? <Label>{options.label}</Label> : null}
 
-            <ArticleCitationEditorCardHolder>
+            <ArticleCitationEditorCardHolder className={validationIssues && validationIssues.length ? 'issues' : ''}>
 
                 <DragDropContext onDragEnd={onDragEnd}>
                     <Droppable droppableId="citation-listing">
