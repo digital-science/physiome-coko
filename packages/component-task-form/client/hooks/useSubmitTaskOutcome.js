@@ -24,11 +24,6 @@ export default  function useSubmitTaskOutcome(instanceId, formDefinition, instan
 
     return (taskId, outcomeType, options) => {
 
-        console.log("------");
-        console.log("Submit task outcome: ");
-        console.dir(outcomeType);
-        console.dir(options);
-
         // From the task definition we want to find the outcome requested.
         // The outcome can have state variable changes requested alongside it that need
         // to be sent to the server at the same time.
@@ -37,8 +32,6 @@ export default  function useSubmitTaskOutcome(instanceId, formDefinition, instan
         if(!outcome) {
             throw new Error(`Unable to find matching outcome for outcome type (${outcomeType})`);
         }
-
-        console.dir(outcome);
 
         // Determine state changes that have been requested, fields should be filtered down to those that are
         // marked as being state variables within the tasks model definition.
@@ -50,15 +43,11 @@ export default  function useSubmitTaskOutcome(instanceId, formDefinition, instan
             }
 
             if(outcome.skipValidations !== true && validateForm && !validateForm()) {
-                console.log("form validation failed");
                 return _submitDidFail(SubmitTaskFailureReason.FormValidationFailed);
             }
 
 
             const state = instanceType.filterObjectToStateVariables(outcome._graphqlState || {});
-
-            console.log("state change !!!");
-            console.dir(state);
 
             return saveInstanceData().then(() => {
 
@@ -72,11 +61,14 @@ export default  function useSubmitTaskOutcome(instanceId, formDefinition, instan
                     return _submitDidFail(SubmitTaskFailureReason.RequiresValidatedSubmitter);
 
                 } else if(result === 'Success') {
-                    console.log(`Completed task[${taskId}] for instance[${instanceId}]`);
 
                     if(wasSubmitted) {
                         return wasSubmitted(outcome, state);
                     }
+
+                } else if(result === 'ValidationFailed') {
+
+                    return _submitDidFail(SubmitTaskFailureReason.FormValidationFailed);
                 }
             });
 
@@ -84,12 +76,7 @@ export default  function useSubmitTaskOutcome(instanceId, formDefinition, instan
 
             const state = instanceType.filterObjectToStateVariables(outcome._graphqlState || {});
 
-            console.log("state change !!!");
-            console.dir(state);
-
             return destroyInstance(instanceId, state).then(result => {
-
-                console.log(`Destroy instance[${instanceId}]`);
 
                 if(wasSubmitted) {
                     return wasSubmitted(outcome, state);
