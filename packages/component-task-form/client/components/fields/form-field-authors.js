@@ -23,9 +23,9 @@ import { registerConditionFunction } from 'client-workflow-model/Condition';
 
 registerConditionFunction('correspondingAuthors', v => {
     if(!v || !v.length) {
-        return false;
+        return 0;
     }
-    return v.filter(a => a.isCorresponding === true).length > 0;
+    return v.filter(a => a.isCorresponding === true).length;
 });
 
 
