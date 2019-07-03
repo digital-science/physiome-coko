@@ -38,7 +38,6 @@ class Condition {
         this.expression = condition.expression;
 
         function _addBindings(e) {
-
             if(!e) {
                 return;
             }
@@ -64,6 +63,8 @@ class Condition {
                 value.value = _enumResolve(value.value);
             } else if(value.type === "enum-set") {
                 value.value = value.value.map(v => _enumResolve(v));
+            } else if(value.type === "function" && value.argument) {
+                _resolveEnumsOnValue(value.argument, _enumResolve);
             }
         }
 
@@ -160,22 +161,22 @@ class Condition {
                 const rhs = _resolveValue(e.rhs);
 
                 switch(e.op) {
-                case "!=":
-                    return lhs !== rhs;
-                case "==":
-                    return lhs === rhs;
+                    case "!=":
+                        return lhs !== rhs;
+                    case "==":
+                        return lhs === rhs;
 
-                case ">=":
-                    return lhs >= rhs;
-                case "<=":
-                    return lhs <= rhs;
-                case ">":
-                    return lhs > rhs;
-                case "<":
-                    return lhs < rhs;
+                    case ">=":
+                        return lhs >= rhs;
+                    case "<=":
+                        return lhs <= rhs;
+                    case ">":
+                        return lhs > rhs;
+                    case "<":
+                        return lhs < rhs;
 
-                case "in":
-                    return (rhs instanceof Array ? rhs : [rhs]).indexOf(lhs) !== -1;
+                    case "in":
+                        return (rhs instanceof Array ? rhs : [rhs]).indexOf(lhs) !== -1;
                 }
 
                 return false;
