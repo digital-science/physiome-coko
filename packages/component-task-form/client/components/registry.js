@@ -18,6 +18,7 @@ import FormFieldGroup from './fields/form-field-group';
 import FormFieldAuthorsEditor, { FormFieldAuthorsListing } from './fields/form-field-authors';
 import FormFieldFundingEditor, { FormFieldFundingListing } from './fields/form-field-funding';
 import FormFieldArticleCitation from './fields/form-field-article-citation';
+import FormFieldArticleCitationListEditor from './fields/form-field-article-citation-list';
 import FormFieldKeywords, { FormFieldKeywordsListing } from './fields/form-field-keywords';
 
 import FormFieldFigshareEmbed from './fields/form-field-figshare-embed';
@@ -44,6 +45,7 @@ const FormFieldRegistry = {
     'FundingListing' : FormFieldFundingListing,
 
     'ArticleCitation' : FormFieldArticleCitation,
+    'ArticleCitationListEditor' : FormFieldArticleCitationListEditor,
 
     'KeywordsEditor' : FormFieldKeywords,
     'KeywordsListing' : FormFieldKeywordsListing,
