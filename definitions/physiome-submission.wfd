@@ -99,6 +99,7 @@ instance Submission {
         supplementaryFiles: [File] <set, file-labels, file-types>,
 
         figshareArticleId: String <input:exclude>,
+        figshareArticleDoi: String <input:exclude>,
 
         paymentSessionId: String <input:exclude>,
         paymentCompleted: Boolean <input:exclude, default:false>
@@ -115,7 +116,8 @@ instance Submission {
         }
 
         fields "read-only" {
-            phase, manuscriptId, submissionDate
+            phase, manuscriptId, submissionDate, figshareArticleDoi,
+            publishDate, figshareArticleId
         }
 
         fields "curation" {
@@ -123,8 +125,7 @@ instance Submission {
     	    curator,
     	    allFilesPresent, resultsMatch, modelAnnotated,
     	    primaryPaperExists, resultsInPapersOverlap, sameModelInPapers,
-    	    curationNotes,
-    	    publishDate, figshareArticleId
+    	    curationNotes
         }
 
         tasks "owner-submit" {
