@@ -215,7 +215,7 @@ instance Submission {
 
         { AuthorsListing => authors, label:"Authors" }
 
-        { ArticleCitation => primaryPapers, label:"Primary Paper", readOnly:true }
+        { ArticleCitationListing => primaryPapers, label:"Primary Papers" }
 
         { StaticText => iupsCommission, label:"Commission Type", mapping:mapping("DisplayedIUPSCommissionKinds") }
 
