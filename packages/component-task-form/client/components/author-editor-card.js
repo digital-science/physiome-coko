@@ -21,7 +21,9 @@ function useAuthorValueField(author, field, didModifyAuthor, includeValidation) 
         author[field] = v;
 
         didModifyAuthor(author);
-        setValidationIssue(false);
+        if(setValidationIssue) {
+            setValidationIssue(false);
+        }
     };
 
     return [value, setValue, handleChange, validationIssue, setValidationIssue];
