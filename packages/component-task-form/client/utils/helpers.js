@@ -15,9 +15,12 @@ function nextUniqueIdInArray(array, idField='id') {
 
 function assignUniqueIdsToArrayItems(array, idField='id') {
 
-    let nextId = nextUniqueIdInArray(array, idField);
+    let nextId = undefined;
     array.forEach(a => {
         if(!a.hasOwnProperty(idField)) {
+            if(nextId === undefined) {
+                nextId = nextUniqueIdInArray(array, idField);
+            }
             a[idField] = nextId;
             ++nextId;
         }
