@@ -10,7 +10,8 @@
       "FunctionDeclaration": {"parameters": "first"},
       "CallExpression": {"arguments": "first"},
       "FunctionExpression": {"parameters": "first"},
-      "ObjectExpression": "first"
+      "ObjectExpression": "first",
+      "SwitchCase": 1
     }],
     "react/jsx-indent-props": [4, "first"],
     "consistent-return": 0,
