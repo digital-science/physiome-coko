@@ -1151,7 +1151,7 @@ aclTarget "acl target"
 
 aclEntry "acl entry"
 	= ws permission:("allow"/"deny") ws target:aclTarget ws actions:aclAccessList
-      grouping:aclAccessTargetSpecifier? condition:aclCondition?
+      grouping:aclAccessTargetSpecifier? condition:aclCondition? validations:aclValidationSet?
    	{
     	const r = {type:"entry", permission:permission, target:target, actions:actions};
     	if(grouping) {
@@ -1159,6 +1159,9 @@ aclEntry "acl entry"
         }
         if(condition) {
         	r.condition = condition;
+        }
+        if(validations) {
+        	r.validations = validations;
         }
     	return r;
     }
@@ -1194,6 +1197,24 @@ aclCondition "acl condition"
 	= ws "where" ws condition:Condition
     {
     	return condition;
+    }
+
+aclValidationSet "acl validation set"
+	= ws "validations" ws "[" ws validations:(aclValidationMultiple / aclValidationsSingle) ws "]"
+    {
+    	return validations;
+    }
+
+aclValidationsSingle
+	= ws validation:string
+    {
+    	return [validation];
+    }
+
+aclValidationMultiple
+	= ws "[" ws first:string rest:(ws "," ws other:string {return other})* ws "]"
+    {
+    	return [first, ...(rest || [])];
     }
 
 
