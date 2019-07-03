@@ -158,19 +158,23 @@ instance Submission {
 
         { abstract => (length(abstract) > 0), "A manuscript abstract is required. Please enter one." }
 
-        { priceAcknowledged => (priceAcknowledged == true), "You must acknowledge your acceptance of the associated curation fee associated with the submission." }
-
         { iupsCommission => (hasValue(iupsCommission)), "A manuscript commission type is required. Please select one." }
+
 
         { articleFiles => (length(articleFiles) > 0), "At least one manuscript file needs to be uploaded for your submission. Please upload a file." }
 
+
         { primaryPapers => (length(primaryPapers) > 0), "At least one primary paper citation is required. Please add an article citation for a primary paper." }
+
+        { primaryPapers => (length(primaryPapers) == 0 || validCitations(primaryPapers) > 0), "At minimum one valid primary paper article citation is required." }
 
 
         { authors => (length(authors) > 0), "At least one author is required. Please add an author." }
 
         { authors => (length(authors) == 0 || correspondingAuthors(authors) > 0), "At least one corresponding author is required. Please mark an existing author as being a corresponding author or add an additional author who is marked as a corresponding author." }
 
+
+        { priceAcknowledged => (priceAcknowledged == true), "You must acknowledge your acceptance of the associated curation fee associated with the submission." }
     }
 
 
