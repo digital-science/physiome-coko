@@ -164,6 +164,8 @@ instance Submission {
 
         { articleFiles => (length(articleFiles) > 0), "At least one manuscript file needs to be uploaded for your submission. Please upload a file." }
 
+        { primaryPapers => (length(primaryPapers) > 0), "At least one primary paper citation is required. Please add an article citation for a primary paper." }
+
 
         { authors => (length(authors) > 0), "At least one author is required. Please add an author." }
 
@@ -180,7 +182,7 @@ instance Submission {
 
         { TextArea => abstract, label:"Abstract", rows:6 }
 
-        { ArticleCitation => primaryPapers, label:"Primary Paper" }
+        { ArticleCitationListEditor => primaryPapers, label:"Primary Papers" }
 
         { AuthorsEditor => authors, label:"Authors" }
 
