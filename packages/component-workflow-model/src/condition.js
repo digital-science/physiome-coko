@@ -267,10 +267,16 @@ ConditionFunctions.hasValue = v => {
 
 ConditionFunctions.correspondingAuthors =  v => {
     if(!v || !v.length) {
-        return false;
+        return 0;
     }
-    return v.filter(a => a.isCorresponding === true).length > 0;
+    return v.filter(a => a.isCorresponding === true).length;
 };
 
+ConditionFunctions.validCitations = citations => {
+    if(!citations || !citations.length) {
+        return 0;
+    }
+    return citations.filter(c => c.title && c.title.trim().length).length;
+};
 
 module.exports = Condition;
