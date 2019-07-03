@@ -27,6 +27,11 @@ const FileUploaderHolder = styled.div`
       box-shadow: inset 0 0 4px #d10f008c;
       border-color: #d10f00;
     }
+    
+    > div.issues ${FileUploader} {
+      background: linear-gradient(180deg,rgba(255,255,255,1) 0%,#d10f002e 100%);
+      border-color: #d10f004a !important;
+    }
 `;
 
 
