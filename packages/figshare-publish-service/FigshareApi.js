@@ -4,8 +4,10 @@ const logger = require('@pubsweet/logger');
 const FigshareApiEndpoints = {
 
     CreateArticle: "account/articles",
+    GetArticle: (id) => { return `account/articles/${encodeURI(id)}` },
     UpdateArticle: (id) => { return `account/articles/${encodeURI(id)}` },
     PublishArticle: (id) => { return `account/articles/${encodeURI(id)}/publish` },
+    ReserveArticleDOI: (id) => { return `account/articles/${encodeURI(id)}/reserve_doi` },
 
     InitiateFileUpload: (id) => { return `account/articles/${encodeURI(id)}/files` },
     CompleteFileUpload: (id, fileInfo) =>  { return `account/articles/${encodeURI(id)}/files/${encodeURI(fileInfo.id)}` },
@@ -34,6 +36,11 @@ class FigshareApi {
         });
     }
 
+    getArticle(articleID) {
+
+        return this._performGetRequest(FigshareApiEndpoints.GetArticle(articleID));
+    }
+
     updateArticle(articleID, articleData) {
 
         return this._performPutRequest(FigshareApiEndpoints.UpdateArticle(articleID), articleData);
@@ -42,6 +49,11 @@ class FigshareApi {
     publishArticle(articleID) {
 
         return this._performPostRequest(FigshareApiEndpoints.PublishArticle(articleID));
+    }
+
+    reserveArticleDoi(articleID) {
+
+        return this._performPostRequest(FigshareApiEndpoints.ReserveArticleDOI(articleID));
     }
 
     getArticleFileListing(articleID) {
