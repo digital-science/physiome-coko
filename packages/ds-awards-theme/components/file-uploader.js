@@ -20,6 +20,7 @@ const FileUploadGreeting = styled(_FileUploadGreeting)`
     padding: 10px;
     text-align: center;
     font-size: 15px;
+    line-height: 40px;
     
     b {
         font-family: ProximaNovaLight, sans-serif;
@@ -54,7 +55,7 @@ const FileUploadProgress = styled(_FileUploadProgress)`
     display: flex;
 
     > div {
-        background: #4caf50a1;
+        background: rgba(35,125,0,0.48);
         border-radius: 5px;
     }
 `;
@@ -94,15 +95,17 @@ const _FileUploader = ({greetingComponent, progressComponent, errorComponent, me
     );
 };
 
-
-export default styled(_FileUploader)`
+const FileUploader = styled(_FileUploader)`
     box-sizing: border-box;
 
     width: 100% !important;
-    height: 40px !important;
+    height: 60px !important;
     
     background: rgb(255,255,255);
     background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(213,238,245,0.59) 100%);
     
     border: 2px dashed #cbcbcb7a !important;
 `;
+
+
+export default FileUploader;
