@@ -277,6 +277,8 @@ instance Submission {
 
                 { StaticText => publishDate, (phase == SubmissionPhase.Published), label:"Published Date" }
 
+                { StaticText => figshareArticleDoi, (hasValue(figshareArticleDoi) == true), label: "Article DOI" }
+
                 { TextArea => curationNotes, <administrator>, label:"Notes" }
 
                 { Checkbox => hidden, <administrator>, (phase in [SubmissionPhase.Submitted, SubmissionPhase.Decision]), label:"Place submission on-hold" }
