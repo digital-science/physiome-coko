@@ -17,6 +17,18 @@ import { th } from "ds-awards-theme";
 import ValidationIssueListing from "ds-awards-theme/components/validation-issue-listing";
 
 
+import { registerConditionFunction } from 'client-workflow-model/Condition';
+
+
+registerConditionFunction('validCitations', citations => {
+    if(!citations || !citations.length) {
+        return 0;
+    }
+    return citations.filter(c => c.title && c.title.trim().length).length;
+});
+
+
+
 const ArticleCitationListEditorHolder = styled.div`    
     > div.inner-holder {
         border: 1px solid #d0d0d0;
