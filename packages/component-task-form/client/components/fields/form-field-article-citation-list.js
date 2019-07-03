@@ -13,8 +13,10 @@ import { DisabledStaticText } from 'ds-awards-theme/components/static-text';
 import { FaPlus } from 'react-icons/fa';
 
 import ArticleCitationEditorCard, { RemoveButtonType } from '../article-citation-editor-card';
-import { th } from "ds-awards-theme";
 import ValidationIssueListing from "ds-awards-theme/components/validation-issue-listing";
+import ArticleCitation from './../article-citation';
+import { th } from "ds-awards-theme";
+
 
 
 import { registerConditionFunction } from 'client-workflow-model/Condition';
@@ -172,3 +174,93 @@ function FormFieldArticleCitationListEditor({ className, data, binding, descript
 
 export default withFormField(FormFieldArticleCitationListEditor);
 
+
+
+
+
+
+// ----
+// Article Citations (static list)
+// ---
+
+const FormStyledArticleCitation = styled(ArticleCitation)`
+  color: black !important;
+`;
+
+const CitationRow = styled.li`
+  /*> div {
+    margin-left: 24px;
+    font-size: 95%;
+    color: #505050;
+  }
+  
+  > ul {
+    font-size: 95%;
+  }*/
+`;
+
+const CitationListing = styled( ({className, citations}) => {
+    return (
+        <ol className={className}>
+            {citations.map((citation, index) => {
+                return (
+                    <CitationRow key={index}>
+                        <FormStyledArticleCitation citation={citation} />
+                    </CitationRow>
+                );
+            } )}
+        </ol>
+    );
+})`
+  
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: ${th('authorListing.fontFamily')};
+  font-size: ${th('authorListing.fontSize')};
+  
+  counter-reset: funding-counter;
+  padding-left: 20px;
+  
+  & > li {
+    margin: 0;
+    counter-increment: funding-counter;
+    position: relative;
+  }
+  & > li::before {
+    content: counter(funding-counter) ".";
+    font-size: ${th('authorListing.fontSize')};
+    position: absolute;
+    left: -20px;
+    line-height: 1.2em;
+    width: 20px;
+    height: 1.2em;
+    top: 0;
+    text-align: left;
+  }
+  
+  & > li + li {
+    margin-top: 5px;
+  }
+
+`;
+
+function _FormFieldArticleCitationListing({ className, data, binding, instanceId, instanceType, options = {} }) {
+
+    const [citations] = useFormValueBindingForComplexObject(data, binding);
+
+    return (
+        <div className={className}>
+            {options.label ? <BlockLabel>{options.label}</BlockLabel> : null}
+            {(citations && citations instanceof Array && citations.length) ?
+                <CitationListing citations={citations} /> : <DisabledStaticText>No article citations were specified</DisabledStaticText>
+            }
+        </div>
+    );
+}
+
+const FormFieldArticleCitationListing = withFormField(_FormFieldArticleCitationListing);
+
+
+
+export { FormFieldArticleCitationListing };
