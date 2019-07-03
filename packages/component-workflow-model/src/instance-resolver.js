@@ -1,4 +1,5 @@
 const { Identity } = require('./../shared-model/identity');
+const { resolveValidationSetForFormDefinition } = require('./validation-set');
 const { filterModelElementsForRelations, filterModelElementsForOwnerFields,
         filterModelElementsForStates, filterModelElementsForListingFilters,
         filterModelElementsForListingSortable, filterModelElementsForIdSequenceFields,
@@ -32,7 +33,8 @@ const AclActions = {
 
 const CompleteTaskOutcome = {
     Success: 'Success',
-    ValidatedEmailRequired: 'ValidatedEmailRequired'
+    ValidatedEmailRequired: 'ValidatedEmailRequired',
+    ValidationFailed: 'ValidationFailed'
 };
 
 
@@ -740,11 +742,24 @@ InstanceResolver.prototype.completeTask = async function completeTask({id, taskI
         throw new Error('Form outcome result type is not a complete task type.');
     }
 
-
+    const validationSet = resolveValidationSetForFormDefinition(formDefinition, this.taskDef, this.enums);
     const taskOpts = {processInstanceBusinessKey:id};
+    let eagerResolves = [];
+    let tasksAclMatch = null;
+
+
+    // If there are relation fields and the validation set has bindings to apply checks against a relation
+    // (like the number of files etc) then we need to perform an eager resolve on those when finding the
+    // instance.
+
+    if(this.relationFields && this.relationFields.length && validationSet) {
+
+        const validationSetBindings = validationSet.bindings();
+        eagerResolves = this.relationFields.filter(f => validationSetBindings.indexOf(f) !== -1);
+    }
 
     const [instance, user, tasks] = await Promise.all([
-        this.modelClass.find(id),
+        this.modelClass.find(id, eagerResolves),
         this.resolveUserForContext(context),
         taskService.list(taskOpts).then((data) => {
             const tasks = data._embedded.tasks || data._embedded.task;
@@ -761,7 +776,10 @@ InstanceResolver.prototype.completeTask = async function completeTask({id, taskI
         throw new Error("Specific task not found for instance.");
     }
 
-    let tasksAclMatch = null;
+
+    // Apply ACL matching against this specific operation (access and then task completion) for the user.
+    // Task filtering is also applied potentially based on the task ACL (i.e. a submitter can only complete a
+    // submit task on the submission).
 
     if(this.acl) {
 
@@ -785,6 +803,9 @@ InstanceResolver.prototype.completeTask = async function completeTask({id, taskI
     }
 
 
+    // If the outcome requires a validated submitter (i.e. identity with a validated email address)
+    // then we enforce that here. A valid user is required by virtue of this condition.
+
     if(outcomeDefinition.requiresValidatedSubmitter === true) {
 
         if(!user) {
@@ -803,14 +824,22 @@ InstanceResolver.prototype.completeTask = async function completeTask({id, taskI
         throw new AuthorizationError("You do not have access to the task associated with the instance.");
     }
 
-    const allowedKeys = this.stateFields ? this.stateFields.map(e => e.field) : [];
-    const filteredState = (state && allowedKeys && allowedKeys.length) ? _.pick(state, allowedKeys) : {};
-    const completeTaskOpts = {id: taskId};
+
+    // If the task has associated validations applied to it, then we need to apply those as well.
+    // If the outcome skips validations, then they aren't applied on the server either.
+
+    if(validationSet && outcomeDefinition.skipValidations !== true && validationSet.evaluate(instance) !== true) {
+        return CompleteTaskOutcome.ValidationFailed;
+    }
 
 
     // We can now overlay the forced state changes that maybe present within the outcome definition.
     // Any state changes that are mandated in the workflow definitions are applied over top of the front-end
     // supplied state changes (which have already been filtered based on what they are allowed access to via ACLs).
+
+    const allowedKeys = this.stateFields ? this.stateFields.map(e => e.field) : [];
+    const filteredState = (state && allowedKeys && allowedKeys.length) ? _.pick(state, allowedKeys) : {};
+    const completeTaskOpts = {id: taskId};
 
     if(outcomeDefinition.state) {
 
@@ -921,6 +950,10 @@ InstanceResolver.prototype.completeTask = async function completeTask({id, taskI
     // state changes and id sequence application).
 
     if(didModify) {
+
+        // FIXME: we need to apply any validations we may have at this point ???
+
+
         await instance.save();
     }
 
