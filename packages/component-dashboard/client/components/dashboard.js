@@ -122,9 +122,8 @@ function Dashboard(props) {
     const destroySubmission = useDestroySubmissionMutation(submissionTaskID);
     const claimSubmission = useClaimSubmissionMutation(submissionTaskID);
 
-    const createTaskUrl = (id, taskName, taskId) => {
+    const createTaskUrl = (id) => {
         return `/submission/${id}`;
-        //return `/task/submission/${id}/${taskName}/${taskId}`;
     };
     const { history, children } = props;
 
@@ -133,15 +132,8 @@ function Dashboard(props) {
 
     function handleCreateNewTask() {
         createNewTask().then(data => {
-            const { id, tasks } = data;
-            if(id && tasks && tasks.length) {
-
-                const tasksWithForms = taskDefinition.primaryTasksFromTaskList(tasks);
-                if(tasksWithForms && tasksWithForms.length) {
-                    const primaryTask = tasksWithForms[0];
-                    history.push(createTaskUrl(id, primaryTask.formKey.replace(/custom:/gi, ""), primaryTask.id));
-                }
-            }
+            const { id } = data;
+            history.push(createTaskUrl(id));
         });
     }
 
@@ -339,10 +331,6 @@ const LineLimitedText = styled.div`
 
 function ActiveSubmissionTableRow({submission, workflowDescription, claimSubmission, destroySubmission, refreshDashboard}) {
 
-    // Determine the current status to apply to the submission.
-    const { tasks } = submission;
-    const submissionTask = (tasks && tasks.length && tasks.find(task => task.formKey === "custom:submission"));
-
     const deleteSubmission = () => {
         destroySubmission(submission.id, {phase:"Cancelled"}).then(() => {
             refreshDashboard();
@@ -356,10 +344,10 @@ function ActiveSubmissionTableRow({submission, workflowDescription, claimSubmiss
     };
 
     const title = submission.title ? <LineLimitedText>{submission.title}</LineLimitedText> : <React.Fragment><span>No title supplied</span></React.Fragment>;
-    let linkedTitle;
 
     const linkElement = (el) => {
-        return submissionTask ? <Link to={`/submission/${submission.id}`}>{el}</Link> : <Link to={`/details/${submission.id}`}>{el}</Link>;
+        return (submission.phase === "Pending" || submission.phase === "Saved")
+            ? <Link to={`/submission/${submission.id}`}>{el}</Link> : <Link to={`/details/${submission.id}`}>{el}</Link>;
     };
 
 

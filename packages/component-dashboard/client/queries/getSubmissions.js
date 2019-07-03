@@ -36,10 +36,6 @@ query GetSubmissions($filter:SubmissionListingFilterInput, $sorting:SubmissionLi
         id
         displayName
     }
-    tasks {
-        id
-        formKey
-    }
   }
 }
 `;
