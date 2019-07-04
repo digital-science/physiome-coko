@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 import HomeIcon from 'ds-awards-theme/static/home.svg';
-//import ExpandIcon from 'ds-awards-theme/static/expand.svg';
+import ExpandIcon from 'ds-awards-theme/static/expand.svg';
 //import AwardIcon from 'ds-awards-theme/static/award.svg';
 
 
@@ -29,13 +29,24 @@ const Sidebar = styled.nav`
 `;
 
 export default () => {
+
+    const pathIsPublished = (window.location.pathname || []).toLowerCase() === '/published';
+
     return (
         <Sidebar>
-            <div className="selected">
+
+            <div className={!pathIsPublished ? "selected" : ""}>
                 <Link to={`/`}>
                     <img alt="Home" src={HomeIcon} />
                 </Link>
             </div>
+
+            <div className={pathIsPublished ? "selected" : ""}>
+                <Link to={`/published`}>
+                    <img alt="Expand" src={ExpandIcon} />
+                </Link>
+            </div>
+
         </Sidebar>
     );
 };

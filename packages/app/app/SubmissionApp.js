@@ -28,7 +28,7 @@ const App = ({ children, hideSidebar, hideUser }) => (
         <Header hideUser={hideUser}/>
         <BodyContainer>
             <ContentContainer>{children}</ContentContainer>
-            {hideSidebar ? null : <Sidebar>Nav</Sidebar>}
+            {hideSidebar ? null : <Sidebar />}
         </BodyContainer>
         <Footer/>
     </Fragment>
