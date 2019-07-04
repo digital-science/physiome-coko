@@ -5,6 +5,7 @@
   "license": "MIT",
   "dependencies": {
     "@pubsweet/ui-toolkit": "^2.0.0",
+    "jw-paginate": "^1.0.4",
     "moment": "^2.24.0",
     "react-autocomplete": "^1.8.1",
     "react-beautiful-dnd": "^11.0.4",

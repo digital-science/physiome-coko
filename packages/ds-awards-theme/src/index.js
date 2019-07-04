@@ -32,6 +32,7 @@ const ThemeBaseDefaults = {
 
     // Text Color
     TextColor: "#505050",
+    DisabledTextColor: "#9c9c9c",
 
     // Misc
     ButtonIconColor: "#9c9c9c",
@@ -193,6 +194,15 @@ const DSAwardsTheme = {
         background: "#ff000014",
         borderRadius: "3px",
         padding: "5px"
+    },
+
+    // Pagination
+    pagination: {
+        fontFamily: ThemeBaseDefaults.LabelFontFamily,
+        fontSize: ThemeBaseDefaults.FontSizeDefault,
+
+        textColor: ThemeBaseDefaults.TextColor,
+        disabledTextColor: ThemeBaseDefaults.DisabledTextColor
     }
 
 };
