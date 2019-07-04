@@ -159,7 +159,7 @@ targetModelName "target model property name"
 
 
 // ----- Top Level -----
-topLevel = ws content:(task / model / enum / mapping)* ws
+topLevel = ws content:(task / model / enum / mapping / extension)* ws
   {
   	    const m = {};
 
@@ -219,6 +219,19 @@ topLevel = ws content:(task / model / enum / mapping)* ws
             });
 
         	m.mappings = mappingMap;
+        }
+
+        const extensions = content.filter(c => c.type === "extension");
+        if(extensions.length) {
+        	const ext = [];
+
+            extensions.forEach(e => {
+            	if(e.name && ext.indexOf(e.name) === -1) {
+                    ext.push(e.name);
+                }
+            });
+
+        	m.extensions = ext;
         }
 
 		return m;
@@ -1362,3 +1375,13 @@ ValidationOption
 
 ValidationOptionValue
  	= value
+
+
+ // -----
+
+
+ extension "model extensions"
+ 	= ws "extension" ws extensionName:string ws
+    {
+    	return {type:"extension", name:extensionName};
+    }
