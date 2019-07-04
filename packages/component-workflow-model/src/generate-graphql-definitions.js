@@ -114,6 +114,8 @@ function generateTaskTypeDef(taskDef, enums, extensions) {
     const stateInputTypeName = `${modelTypeName}StateInput`;
 
     const listingAccessorName = listingAccessorNameForTaskDefinition(taskDef);
+    const listingOutputResultName = `${modelTypeName}ListingResult`;
+    const listingPageInfoName = `${modelTypeName}ListingPageInfo`;
     const listingFilterInputTypeName = `${modelTypeName}ListingFilterInput`;
     const listingSortingInputTypeName = `${modelTypeName}ListingSortingInput`;
 
@@ -128,8 +130,14 @@ extend type Query {
     get${taskDef.name}(id:ID): ${modelTypeName}
     `;
 
+    const additionalStatements = [];
+
     if((listingFilterElements && listingFilterElements.length) || (listingSortingInputTypeName && listingSortingInputTypeName.length)) {
+
         const f = [];
+        f.push(`first:Int`);
+        f.push(`offset:Int`);
+
         if(listingFilterElements && listingFilterElements.length) {
             f.push(`filter:${listingFilterInputTypeName}`);
         }
@@ -137,7 +145,31 @@ extend type Query {
             f.push(`sorting:${listingSortingInputTypeName}`);
         }
 
-        query += tab + `${listingAccessorName}(${f.join(", ")}) : [${modelTypeName}]\n`;
+        if(extensions && extensions.length) {
+            extensions.forEach(ext => {
+                if(ext.modifyListingParameters) {
+                    const statement = ext.modifyListingParameters(f, taskDef, enums);
+                    if(statement && statement.length) {
+                        additionalStatements.push(statement);
+                    }
+                }
+            });
+        }
+
+        query += tab + `${listingAccessorName}(${f.join(", ")}) : ${listingOutputResultName}\n`;
+
+        additionalStatements.push(`
+type ${listingOutputResultName} {
+    results: [${modelTypeName}]
+    pageInfo: ${listingPageInfoName}
+}
+
+type ${listingPageInfoName} {
+    totalCount: Int
+    offset: Int
+    pageSize: Int
+}
+        `);
 
     } else {
 
@@ -198,7 +230,8 @@ extend type Subscription {
     subscription += "\n" + '}';
 
 
-    return model + "\n\n" + input + "\n" + stateInput + "\n" + listingFilterInput + "\n" + listingSortingInput + "\n" + query + "\n" + mutation + "\n" + subscription;
+    return model + "\n\n" + input + "\n" + stateInput + "\n" + listingFilterInput + "\n" + listingSortingInput + "\n"
+        + query + "\n" + mutation + "\n" + subscription + "\n" + additionalStatements.join("\n");
 }
 
 

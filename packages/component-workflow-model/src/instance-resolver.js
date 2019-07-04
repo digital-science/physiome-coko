@@ -169,9 +169,11 @@ InstanceResolver.prototype.get = async function(input, info, context) {
 InstanceResolver.prototype.list = async function(input, info, context) {
 
     const fieldsWithoutTypeName = GraphQLFields(info, {}, { excludedFields: ['__typename'] });
-    const topLevelFields = fieldsWithoutTypeName ? Object.keys(fieldsWithoutTypeName) : [];
-    let eagerResolves = null;
+    const topLevelFields = (fieldsWithoutTypeName && fieldsWithoutTypeName.results) ? Object.keys(fieldsWithoutTypeName.results) : [];
+    const limit = input.first || 200;
+    const offset = input.offset || 0;
 
+    let eagerResolves = null;
     if(this.relationFields && this.relationFields.length && fieldsWithoutTypeName) {
         eagerResolves = this.relationFields.filter(f => topLevelFields.indexOf(f) !== -1);
     }
@@ -180,6 +182,10 @@ InstanceResolver.prototype.list = async function(input, info, context) {
 
     const user = await this.resolveUserForContext(context);
     let allowedRestrictions;
+
+
+    // For the current user, determine what level of access they are allowed on objects.
+    // This will normally be either "all" for an admin user or "owner" if they are the submitter etc.
 
     if(this.acl) {
 
@@ -199,43 +205,110 @@ InstanceResolver.prototype.list = async function(input, info, context) {
     }
 
 
+    // We need to modify the select query. First, restrict the select to only top level fields the user is interested in.
+    // Second, we need to obtain the full count of results over the entire data set (not just the limited range).
+
     let addedWhereStatement = false;
+    let query = this.modelClass.query();
+    const filter = input.filter;
 
-    let query = this.modelClass.query().where(builder => {
+    const knex = this.modelClass.knex();
 
-        const filter = input.filter;
-        if(this.listingFilterFields && this.listingFilterFields.length && filter) {
+    const relationFieldNames = {};
+    if(this.relationFields) {
+        this.relationFields.forEach(f => relationFieldNames[f] = true);
+    }
 
-            let b = builder;
+    const topLevelFieldsWithoutRelations = topLevelFields.filter(field => !relationFieldNames.hasOwnProperty(field));
+
+    query = query.select(topLevelFieldsWithoutRelations).select(knex.raw('count(*) OVER() AS internal_full_count')).limit(limit).offset(offset);
+
+
+    if(this.listingFilterFields && this.listingFilterFields.length && filter) {
+
+        const filterExtensions = this.specificExtensions.modifyListingFilterQuery;
+        const filterFieldExtensions = this.specificExtensions.modifyListingFilterQueryForField;
+
+        query = query.where(b => {
+
+            let builder = b;
 
             this.listingFilterFields.forEach(f => {
 
-                if(!filter[f.field]) {
+                if(filter[f.field] === undefined) {
                     return;
                 }
 
                 const v = filter[f.field];
-                if(v !== null && v !== undefined) {
 
-                    if(f.listingFilterMultiple) {
+                // If there are any extensions that seek to modify the "where" statement produced for a specific field
+                // we can let them override it here. Extensions are performed on a first-in basis. Once one extension
+                // overrides the field and modifies the query, all other processing for the field is terminated.
 
-                        if(v instanceof Array) {
-                            b = b.whereIn(f.field, v);
+                if(filterFieldExtensions && filterFieldExtensions.length) {
+                    for(let i = 0; i < filterFieldExtensions.length; i++) {
+                        const r = filterFieldExtensions[i](builder, f, v, this.modelClass, filter);
+                        if(r) {
+                            builder = r;
+                            addedWhereStatement = true;
+                            return;
+                        }
+                    }
+                }
+
+                if (v !== null) {
+
+                    if (f.listingFilterMultiple) {
+
+                        if (v instanceof Array) {
+                            builder = builder.whereIn(f.field, v);
                             addedWhereStatement = true;
                         }
 
                     } else {
 
-                        b = b.where(f.field, v);
+                        if(v === false) {
+                            builder = builder.where(bb => bb.where(f.field, false).orWhereNull(f.field));
+                        } else {
+                            builder = builder.where(f.field, v);
+                        }
+                        addedWhereStatement = true;
+
+                    }
+
+                } else {
+
+                    builder = builder.whereNull(f.field);
+                    addedWhereStatement = true;
+                }
+            });
+
+            // Apply any filtering extensions (these are not field specific). All extensions which provide a
+            // 'modifyListingFilterQuery' will have the extension applied, regardless whether or not another
+            // extension has already performed a modification to the query.
+
+            if(filterExtensions && filterExtensions.length) {
+                for(let i = 0; i < filterExtensions.length; i++) {
+                    const r = filterExtensions[i](builder, this.modelClass, filter);
+                    if(r) {
+                        builder = r;
                         addedWhereStatement = true;
                     }
                 }
-            });
-        }
-    });
+            }
+        });
+    }
 
-    // ACL matching then needs to apply on a per object basis to determine what the user is allowed to see on each one.
+
+    // ACL matching then needs to apply on a per object basis to determine what the user is allowed to see.
     // Because conditions can be applied, this can change on a per instance to instance basis.
+    // An easy top level restriction to apply in the first instance however is to check to see if the user
+    // isn't allowed access to all instances, if that is the case a where statement is constructed to restrict
+    // to fields where the user is considered an "owner".
+
+    // FIXME: we will need to include any variables within the ACL conditions inside the requested fields set
+    // we may even need to figure out if it is possible to include conditions inside the where clauses that
+    // represent the restrictions in place for the current user
 
     if(allowedRestrictions.indexOf("all") === -1) {
 
@@ -273,7 +346,7 @@ InstanceResolver.prototype.list = async function(input, info, context) {
 
         this.listingSortableFields.forEach(f => {
 
-            if(!sorting.hasOwnProperty(f.field)) {
+            if(sorting[f.field] === undefined) {
                 return;
             }
 
@@ -295,19 +368,47 @@ InstanceResolver.prototype.list = async function(input, info, context) {
     }
 
 
+    // Apply any extensions that wish to modify the listing query
+    if(this.extensions) {
+        this.extensions.forEach(ext => {
+
+            if(ext.modifyListingQuery) {
+                const newQuery = ext.modifyListingQuery(query);
+                if(newQuery) {
+                    query = newQuery;
+                }
+            }
+        });
+    }
+
+
+    // Eager resolve on any fields inside this request, we also restrict the fields returned down to those requested by the user.
     if(eagerResolves) {
-        query = query.eager(this.modelClass.parseEagerRelations(eagerResolves));
+        eagerResolves.forEach(eagerField => {
+            const eagerFields = Object.keys(fieldsWithoutTypeName.results[eagerField]);
+            query = query.eager(eagerField).modifyEager(eagerField, builder => builder.select(eagerFields));
+        });
     }
 
     const r = await query;
-
     this.addInstancesToContext(r, context);
 
     // For each result, we then apply read ACL rules to it, ensuring only the allowed fields are returned for each instance.
-    return r.map(object => {
+    const totalCount = (r && r.length ? r[0].internalFullCount : 0);
+
+    const results = r.map(object => {
         const [aclTargets, _] = this.userToAclTargets(user, object);
         return this._getInstance(object, aclTargets, topLevelFields);
     });
+
+    return {
+        results,
+        pageInfo: {
+            totalCount,
+            offset: 0,
+            pageSize: limit
+        }
+    };
 };
 
 
