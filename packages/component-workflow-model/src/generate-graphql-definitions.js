@@ -8,6 +8,8 @@ const GraphQLJSON = require('graphql-type-json');
 const path = require('path');
 const fs = require("fs");
 
+const logger = require('workflow-utils/logger-with-prefix')('workflow-model/generate-graphql-definitions');
+
 const ModelFile = require('./../shared-model/file');
 const ModelIdentity = require('./../shared-model/identity');
 const tab = "    ";
@@ -26,6 +28,29 @@ const staticContent = fs.readFileSync(path.join(__dirname, '../shared-model/shar
 
 module.exports = function generateTypeDefsForDefinition(definition) {
 
+    // Resolve any extensions that are specified.
+    const extensions = [];
+
+    if(definition.extensions) {
+        definition.extensions.forEach(ext => {
+            try {
+                const mod = require(ext);
+                if(mod) {
+
+                    if(mod.modelExtensions) {
+                        extensions.push(mod.modelExtensions);
+                    } else {
+                        logger.warn(`workflow model extension [${ext}] does not export 'modelExtensions'.`);
+                    }
+                }
+
+            } catch(e) {
+                logger.error(`unable to load workflow model extension [${ext}] due to: ${e.toString()}`);
+            }
+        });
+    }
+
+
     const resolvers = Object.assign({
         JSON: GraphQLJSON
     }, commonResolvers);
@@ -33,10 +58,11 @@ module.exports = function generateTypeDefsForDefinition(definition) {
     let tasks = [];
     let taskUnion = '';
     let enums = [];
-    let models = [];
 
     if(definition.tasks) {
-        tasks = Object.values(definition.tasks).map(taskDef => generateTaskTypeDef(taskDef, definition.enums)).filter(v => !!v);
+        tasks = Object.values(definition.tasks).map(taskDef =>
+            generateTaskTypeDef(taskDef, definition.enums, extensions.map(ext => ext.hasOwnProperty(taskDef.name) ? ext[taskDef.name] : null).filter(ext => !!ext))
+        ).filter(v => !!v);
         taskUnion = "\n\n" + 'union WorkflowInstance = ' + Object.values(definition.tasks).map(t => t.name).join(" | ");
     }
 
@@ -58,20 +84,20 @@ module.exports = function generateTypeDefsForDefinition(definition) {
         Identity: ModelIdentity.model
     };
 
-    const resAndModels = definition.tasks ? generateModelsAndResolvers(Object.values(definition.tasks), definition.enums, topLevelModels) : {};
+    const resAndModels = definition.tasks ? generateModelsAndResolvers(Object.values(definition.tasks), definition.enums, topLevelModels, extensions) : {};
 
     mergeResolvers(resolvers, ModelFile.resolvers);
     mergeResolvers(resolvers, ModelIdentity.resolvers);
 
     return {
         models: resAndModels.models,
-        typeDefs: tasks.join("\n\n") + taskUnion + "\n\n\n" + models.join("\n\n") + "\n\n\n" + enums.join("\n\n") + staticContent,
+        typeDefs: tasks.join("\n\n") + taskUnion + "\n\n\n" + enums.join("\n\n") + staticContent,
         resolvers: mergeResolvers(resolvers, resAndModels.resolvers),
     };
 };
 
 
-function generateTaskTypeDef(taskDef, enums) {
+function generateTaskTypeDef(taskDef, enums, extensions) {
 
     if(!taskDef.model) {
         return;

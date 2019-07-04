@@ -52,6 +52,12 @@ function InstanceResolver(modelClass, taskDefinition, enums) {
     this.modelClass = modelClass;
     this.acl = modelClass.acl;
 
+    this.extensions = (modelClass.extensions && modelClass.extensions.length) ? modelClass.extensions : null;
+    this.specificExtensions = this.extensions ? {
+        modifyListingFilterQuery: this.extensions.map(ext => ext.modifyListingFilterQuery).filter(f => !!f),
+        modifyListingFilterQueryForField: this.extensions.map(ext => ext.modifyListingFilterQueryForField).filter(f => !!f)
+    } : {};
+
     this.taskDef = taskDefinition;
     this.modelDef = taskDefinition.model;
     this.enums = enums;

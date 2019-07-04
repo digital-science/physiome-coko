@@ -20,7 +20,7 @@ function uppercaseCamelToLowercaseDashed(name) {
 /**/
 /* Generate Models & Resolvers for each of the top level defined tasks, enums and top level model objects. */
 /**/
-exports.generateModelsAndResolvers = function generateModelsAndResolvers(tasks, enums, topLevelModels) {
+exports.generateModelsAndResolvers = function generateModelsAndResolvers(tasks, enums, topLevelModels, extensions) {
 
     const models = {};
     const resolvers = {};
@@ -31,14 +31,14 @@ exports.generateModelsAndResolvers = function generateModelsAndResolvers(tasks, 
     };
 
     tasks.forEach(task => {
-        models[task.name] = createModelForTask(task, enums, lookupModel);
+        models[task.name] = createModelForTask(task, enums, lookupModel, extensions);
     });
 
     Object.assign(allModels, topLevelModels);
     Object.assign(allModels, models);
 
     tasks.forEach(task => {
-        const r = createResolversForTask(task, enums, models);
+        const r = createResolversForTask(task, enums, models, extensions);
         mergeResolvers(resolvers, r);
     });
 
@@ -64,7 +64,7 @@ function _joinTableFieldNameForEntityName(name) {
 
 
 
-function createModelForTask(task, enums, lookupModel) {
+function createModelForTask(task, enums, lookupModel, extensions) {
 
     const model = task.model;
     if(!model) {
@@ -120,6 +120,15 @@ function createModelForTask(task, enums, lookupModel) {
         properties[p.key] = p.value;
     });
 
+    const extensionsForTask = [];
+    if(extensions && extensions.length) {
+        extensions.forEach(ext => {
+            if(ext && ext.hasOwnProperty(task.name)) {
+                extensionsForTask.push(ext[task.name]);
+            }
+        });
+    }
+
 
     const createClass = (name, cls) => ({
         [name] : class extends cls {
@@ -150,6 +159,10 @@ function createModelForTask(task, enums, lookupModel) {
 
             static get modelDescription() {
                 return model;
+            }
+
+            static get extensions() {
+                return extensionsForTask;
             }
 
             static get fileProperties() {
@@ -271,7 +284,7 @@ function createModelForTask(task, enums, lookupModel) {
 
 
 
-function createResolversForTask(task, enums, models) {
+function createResolversForTask(task, enums, models, extensions) {
 
     const ModelClass = models[task.name];
     const relations = filterModelElementsForRelations(task.model.elements, enums);
