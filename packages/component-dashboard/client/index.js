@@ -1,4 +1,6 @@
-import Dashboard from "./components/dashboard";
+import DashboardActive from "./components/dashboard-active";
+import DashboardPublished from "./components/dashboard-published";
+
 import { registerFormFieldType } from 'component-task-form/client/components/registry';
 
 import FormFieldSubmissionStatus from './components/form-field-submission-status';
@@ -12,6 +14,6 @@ if(!hasSetup) {
     registerFormFieldType('ResumeRejectedSubmission', FormFieldResumeRejectedSubmission);
 }
 
-export { Dashboard };
+export { DashboardActive, DashboardPublished };
 
 
