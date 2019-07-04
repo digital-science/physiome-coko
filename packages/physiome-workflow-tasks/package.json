@@ -1,5 +1,5 @@
 {
-  "name": "component-workflow-physiome-tasks",
+  "name": "physiome-workflow-tasks",
   "version": "0.0.1",
   "dependencies": {
     "camunda-bpm-sdk-js": "^7.7.4-SNAPSHOT",
