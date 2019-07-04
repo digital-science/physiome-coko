@@ -60,6 +60,8 @@ mapping "DisplayedIUPSCommissionKinds" on IUPSCommissionKind {
 }
 
 
+extension "physiome-model-extensions"
+
 instance Submission {
 
     processKey: "physiome-submission"

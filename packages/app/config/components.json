@@ -4,7 +4,8 @@
   "component-dashboard",
   "component-model",
   "component-task-form",
-  "component-workflow-physiome-tasks",
+  "physiome-model-extensions",
+  "physiome-workflow-tasks",
   "component-workflow-model",
   "dimensions-lookup-service",
   "stripe-apc-service"
