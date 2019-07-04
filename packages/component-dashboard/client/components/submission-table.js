@@ -1,58 +1,78 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import moment from 'moment';
-import debounce from 'lodash/debounce';
 
-import { WorkflowDescriptionContext } from 'client-workflow-model';
-
-import useCreateTaskMutation from './../mutations/createTask';
 import useDestroySubmissionMutation from './../mutations/destroySubmission';
 import useClaimSubmissionMutation from './../mutations/claimSubmission';
-import useGetSubmissions from './../queries/getSubmissions';
-import { useSubmissionWasCreatedSubscription, useSubmissionWasModifiedSubscription } from './../subscriptions/submissionsChanged';
 
-import PopoverTrigger from 'component-task-form/client/components/popover';
+import PopoverTrigger from "component-task-form/client/components/popover";
 
-import BinIconImage from './../static/bin.svg';
-import Spinner from 'ds-awards-theme/components/spinner';
-import Button from 'ds-awards-theme/components/button';
-import { SmallInlineButton } from 'ds-awards-theme/components/inline-button';
-import SubmissionStatusPill from './submission-status-pill';
+import Spinner from "ds-awards-theme/components/spinner";
+import SubmissionStatusPill from "./submission-status-pill";
+import {SmallInlineButton} from "ds-awards-theme/components/inline-button";
+import Button from "ds-awards-theme/components/button";
 
-
-const DashboardHolder = styled.div`
-    padding: 32px;
-`;
+import BinIconImage from "../static/bin.svg";
 
 
-const AssignNewButton = styled.button`
-    display: inline-block;
-    height: 30px;
-    
-    font-size: 17px;
-    line-height: 30px;
-    border: none;
-    background: none;
-    font-family: NovcentoSansWideNormal, sans-serif;
-    text-transform: uppercase;
-    
-    cursor: pointer;
 
-    > span {
-        display: inline-block;
-        font-size: 30px;
-        color: #3779a0;
+const _SubmissionTable = ({className, submissionInstanceType, loading, error, submissions, refreshSubmissions}) => {
+
+    const destroySubmission = useDestroySubmissionMutation(submissionInstanceType.name);
+    const claimSubmission = useClaimSubmissionMutation(submissionInstanceType.name);
+    const [displayedSubmissions, setDisplayedSubmissions] = useState(submissions);
+
+    if(submissions && displayedSubmissions !== submissions) {
+        setDisplayedSubmissions(submissions);
     }
-`;
 
-const ActiveAwardsHeader = styled.div`
-    font-size: 17px;
-    font-family: NovcentoSansWideBook, sans-serif;
-    text-transform: uppercase;
-`;
+    return (
+        <table className={className}>
+            <thead>
+                <tr className="heading">
+                    <th className="small manuscript_id">ID</th>
+                    <th>Submission Title</th>
+                    <th className="small">Date</th>
+                    <th className="small status">Status</th>
+                    {/*<th>Authors</th>*/}
+                    <th className="medium">Submitter</th>
+                    <th className="medium">Assigned</th>
+                    <th className="small actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {loading && !displayedSubmissions ? (
+                    <tr>
+                        <td colSpan={6}>
+                            <Spinner center={true} />
+                        </td>
+                    </tr>) : null
+                }
 
-const DashboardTable = styled.table`
+                {error ? (
+                    <tr>
+                        <td colSpan={6}>
+                        An error occurred while loading the active award submissions.
+                        </td>
+                    </tr>) : null
+                }
+
+                {
+                    displayedSubmissions ?
+                        displayedSubmissions.map(submission =>
+                            <SubmissionTableRow key={submission.id} submission={submission}
+                                refreshSubmissions={refreshSubmissions} claimSubmission={claimSubmission}
+                                destroySubmission={destroySubmission} />
+                        ) : null
+                }
+            </tbody>
+        </table>
+    );
+};
+
+
+const SubmissionTable = styled(_SubmissionTable)`
 
     table-layout: fixed;
     margin-top: 18px;
@@ -107,123 +127,11 @@ const DashboardTable = styled.table`
     .manuscript_id {
         width: 60px;
     }
-
 `;
 
-
-function Dashboard(props) {
-
-
-    const workflowDescription = useContext(WorkflowDescriptionContext);
-    const submissionInstanceType = workflowDescription.findInstanceType('Submission');
-    const submissionTaskID = submissionInstanceType.name;
-
-    const createNewTask = useCreateTaskMutation(submissionTaskID);
-    const destroySubmission = useDestroySubmissionMutation(submissionTaskID);
-    const claimSubmission = useClaimSubmissionMutation(submissionTaskID);
-
-    const createTaskUrl = (id) => {
-        return `/submission/${id}`;
-    };
-    const { history, children } = props;
-
-    const taskDefinition = workflowDescription.findInstanceType(submissionTaskID);
+export default SubmissionTable;
 
 
-    function handleCreateNewTask() {
-        createNewTask().then(data => {
-            const { id } = data;
-            history.push(createTaskUrl(id));
-        });
-    }
-
-    const filter = {
-        phase: [
-            "Pending",
-            "Saved",
-            "Submitted",
-            "Decision",
-            "Payment",
-            "Paid",
-            "Publish",
-            "Reject",
-            "Published"
-        ],
-    };
-    const sorting = { submissionDate: false };
-
-
-    const { data, error, loading, refetch } = useGetSubmissions(filter, sorting);
-    const throttledRefetch = debounce(refetch, 2000, { leading: true, trailing: true, maxWait:2000 });
-
-    useSubmissionWasCreatedSubscription(submissionId => {
-        return throttledRefetch();
-    });
-
-    useSubmissionWasModifiedSubscription(submissionId => {
-        return throttledRefetch();
-    });
-
-    const refreshDashboard = () => {
-        return throttledRefetch();
-    };
-
-
-    return (
-        <DashboardHolder>
-
-            <ActiveAwardsHeader>Active Submissions</ActiveAwardsHeader>
-
-            <DashboardTable>
-                <thead>
-                    <tr className="heading">
-                        <th className="small manuscript_id">ID</th>
-                        <th>Submission Title</th>
-                        <th className="small">Date</th>
-                        <th className="small status">Status</th>
-                        {/*<th>Authors</th>*/}
-                        <th className="medium">Submitter</th>
-                        <th className="medium">Assigned</th>
-                        <th className="small actions">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {loading ? (
-                        <tr>
-                            <td colSpan={6}>
-                                <Spinner center={true} />
-                            </td>
-                        </tr>) : null
-                    }
-
-                    {error ? (
-                        <tr>
-                            <td colSpan={6}>
-                                An error occurred while loading the active award submissions.
-                            </td>
-                        </tr>) : null
-                    }
-
-                    {
-                        data.submissions ?
-                            data.submissions.map(submission =>
-                                <ActiveSubmissionTableRow submission={submission} workflowDescription={workflowDescription}
-                                    key={submission.id} refreshDashboard={refreshDashboard} claimSubmission={claimSubmission}
-                                    destroySubmission={destroySubmission} />
-                            ) : null
-                    }
-                </tbody>
-            </DashboardTable>
-
-            <AssignNewButton onClick={handleCreateNewTask}>
-                <span>+</span>Create New Submission&hellip;
-            </AssignNewButton>
-
-            {children}
-
-        </DashboardHolder>
-    );
-}
 
 
 const SubmissionRow = styled.tr`
@@ -315,7 +223,6 @@ const IdentityColumn = styled.td`
 `;
 
 
-
 const LineLimitedText = styled.div`
    overflow: hidden;
    text-overflow: ellipsis;
@@ -329,17 +236,17 @@ const LineLimitedText = styled.div`
 
 
 
-function ActiveSubmissionTableRow({submission, workflowDescription, claimSubmission, destroySubmission, refreshDashboard}) {
+const SubmissionTableRow = ({submission, claimSubmission, destroySubmission, refreshSubmissions}) => {
 
     const deleteSubmission = () => {
         destroySubmission(submission.id, {phase:"Cancelled"}).then(() => {
-            refreshDashboard();
+            refreshSubmissions();
         });
     };
 
     const handleClaimSubmission = () => {
         claimSubmission(submission.id).then(r => {
-            refreshDashboard();
+            refreshSubmissions();
         });
     };
 
@@ -356,6 +263,7 @@ function ActiveSubmissionTableRow({submission, workflowDescription, claimSubmiss
             <ManuscriptIDColumn className="small manuscript_id">
                 {linkElement(submission.manuscriptId ? submission.manuscriptId : <span>-</span>)}
             </ManuscriptIDColumn>
+
             <TitleColumn className={`title ${!submission.title ? "no-title" : ""}`}>
                 {linkElement(title)}
                 {submission.authors && submission.authors instanceof Array && submission.authors.length ?
@@ -363,9 +271,11 @@ function ActiveSubmissionTableRow({submission, workflowDescription, claimSubmiss
                         {(submission.authors.map((a, i) => <li key={i}>{a.name}</li>))}
                     </AuthorListing> : null}
             </TitleColumn>
+
             <td className="date">
                 {submission.submissionDate ? moment(submission.submissionDate).format("MMMM D, YYYY") : <span>&ndash;</span>}
             </td>
+
             <td className="small status">
                 <SubmissionStatusPill submission={submission} />
             </td>
@@ -397,7 +307,4 @@ function ActiveSubmissionTableRow({submission, workflowDescription, claimSubmiss
             </td>
         </SubmissionRow>
     );
-}
-
-
-export default Dashboard;
+};
