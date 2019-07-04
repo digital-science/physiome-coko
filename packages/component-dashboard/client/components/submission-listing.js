@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useContext, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import debounce from 'lodash/debounce';
 
@@ -28,22 +28,31 @@ const DefaultPhases = [
     "Published"
 ];
 
-const _SubmissionListing = ({className, history, children, heading, renderHeading=null, phases}) => {
+const _SubmissionListing = ({className, history, children, heading, showOnHoldSubmissions=false, renderHeading=null, phases}) => {
 
     const workflowDescription = useContext(WorkflowDescriptionContext);
     const submissionInstanceType = workflowDescription.findInstanceType('Submission');
+    const [page, setPage] = useState(0);
+    const pageSize = 10;
 
     const filter = useMemo(() => {
-
-        return {
+        const r = {
             phase: (phases || DefaultPhases).slice(0)
         };
 
-    },[phases]);
+        if(showOnHoldSubmissions === true || showOnHoldSubmissions === false){
+            r.hidden = showOnHoldSubmissions;
+        }
+        return r;
+    },[phases, showOnHoldSubmissions]);
+
+    useEffect(() => {
+        setPage(0);
+    }, [filter]);
 
     const sorting = { submissionDate: false };
 
-    const { data, error, loading, refetch } = useGetSubmissions(filter, sorting);
+    const { data, error, loading, refetch } = useGetSubmissions(pageSize, page * pageSize, filter, sorting);
     const throttledRefetch = debounce(refetch, 2000, { leading: true, trailing: true, maxWait:2000 });
 
     useSubmissionWasCreatedSubscription(submissionId => {
@@ -58,6 +67,10 @@ const _SubmissionListing = ({className, history, children, heading, renderHeadin
         return throttledRefetch();
     };
 
+    const changeDisplayedPage = (page) => {
+        setPage(page - 1);
+    };
+
     const header = <SubmissionListingHeader>{heading}</SubmissionListingHeader>;
 
     return (
@@ -65,10 +78,12 @@ const _SubmissionListing = ({className, history, children, heading, renderHeadin
 
             {renderHeading ? renderHeading({header, heading}) : header}
 
-            <SubmissionTable submissionInstanceType={submissionInstanceType} loading={loading} error={error}
-                submissions={data ? data.submissions : null} refreshSubmissions={refreshSubmissions} />
+            <SubmissionTable submissionInstanceType={submissionInstanceType} loading={loading} error={error} refreshSubmissions={refreshSubmissions}
+                submissions={data && data.submissions ? data.submissions.results : null} pageInfo={data && data.submissions ? data.submissions.pageInfo : null}
+                currentPage={page + 1} pageSize={pageSize} setPage={changeDisplayedPage}  />
 
             {children}
+
         </div>
     );
 };

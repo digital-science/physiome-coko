@@ -79,7 +79,41 @@ const FilterCheckboxListing = styled.div`
   & > div + div {
     margin-top: 5px;
   }
+  
+  & > div.on-hold-section {
+    margin-top: 10px;
+    padding-top: 5px;
+    border-top: 1px solid #b9b9b9;
+  }
 `;
+
+
+function savePhases(filterOptions) {
+    const r = {};
+    filterOptions.forEach(f => {
+        r[f.filter] = f.active;
+    });
+    return r;
+}
+
+function applyPhases(filterOptions, savedState) {
+    if(!savedState) {
+        return;
+    }
+
+    filterOptions.forEach(f => {
+        if(savedState.hasOwnProperty(f.filter)) {
+            f.setActive(savedState[f.filter]);
+
+        }
+    });
+}
+
+function deactiveAllPhases(filterOptions) {
+    filterOptions.forEach(f => {
+        f.setActive(false);
+    });
+}
 
 
 const _DashboardActiveSubmissions = ({className, history, children}) => {
@@ -87,7 +121,10 @@ const _DashboardActiveSubmissions = ({className, history, children}) => {
     const workflowDescription = useContext(WorkflowDescriptionContext);
     const submissionInstanceType = workflowDescription.findInstanceType('Submission');
     const createNewTask = useCreateTaskMutation(submissionInstanceType.name);
+
     const [phases, setPhases] = useState(ActivePhases.slice(0));
+    const [showOnHoldSubmissions, setShowOnHoldSubmissions] = useState(false);
+    const [savedPhases, setSavedPhases] = useState(null);
 
     function handleCreateNewSubmission() {
         createNewTask().then(data => {
@@ -96,6 +133,16 @@ const _DashboardActiveSubmissions = ({className, history, children}) => {
         });
     }
 
+    const handleOnChangeOnHoldSubmissions = (e) => {
+        if(e.target.checked) {
+            setSavedPhases(savePhases(filterOptions));
+            deactiveAllPhases(filterOptions);
+        } else {
+            applyPhases(filterOptions, savedPhases);
+        }
+        setShowOnHoldSubmissions(e.target.checked);
+    };
+
     const filterOptions = AllPhases.map(filter => {
 
         const [checked, setChecked] = useState(true);
@@ -103,10 +150,14 @@ const _DashboardActiveSubmissions = ({className, history, children}) => {
             setChecked(e.target.checked);
         };
         const checkbox = <CheckboxLabel><Checkbox checked={checked} onChange={handleOnChange} />{filter}</CheckboxLabel>;
-        return {filter, active:checked, checkbox};
+        return {filter, active:checked, setActive:setChecked, checkbox};
     });
 
     useEffect(() => {
+
+        if(showOnHoldSubmissions) {
+            return;
+        }
 
         const newPhases = [];
         filterOptions.forEach(f => {
@@ -116,7 +167,7 @@ const _DashboardActiveSubmissions = ({className, history, children}) => {
         });
         setPhases(newPhases);
 
-    }, [...filterOptions.map(f => f.active)]);
+    }, [showOnHoldSubmissions, ...filterOptions.map(f => f.active)]);
 
 
     const renderHeading = ({header}) => {
@@ -128,6 +179,9 @@ const _DashboardActiveSubmissions = ({className, history, children}) => {
                         return (
                             <FilterCheckboxListing>
                                 {filterOptions.map((filter, index) => <div key={index}>{filter.checkbox}</div> )}
+                                <div className="on-hold-section">
+                                    <CheckboxLabel><Checkbox checked={showOnHoldSubmissions} onChange={handleOnChangeOnHoldSubmissions} />On-hold</CheckboxLabel>
+                                </div>
                             </FilterCheckboxListing>
                         );
                     }}>
@@ -143,7 +197,7 @@ const _DashboardActiveSubmissions = ({className, history, children}) => {
 
     return (
         <div className={className}>
-            <SubmissionListing heading="Active Submissions" renderHeading={renderHeading} phases={phases}>
+            <SubmissionListing heading="Active Submissions" renderHeading={renderHeading} phases={phases} showOnHoldSubmissions={showOnHoldSubmissions}>
 
                 <AssignNewButton onClick={handleCreateNewSubmission}>
                     <span>+</span>Create New Submission&hellip;

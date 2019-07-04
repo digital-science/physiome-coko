@@ -12,62 +12,87 @@ import Spinner from "ds-awards-theme/components/spinner";
 import SubmissionStatusPill from "./submission-status-pill";
 import {SmallInlineButton} from "ds-awards-theme/components/inline-button";
 import Button from "ds-awards-theme/components/button";
+import Pagination from 'ds-awards-theme/components/pagination';
 
 import BinIconImage from "../static/bin.svg";
 
+const PaginationHolder = styled.div`
+    margin-top: 5px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    
+    &.loading > ${PaginationHolder} {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+`;
 
 
-const _SubmissionTable = ({className, submissionInstanceType, loading, error, submissions, refreshSubmissions}) => {
+const _SubmissionTable = ({className, submissionInstanceType, loading, error, submissions, pageInfo, pageSize, currentPage=1, setPage, refreshSubmissions}) => {
 
     const destroySubmission = useDestroySubmissionMutation(submissionInstanceType.name);
     const claimSubmission = useClaimSubmissionMutation(submissionInstanceType.name);
     const [displayedSubmissions, setDisplayedSubmissions] = useState(submissions);
+    const [displayedPageInfo, setDisplayedPageInfo] = useState(pageInfo);
 
     if(submissions && displayedSubmissions !== submissions) {
         setDisplayedSubmissions(submissions);
     }
 
+    if(!loading && displayedPageInfo !== pageInfo) {
+        setDisplayedPageInfo(pageInfo);
+    }
+
     return (
-        <table className={className}>
-            <thead>
-                <tr className="heading">
-                    <th className="small manuscript_id">ID</th>
-                    <th>Submission Title</th>
-                    <th className="small">Date</th>
-                    <th className="small status">Status</th>
-                    {/*<th>Authors</th>*/}
-                    <th className="medium">Submitter</th>
-                    <th className="medium">Assigned</th>
-                    <th className="small actions">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {loading && !displayedSubmissions ? (
-                    <tr>
-                        <td colSpan={6}>
-                            <Spinner center={true} />
-                        </td>
-                    </tr>) : null
-                }
+        <React.Fragment>
+            <table className={className}>
+                <thead>
+                    <tr className="heading">
+                        <th className="small manuscript_id">ID</th>
+                        <th>Submission Title</th>
+                        <th className="small">Date</th>
+                        <th className="small status">Status</th>
+                        {/*<th>Authors</th>*/}
+                        <th className="medium">Submitter</th>
+                        <th className="medium">Assigned</th>
+                        <th className="small actions">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {loading && !displayedSubmissions ? (
+                        <tr>
+                            <td colSpan={6}>
+                                <Spinner center={true} />
+                            </td>
+                        </tr>) : null
+                    }
 
-                {error ? (
-                    <tr>
-                        <td colSpan={6}>
-                        An error occurred while loading the active award submissions.
-                        </td>
-                    </tr>) : null
-                }
+                    {error ? (
+                        <tr>
+                            <td colSpan={6}>
+                            An error occurred while loading the active award submissions.
+                            </td>
+                        </tr>) : null
+                    }
 
-                {
-                    displayedSubmissions ?
-                        displayedSubmissions.map(submission =>
-                            <SubmissionTableRow key={submission.id} submission={submission}
-                                refreshSubmissions={refreshSubmissions} claimSubmission={claimSubmission}
-                                destroySubmission={destroySubmission} />
-                        ) : null
-                }
-            </tbody>
-        </table>
+                    {
+                        displayedSubmissions ?
+                            displayedSubmissions.map(submission =>
+                                <SubmissionTableRow key={submission.id} submission={submission}
+                                    refreshSubmissions={refreshSubmissions} claimSubmission={claimSubmission}
+                                    destroySubmission={destroySubmission} />
+                            ) : null
+                    }
+                </tbody>
+            </table>
+
+            {displayedPageInfo ? (
+                <PaginationHolder className={loading ? 'loading' : ''}>
+                    <Pagination currentPage={currentPage} pageSize={pageSize} totalItems={displayedPageInfo.totalCount} setPage={setPage} />
+                    {loading ? <div><Spinner /></div> : null}
+                </PaginationHolder>) : null}
+        </React.Fragment>
     );
 };
 
