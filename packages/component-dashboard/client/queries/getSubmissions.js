@@ -16,7 +16,7 @@ export default (filter, sorting, opts = {}) => {
         }
     });
 
-    const getAwardSubmissionsQuery = gql`
+    const getSubmissionsQuery = gql`
 query GetSubmissions($filter:SubmissionListingFilterInput, $sorting:SubmissionListingSortingInput) {
   submissions: submissions(filter:$filter, sorting:$sorting) {
     id
@@ -40,6 +40,6 @@ query GetSubmissions($filter:SubmissionListingFilterInput, $sorting:SubmissionLi
 }
 `;
 
-    return useQuery(getAwardSubmissionsQuery, queryOptions);
+    return useQuery(getSubmissionsQuery, queryOptions);
 };
 
