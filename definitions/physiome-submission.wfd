@@ -60,6 +60,18 @@ mapping "DisplayedIUPSCommissionKinds" on IUPSCommissionKind {
 }
 
 
+enum RejectionReason {
+    OutOfScope => "out-of-scope",
+    Other => "other"
+}
+
+mapping "DisplayedRejectionReason" on RejectionReason {
+    OutOfScope => "Out of scope",
+    Other => "Other"
+}
+
+
+
 extension "physiome-model-extensions"
 
 instance Submission {
@@ -75,8 +87,10 @@ instance Submission {
         submissionDate: DateTime <listing-sortable>,
         publishDate: DateTime <listing-sortable>,
 
-        phase: SubmissionPhase <state, listing-filter-multiple, default:SubmissionPhase.Pending>,
+        phase: SubmissionPhase <state, input:exclude, listing-filter-multiple, default:SubmissionPhase.Pending>,
         hidden: Boolean <listing-filter, default:false>,
+        rejectionReason: RejectionReason,
+        rejectionOther: String,
 
         kind: SubmissionKind <default:SubmissionKind.Original>,
         iupsCommission: IUPSCommissionKind,
@@ -123,7 +137,7 @@ instance Submission {
         }
 
         fields "curation" {
-            hidden,
+            hidden, rejectionReason, rejectionOther,
     	    curator,
     	    allFilesPresent, resultsMatch, modelAnnotated,
     	    primaryPaperExists, resultsInPapersOverlap, sameModelInPapers,
@@ -454,7 +468,13 @@ instance Submission {
 
             { Button, (phase != SubmissionPhase.Reject), outcome:"reject", label:"Reject Article",
                 confirmation:"Are you sure you want to reject this manuscript submission?", confirmationHeading:"Reject Manuscript Submission",
-                confirmationAffirmativeLabel: "Reject Manuscript", confirmationNegativeLabel: "Cancel" }
+                confirmationAffirmativeLabel: "Reject Manuscript", confirmationNegativeLabel: "Cancel", children:{
+
+                { SelectValue => rejectionReason, label:"Reason for Rejection", options:mapping("DisplayedRejectionReason"), placeholder:"Please select the rejection reason kind" }
+
+                { TextArea => rejectionOther, (rejectionReason == RejectionReason.Other), placeholder:"Further details for rejection (sent to manuscript submitter)." }
+
+            } }
         }
     }
 
