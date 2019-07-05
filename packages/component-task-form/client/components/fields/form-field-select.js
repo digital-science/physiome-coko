@@ -5,14 +5,18 @@ import useFormValueBinding from './../../hooks/useFormValueBinding';
 import useFormValidation from "../../hooks/useFormValidation";
 import withFormField from './withFormField'
 
-import SelectInput from 'ds-awards-theme/components/select-input';
-import Label from 'ds-awards-theme/components/label';
+import { ConfirmationDialogContext } from './form-field-button';
+
+import { Select, SmallSelect } from 'ds-awards-theme/components/select-input';
+import { BlockLabel } from 'ds-awards-theme/components/label';
 import ValidationIssueListing from 'ds-awards-theme/components/validation-issue-listing';
 
-function FormFieldSelect({data, binding, description, formDefinition, formValidator, options = {}}) {
+
+function FormFieldSelect({data, binding, description, formDefinition, formValidator, context, options = {}}) {
 
     const [value, _, handleInputChange] = useFormValueBinding(data, binding, "", (v) => v || "");
     const [validationIssues, clearValidationIssues] = useFormValidation(description, formDefinition, formValidator);
+    const isInsideConfirmationDialog = context && context[0] === ConfirmationDialogContext;
 
     const handleInputChangeWithIssuesClear = (e) => {
         clearValidationIssues();
@@ -36,14 +40,16 @@ function FormFieldSelect({data, binding, description, formDefinition, formValida
 
     }, [options, options.values]);
 
+    const SelectInputType = isInsideConfirmationDialog ? SmallSelect : Select;
+
     const selectInput = (
-        <SelectInput value={value || ""} placeholder={options.placeholder} issue={validationIssues && validationIssues.length}
+        <SelectInputType value={value || ""} placeholder={options.placeholder} issue={validationIssues && validationIssues.length}
             onChange={handleInputChangeWithIssuesClear} options={optValues} />
     );
 
     return (
         <React.Fragment>
-            {options.label ? <Label>{options.label}</Label> : null}
+            {options.label ? <BlockLabel className={isInsideConfirmationDialog ? 'dialog' : ''}>{options.label}</BlockLabel> : null}
             {selectInput}
             { validationIssues ? <ValidationIssueListing issues={validationIssues} /> : null }
         </React.Fragment>
@@ -57,6 +63,10 @@ function FormFieldSelect({data, binding, description, formDefinition, formValida
  */
 
 export default styled(withFormField(FormFieldSelect))`
+
+  > ${BlockLabel}.dialog {
+      font-size: 14px;
+  }
 
   > select {
        width: auto;

@@ -2,18 +2,21 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { FormFieldInlineTaskHolder } from './form-field-inline-task';
+import { ConfirmationDialogContext } from './form-field-button';
+
 import useFormValueBinding from './../../hooks/useFormValueBinding';
 import useFormValidation from './../../hooks/useFormValidation';
 import withFormField from './withFormField'
 
-import Label from 'ds-awards-theme/components/label';
+import { BlockLabel } from 'ds-awards-theme/components/label';
 import TextArea from 'ds-awards-theme/components/text-area';
 import ValidationIssueListing from 'ds-awards-theme/components/validation-issue-listing';
 
 
 const FormStyledTextArea = styled(TextArea)`
 
-  ${FormFieldInlineTaskHolder} & {
+  ${FormFieldInlineTaskHolder} &,
+  &.in-dialog {
       font-size: 14px;
       padding: 10px;
       min-height: 92px;
@@ -21,10 +24,11 @@ const FormStyledTextArea = styled(TextArea)`
 `;
 
 
-function FormFieldTextArea({data, binding, description, formDefinition, formValidator, options = {}}) {
+function FormFieldTextArea({data, binding, description, formDefinition, formValidator, context, options = {}}) {
 
     const [value, _, handleInputChange] = useFormValueBinding(data, binding, "", (v) => v || "");
     const [validationIssues, clearValidationIssues] = useFormValidation(description, formDefinition, formValidator);
+    const isInsideConfirmationDialog = context && context[0] === ConfirmationDialogContext;
 
     const handleInputChangeWithWarningsClear = (e) => {
         clearValidationIssues();
@@ -32,13 +36,13 @@ function FormFieldTextArea({data, binding, description, formDefinition, formVali
     };
 
     const textInput = (
-        <FormStyledTextArea value={value || ""} onChange={handleInputChangeWithWarningsClear}
+        <FormStyledTextArea className={isInsideConfirmationDialog ? 'in-dialog' : ''} value={value || ""} onChange={handleInputChangeWithWarningsClear}
             rows={options.rows || 2} issue={validationIssues && validationIssues.length}  />
     );
 
     return (
         <React.Fragment>
-            {options.label ? <React.Fragment><Label>{options.label}</Label><br /></React.Fragment> : null}
+            {options.label ? <BlockLabel>{options.label}</BlockLabel> : null}
             {textInput}
             { validationIssues ? <ValidationIssueListing issues={validationIssues} /> : null }
         </React.Fragment>
