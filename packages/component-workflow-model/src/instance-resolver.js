@@ -54,6 +54,7 @@ function InstanceResolver(modelClass, taskDefinition, enums) {
 
     this.extensions = (modelClass.extensions && modelClass.extensions.length) ? modelClass.extensions : null;
     this.specificExtensions = this.extensions ? {
+        modifyListingQuery: this.extensions.map(ext => ext.modifyListingQuery).filter(f => !!f),
         modifyListingFilterQuery: this.extensions.map(ext => ext.modifyListingFilterQuery).filter(f => !!f),
         modifyListingFilterQueryForField: this.extensions.map(ext => ext.modifyListingFilterQueryForField).filter(f => !!f)
     } : {};
@@ -167,7 +168,7 @@ InstanceResolver.prototype.get = async function(input, info, context) {
 
 
 InstanceResolver.prototype.list = async function(input, info, context) {
-
+    
     const fieldsWithoutTypeName = GraphQLFields(info, {}, { excludedFields: ['__typename'] });
     const topLevelFields = (fieldsWithoutTypeName && fieldsWithoutTypeName.results) ? Object.keys(fieldsWithoutTypeName.results) : [];
     const limit = input.first || 200;
@@ -369,14 +370,12 @@ InstanceResolver.prototype.list = async function(input, info, context) {
 
 
     // Apply any extensions that wish to modify the listing query
-    if(this.extensions) {
-        this.extensions.forEach(ext => {
+    if(this.specificExtensions.modifyListingQuery) {
+        this.specificExtensions.modifyListingQuery.forEach(ext => {
 
-            if(ext.modifyListingQuery) {
-                const newQuery = ext.modifyListingQuery(query);
-                if(newQuery) {
-                    query = newQuery;
-                }
+            const newQuery = ext(query, this.modelClass, input, topLevelFields, eagerResolves);
+            if(newQuery) {
+                query = newQuery;
             }
         });
     }
@@ -389,6 +388,7 @@ InstanceResolver.prototype.list = async function(input, info, context) {
             query = query.eager(eagerField).modifyEager(eagerField, builder => builder.select(eagerFields));
         });
     }
+
 
     const r = await query;
     this.addInstancesToContext(r, context);
