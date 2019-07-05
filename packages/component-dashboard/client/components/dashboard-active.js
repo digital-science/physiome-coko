@@ -9,7 +9,9 @@ import PopoverTrigger from "component-task-form/client/components/popover";
 import SubmissionListing from './submission-listing';
 import { FaFilter } from 'react-icons/fa';
 
-import {Checkbox, CheckboxLabel} from "ds-awards-theme/components/checkbox-input";
+import { Checkbox, CheckboxLabel } from "ds-awards-theme/components/checkbox-input";
+import { SmallTextInput } from "ds-awards-theme/components/text-input";
+import useDebouncedValue from "ds-awards-theme/hooks/useDebouncedValue";
 
 
 // FIXME: we only want "Saved" active phases for the current user!!
@@ -87,6 +89,20 @@ const FilterCheckboxListing = styled.div`
   }
 `;
 
+const FilteringHolder = styled.div`
+
+  flex-basis: 20%;
+  min-width: 10em;
+
+  display: flex;
+  flex-wrap: nowrap;
+  
+  > * + * {
+    margin-left: 10px;
+  }
+`;
+
+
 
 function savePhases(filterOptions) {
     const r = {};
@@ -126,6 +142,10 @@ const _DashboardActiveSubmissions = ({className, history, children}) => {
     const [showOnHoldSubmissions, setShowOnHoldSubmissions] = useState(false);
     const [savedPhases, setSavedPhases] = useState(null);
 
+    const [searchText, setSearchText] = useState("");
+    const [debouncedSearchText] = useDebouncedValue(searchText, 300);
+
+
     function handleCreateNewSubmission() {
         createNewTask().then(data => {
             const { id } = data;
@@ -141,6 +161,10 @@ const _DashboardActiveSubmissions = ({className, history, children}) => {
             applyPhases(filterOptions, savedPhases);
         }
         setShowOnHoldSubmissions(e.target.checked);
+    };
+
+    const handleOnChangeSearchText = (e) => {
+        setSearchText(e.target.value || "");
     };
 
     const filterOptions = AllPhases.map(filter => {
@@ -174,7 +198,9 @@ const _DashboardActiveSubmissions = ({className, history, children}) => {
         return (
             <HeaderHolder>
                 {header}
-                <div>
+                <FilteringHolder>
+                    <SmallTextInput value={searchText} onChange={handleOnChangeSearchText} placeholder="Search submissions…" />
+
                     <PopoverTrigger placement="bottom" renderContent={() => {
                         return (
                             <FilterCheckboxListing>
@@ -189,7 +215,7 @@ const _DashboardActiveSubmissions = ({className, history, children}) => {
                             <FaFilter />
                         </FilterButton>
                     </PopoverTrigger>
-                </div>
+                </FilteringHolder>
             </HeaderHolder>
         );
     };
@@ -197,7 +223,7 @@ const _DashboardActiveSubmissions = ({className, history, children}) => {
 
     return (
         <div className={className}>
-            <SubmissionListing heading="Active Submissions" renderHeading={renderHeading} phases={phases} showOnHoldSubmissions={showOnHoldSubmissions}>
+            <SubmissionListing heading="Active Submissions" renderHeading={renderHeading} phases={phases} searchText={debouncedSearchText} showOnHoldSubmissions={showOnHoldSubmissions}>
 
                 <AssignNewButton onClick={handleCreateNewSubmission}>
                     <span>+</span>Create New Submission&hellip;

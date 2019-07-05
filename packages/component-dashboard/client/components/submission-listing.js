@@ -28,7 +28,7 @@ const DefaultPhases = [
     "Published"
 ];
 
-const _SubmissionListing = ({className, history, children, heading, showOnHoldSubmissions=false, renderHeading=null, phases}) => {
+const _SubmissionListing = ({className, children, heading, showOnHoldSubmissions=false, renderHeading=null, phases, searchText}) => {
 
     const workflowDescription = useContext(WorkflowDescriptionContext);
     const submissionInstanceType = workflowDescription.findInstanceType('Submission');
@@ -48,11 +48,11 @@ const _SubmissionListing = ({className, history, children, heading, showOnHoldSu
 
     useEffect(() => {
         setPage(0);
-    }, [filter]);
+    }, [filter, searchText]);
 
     const sorting = { submissionDate: false };
 
-    const { data, error, loading, refetch } = useGetSubmissions(pageSize, page * pageSize, filter, sorting);
+    const { data, error, loading, refetch } = useGetSubmissions(pageSize, page * pageSize, filter, sorting, (searchText && searchText.length) ? searchText : null);
     const throttledRefetch = debounce(refetch, 2000, { leading: true, trailing: true, maxWait:2000 });
 
     useSubmissionWasCreatedSubscription(submissionId => {
