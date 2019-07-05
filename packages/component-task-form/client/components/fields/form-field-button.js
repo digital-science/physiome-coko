@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FormFieldInlineTaskHolder, InlineTaskContext } from './form-field-inline-task';
+import FieldListing from '../field-listing';
 import { BasicOverlay } from 'component-overlay';
 
 import Button, { PlainButtonStyle, SmallButtonStyle } from 'ds-awards-theme/components/button';
@@ -51,8 +52,16 @@ const ConfirmationButtonSet = styled.div`
   }
 `;
 
+const _noopSubmitTaskOutcome = () => {
+    console.error(`form-field-button - confirmation dialog child element (via field listing) attempted to submit a task outcome`);
+};
 
-function FormFieldButton({taskId, submitTaskOutcome, context, options}) {
+
+const ConfirmationDialogContext = { content: "ConfirmationDialog" };
+export { ConfirmationDialogContext };
+
+
+function FormFieldButton({taskId, submitTaskOutcome, description, context, options = {}, ...rest}) {
 
     const isInsideInlineForm = (context && context.length && context[0] === InlineTaskContext);
     const ButtonTag = isInsideInlineForm ? InlineButton : FormStyledButton;
@@ -102,6 +111,11 @@ function FormFieldButton({taskId, submitTaskOutcome, context, options}) {
                     <ConfirmationContent>
                         {options.confirmationHeading ? <ConfirmationHeading>{options.confirmationHeading}</ConfirmationHeading> : null}
                         {options.confirmation ? <ConfirmationMessage>{options.confirmation}</ConfirmationMessage> : null}
+
+                        {description.children ?
+                            <FieldListing elements={description.children} taskId={taskId} context={[ConfirmationDialogContext, ...context]}
+                                submitTaskOutcome={_noopSubmitTaskOutcome} {...rest} /> : null
+                        }
 
                         <ConfirmationButtonSet>
                             <InlineButton bordered={true} onClick={closeModal}>{options.confirmationNegativeLabel || "Cancel"}</InlineButton>
