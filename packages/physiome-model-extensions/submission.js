@@ -23,6 +23,9 @@ function modifyListingQuery(query, modelClass, input, topLevelFields, topLevelRe
             // Search the title
             return builder.select('id').from(tableName).where(knex.raw(`to_tsvector('english', title) @@ ${_buildTextQuery()}`, [input.searchText])).union(
 
+                // Search on manuscript ID
+                knex.select('id').from(tableName).where('manuscriptId', input.searchText.replace(/\s+/g, '').toUpperCase()),
+
                 // Search the author names
                 knex.select('id').from(tableName).where(knex.raw(`submission_authors_names_to_tsvector(authors) @@ ${_buildTextQuery()}`, [input.searchText])),
 

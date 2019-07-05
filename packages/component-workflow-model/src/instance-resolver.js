@@ -168,7 +168,7 @@ InstanceResolver.prototype.get = async function(input, info, context) {
 
 
 InstanceResolver.prototype.list = async function(input, info, context) {
-    
+
     const fieldsWithoutTypeName = GraphQLFields(info, {}, { excludedFields: ['__typename'] });
     const topLevelFields = (fieldsWithoutTypeName && fieldsWithoutTypeName.results) ? Object.keys(fieldsWithoutTypeName.results) : [];
     const limit = input.first || 200;
