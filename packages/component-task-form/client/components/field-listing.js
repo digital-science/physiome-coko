@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useMemo, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import AuthenticatedUserContext from "component-authentication/client/AuthenticatedUserContext";
@@ -12,67 +12,120 @@ function _FormFieldListing({ className, elements, fieldRegistry, data, binding, 
         return null;
     }
 
+
     const currentUser = useContext(AuthenticatedUserContext);
-    const items = [];
+    const [generation, setGeneration] = useState(0);
 
-    const pushElement = (ElementComponent, e, key) => {
-        items.push(
-            <ElementComponent key={key} className={`type-${e.type.toLowerCase()}`} binding={e.binding} options={e.options || {}} fieldRegistry={fieldRegistry}
-                description={e} data={data} {...elementComponentProps} />
-        );
-    };
 
-    const pushUnknownElement = (key) => {
-        items.push(<div key={key}>Unknown Element Type</div>);  //FIXME: this is displayed for debugging purposes only
-    };
+    const [finalItems, dependentBindings] = useMemo(() => {
 
-    /*const items = */
-    elements.forEach((e, i) => {
+        const conditionBindings = {};
+        const items = [];
 
-        if(!e.userIsTargetOfElement(currentUser)) {
-            return;
-        }
+        const pushElement = (ElementComponent, e, key) => {
+            items.push(
+                <ElementComponent key={key} className={`type-${e.type.toLowerCase()}`} binding={e.binding} options={e.options || {}} fieldRegistry={fieldRegistry}
+                    description={e} data={data} {...elementComponentProps} />
+            );
+        };
 
-        if(e.type === "Layout") {
+        const pushUnknownElement = (key) => {
+            items.push(<div key={key}>Unknown Element Type</div>);  //FIXME: this is displayed for debugging purposes only
+        };
 
-            const { instanceType } = elementComponentProps;
-            if(instanceType && e.options.layout) {
+        const pushConditionBindings = (condition) => {
+            const b = condition ? condition.bindings : null;
+            if(b) {
+                b.forEach(binding => conditionBindings[binding] = true);
+            }
+        };
 
-                const layout = instanceType.layoutDefinitionForLayoutName(e.options.layout);
-                if(layout && layout.elements) {
 
-                    layout.elements.forEach((layoutElement, layoutIndex) => {
+        elements.forEach((e, i) => {
 
-                        const key = `${i}-${layoutIndex}`;
-                        const LayoutElementComponent = fieldRegistry[layoutElement.type];
-
-                        if(!LayoutElementComponent) {
-                            return pushUnknownElement(key);
-                        }
-
-                        return pushElement(LayoutElementComponent, layoutElement, key);
-                    });
-                }
+            if(!e.userIsTargetOfElement(currentUser)) {
+                return;
             }
 
+            // If the type requested is a layout, resolve it and include the elements in question.
+            if(e.type === "Layout") {
+
+                const { instanceType } = elementComponentProps;
+                if(instanceType && e.options.layout) {
+
+                    const layout = instanceType.layoutDefinitionForLayoutName(e.options.layout);
+                    if(layout && layout.elements) {
+
+                        layout.elements.forEach((layoutElement, layoutIndex) => {
+
+                            const key = `${i}-${layoutIndex}`;
+                            const LayoutElementComponent = fieldRegistry[layoutElement.type];
+
+                            if(!LayoutElementComponent) {
+                                return pushUnknownElement(key);
+                            }
+
+                            pushConditionBindings(layoutElement.condition);
+                            if(layoutElement.condition && !layoutElement.evaluate(data)) {
+                                return;
+                            }
+
+                            return pushElement(LayoutElementComponent, layoutElement, key);
+                        });
+                    }
+                }
+
+                return;
+            }
+
+            const ElementComponent = fieldRegistry[e.type];
+            if(!ElementComponent) {
+                return pushUnknownElement(i);
+            }
+
+            pushConditionBindings(e.condition);
+            if(e.condition && !e.condition.evaluate(data)) {
+                return;
+            }
+
+            pushElement(ElementComponent, e, i);
+        });
+
+        const simpleDependentKeys = Object.keys(conditionBindings).map(key => key.split('.')[0]);
+
+        return [items, [...new Set(simpleDependentKeys)]];
+
+    }, [generation, currentUser, elements, fieldRegistry, data, ...Object.values(elementComponentProps)]);
+
+
+    const formDataWasChanged = () => {
+        setGeneration(generation + 1);
+    };
+
+    useEffect(() => {
+
+        // For each of the dependent binding, we want to watch the form data for changes and then force updates to reflect
+        // the fact that the outcome of the condition evaluation may now have changed.
+
+        if(!data) {
             return;
         }
 
-        const ElementComponent = fieldRegistry[e.type];
-        if(!ElementComponent) {
-            return pushUnknownElement(i);
-        }
+        dependentBindings.forEach(simpleBinding => {
+            data.on(`field.${simpleBinding}`, formDataWasChanged);
+        });
 
-        if(e.condition && !e.condition.evaluate(data)) {
-            return null;
-        }
+        return function cleanup() {
+            dependentBindings.forEach(simpleBinding => {
+                data.off(`field.${simpleBinding}`, formDataWasChanged);
+            });
+        };
 
-        pushElement(ElementComponent, e, i);
-    });
+    }, [generation, dependentBindings]);
 
     return (
         <div className={`${className || ''} form-field-listing`}>
-            {items}
+            {finalItems}
         </div>
     );
 }
