@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { FormFieldInlineTaskHolder, InlineTaskContext } from './form-field-inline-task';
 import FieldListing from '../field-listing';
+import FormValidator from '../../utils/FormValidator';
+
 import { BasicOverlay } from 'component-overlay';
 
 import Button, { PlainButtonStyle, SmallButtonStyle } from 'ds-awards-theme/components/button';
@@ -61,7 +63,7 @@ const ConfirmationDialogContext = { content: "ConfirmationDialog" };
 export { ConfirmationDialogContext };
 
 
-function FormFieldButton({taskId, submitTaskOutcome, description, context, options = {}, ...rest}) {
+function FormFieldButton({instanceType, data, taskId, submitTaskOutcome, description, context, formDefinition, formValidator, options = {}, ...rest}) {
 
     const isInsideInlineForm = (context && context.length && context[0] === InlineTaskContext);
     const ButtonTag = isInsideInlineForm ? InlineButton : FormStyledButton;
@@ -93,13 +95,31 @@ function FormFieldButton({taskId, submitTaskOutcome, description, context, optio
         setShowConfirmation(true);
     };
 
-    const affirmativeOnClick = () => {
-        handleSubmit(options.outcome);
-    };
-
     const closeModal = () => {
         setShowConfirmation(false);
     };
+
+    const [confirmationFormValidator, confirmationFormDefinition] = useMemo(() => {
+
+        if(!options.confirmationValidation || !options.confirmationValidation.length) {
+            return [null, null];
+        }
+
+        const validations = instanceType.validationListForValidationNameSet(options.confirmationValidation);
+        return [new FormValidator(), new ConfirmationFormDefinition(validations)];
+
+    }, [instanceType, options.confirmationValidation]);
+
+
+    const affirmativeOnClick = () => {
+
+        if(confirmationFormValidator && !confirmationFormValidator.validate(data)) {
+            return;
+        }
+
+        handleSubmit(options.outcome);
+    };
+
 
     return (
         <React.Fragment>
@@ -113,8 +133,8 @@ function FormFieldButton({taskId, submitTaskOutcome, description, context, optio
                         {options.confirmation ? <ConfirmationMessage>{options.confirmation}</ConfirmationMessage> : null}
 
                         {description.children ?
-                            <FieldListing elements={description.children} taskId={taskId} context={[ConfirmationDialogContext, ...context]}
-                                submitTaskOutcome={_noopSubmitTaskOutcome} {...rest} /> : null
+                            <FieldListing elements={description.children} data={data} instanceType={instanceType} taskId={taskId} context={[ConfirmationDialogContext, ...context]}
+                                submitTaskOutcome={_noopSubmitTaskOutcome} formValidator={confirmationFormValidator} formDefinition={confirmationFormDefinition} {...rest} /> : null
                         }
 
                         <ConfirmationButtonSet>
@@ -129,3 +149,24 @@ function FormFieldButton({taskId, submitTaskOutcome, description, context, optio
 }
 
 export default withFormField(FormFieldButton);
+
+
+
+
+class ConfirmationFormDefinition {
+
+    constructor(validations) {
+        this.validations = validations;
+    }
+
+    findMatchingValidations(formElement) {
+        if(!this.validations || !this.validations.length) {
+            return null;
+        }
+        if(!formElement.binding) {
+            return null;
+        }
+        const m = this.validations.filter(v => v.target === formElement.binding);
+        return m.length ? m : null;
+    }
+}

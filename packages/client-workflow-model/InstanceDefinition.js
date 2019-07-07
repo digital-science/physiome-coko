@@ -108,9 +108,33 @@ class InstanceDefinition {
         return viewName ? this.views[viewName] : null;
     }
 
-
     layoutDefinitionForLayoutName(layoutName) {
         return layoutName ? this.layouts[layoutName] : null;
+    }
+
+
+    validationListForValidationNameSet(validationNames) {
+
+        if(!validationNames || !validationNames.length) {
+            return null;
+        }
+
+        const allEntries = [];
+
+        validationNames.map(v => this.validations[v]).forEach(set => {
+
+            if(!set || !set.entries) {
+                return;
+            }
+
+            set.entries.forEach(entry => {
+                if(allEntries.indexOf(entry) === -1) {
+                    allEntries.push(entry);
+                }
+            });
+        });
+
+        return allEntries;
     }
 
 }
