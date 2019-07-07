@@ -1,5 +1,7 @@
-const TaskEmailInitialSubmission = require('./task-email-initial-submission');
 const TaskEmailManuscriptAcceptance = require('./task-email-acceptance');
+const TaskEmailManuscriptInitialSubmission = require('./task-email-initial-submission');
+const TaskEmailManuscriptPaymentReceived = require('./task-email-payment-received');
+const TaskEmailManuscriptPublished = require('./task-email-published');
 const TaskEmailManuscriptRejection = require('./task-email-rejection');
 
 const TaskPublishArticle = require('./task-publish-article');
@@ -8,8 +10,16 @@ const TaskReserveDoi = require('./task-reserve-doi');
 const TaskTimeoutSubmission = require('./task-time-out-submission');
 
 
-const AllTaskSetups = [TaskEmailInitialSubmission, TaskEmailManuscriptAcceptance, TaskEmailManuscriptRejection,
-    TaskPublishArticle, TaskReserveDoi, TaskTimeoutSubmission];
+const AllTaskSetups = [
+    TaskEmailManuscriptAcceptance,
+    TaskEmailManuscriptInitialSubmission,
+    TaskEmailManuscriptPaymentReceived,
+    TaskEmailManuscriptPublished,
+    TaskEmailManuscriptRejection,
+    TaskPublishArticle,
+    TaskReserveDoi,
+    TaskTimeoutSubmission
+];
 
 
 module.exports = function initExternalTasks(client) {

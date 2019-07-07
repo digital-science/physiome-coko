@@ -6,6 +6,13 @@ const path = require('path');
 const emailTemplateDirectory = config.get('workflow-send-email.templateDirectory');
 
 
+Handlebars.registerHelper('ifEquals', function(a, b, options) {
+    if (a === b) {
+        return options.fn(this);
+    }
+    return options.inverse(this);
+});
+
 class EmailTemplate {
 
     constructor(templateName) {

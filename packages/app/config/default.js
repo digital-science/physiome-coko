@@ -89,14 +89,17 @@ const values = {
 
     'workflow-send-email' : {
         from: `Jared Watts <jaredwatts@gmail.com>`,
-        prefix: '[DEV] Physiome Journal - ',
+        prefix: '[DEV] Physiome submission system: ',
         templateDirectory: `${__dirname}/../../../definitions/email-templates`,
         restrictedEmailAddresses: [
             "jaredwatts@gmail.com",
             /^.+@digital-science\.com$/i,
             /^.+@auckland\.ac\.nz$/i,
             /^.+@coko\.foundation/i
-        ]
+        ],
+        signature:`Kind regards,
+Physiome curation team
+physiome-curators@physiomeproject.org`
     },
 
     identity: {

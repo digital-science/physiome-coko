@@ -7,6 +7,8 @@ const EmailValidationEmailTemplate = new EmailTemplate('validate-email-address')
 const MaximumEmailValidationAttemptsPerDay = config.get('identity.maximumEmailValidationsPerDay');
 const MaximumEmailSendTimesArrayLength = Math.max(20, MaximumEmailValidationAttemptsPerDay * 2);
 
+const EmailSignature = config.get('workflow-send-email.signature');
+
 const MILLISECONDS_PER_DAY = 86400000;
 
 
@@ -64,8 +66,8 @@ exports.createEmailValidationForIdentity = async function(identity, resend = fal
 
     const email = {
         to: `${identity.displayName} <${identity.email}>`,
-        subject: "Email Address Confirmation",
-        text: EmailValidationEmailTemplate.template({user:identity, validateLink, validationCode})
+        subject: "email address confirmation",
+        text: EmailValidationEmailTemplate.template({user:identity, validateLink, validationCode, signature:EmailSignature})
     };
     
     // Note: email is sent async

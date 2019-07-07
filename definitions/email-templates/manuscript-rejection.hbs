@@ -1,7 +1,9 @@
 Dear {{user.displayName}},
 
-We regret to inform you that your submission to Physiome has been rejected, as it is outside of the scope of this journal.
+We regret to inform you that your submission to Physiome has been rejected for the following reason:
+
+{{#ifEquals submission.rejectionReason 'out-of-scope'}}Out of scope{{else}}{{submission.rejectionOther}}{{/ifEquals}}
+
 Your submission identification number is: {{submission.manuscriptId}}
 
-Kind regards,
-Physiome curation team.
+{{{signature}}}
