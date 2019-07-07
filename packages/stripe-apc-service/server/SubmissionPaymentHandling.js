@@ -75,8 +75,8 @@ async function createCheckoutSession(submissionId, emailAddress = null) {
         payment_method_types: ["card"],
         submit_type: "pay",
         line_items: [{
-            name: "Physiome Journal APC",
-            description: "Physiome Journal article processing fee",
+            name: "Physiome Journal Curation fee",
+            description: "Physiome Journal article curation fee",
             amount: 30000,
             currency: "usd",
             quantity: 1

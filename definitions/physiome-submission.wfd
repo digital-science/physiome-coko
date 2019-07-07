@@ -397,7 +397,7 @@ instance Submission {
                 { Layout, layout:"submission-editor" }
 
                 { HeroCheckbox => priceAcknowledged, heading:"Conditions of Submission",
-                    label: "I understand that there is an article processing charge (APC) of $300 USD associated with the successful acceptance of this manuscript." }
+                    label: "I understand that there is a curation processing fee of $300 USD associated with the successful acceptance of this manuscript." }
 
             } }
 
@@ -464,15 +464,15 @@ instance Submission {
 
             { Button, (phase == SubmissionPhase.Submitted), outcome:"checked", label:"Checks Completed" }
 
-            { Button, (phase == SubmissionPhase.Decision), outcome:"resume-checks", label:"Resume Quality Checks"}
+            { Button, (phase == SubmissionPhase.Decision), outcome:"resume-checks", label:"Resume Quality Checks" }
 
             { Button, (phase == SubmissionPhase.Decision), outcome:"payment", label:"Approve for Payment",
-                confirmation:"Are you sure you want to approve this submission for payment? The submitter will be asked to pay the article processing charge.",
-                confirmationHeading:"Approve Manuscript for APC Payment", confirmationAffirmativeLabel: "Request Payment", confirmationNegativeLabel: "Cancel"}
+                confirmation:"Are you sure you want to approve this submission for curation fee payment? The submitter will be emailed and asked to pay the curation processing charge.",
+                confirmationHeading:"Request Curation Fee Payment", confirmationAffirmativeLabel: "Send Payment Request", confirmationNegativeLabel: "Cancel" }
 
             { Button, (phase == SubmissionPhase.Paid), outcome:"publish", label:"Publish Article",
                 confirmation:"Are you sure you want to publish this manuscript submission through into figshare?", confirmationHeading:"Publish Manuscript to Figshare",
-                confirmationAffirmativeLabel: "Publish Manuscript", confirmationNegativeLabel: "Cancel"}
+                confirmationAffirmativeLabel: "Publish Manuscript", confirmationNegativeLabel: "Cancel" }
 
             { Button, (phase != SubmissionPhase.Reject), outcome:"reject", label:"Reject Article",
                 confirmation:"Are you sure you want to reject this manuscript submission?", confirmationHeading:"Reject Manuscript Submission",
