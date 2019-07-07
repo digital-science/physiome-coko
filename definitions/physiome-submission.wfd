@@ -417,6 +417,14 @@ instance Submission {
     }
 
 
+    validations "rejection-reason" {
+
+        { rejectionReason => (hasValue(rejectionReason) == true), "The kind of rejection being used must be specified. Choose 'Other' to write-in a reason not listed." }
+
+        { rejectionOther => (rejectionReason != RejectionReason.Other || length(rejectionOther) > 0), "A rejection reason is required if you choose 'Other' as the rejection reason." }
+    }
+
+
     form "decisions" {
 
         outcomes: [
@@ -468,7 +476,7 @@ instance Submission {
 
             { Button, (phase != SubmissionPhase.Reject), outcome:"reject", label:"Reject Article",
                 confirmation:"Are you sure you want to reject this manuscript submission?", confirmationHeading:"Reject Manuscript Submission",
-                confirmationAffirmativeLabel: "Reject Manuscript", confirmationNegativeLabel: "Cancel", children:{
+                confirmationAffirmativeLabel: "Reject Manuscript", confirmationNegativeLabel: "Cancel", confirmationValidation:["rejection-reason"], children:{
 
                 { SelectValue => rejectionReason, label:"Reason for Rejection", options:mapping("DisplayedRejectionReason"), placeholder:"Please select the rejection reason kind" }
 
