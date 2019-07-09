@@ -1,6 +1,8 @@
 const WorkflowModel = require('component-workflow-model/model');
 const { Submission } = WorkflowModel.models;
 
+const logger = require('workflow-utils/logger-with-prefix')('dashboard/server');
+
 module.exports = {
 
     Mutation: {
@@ -62,7 +64,7 @@ module.exports = {
 
         restartRejectedSubmission: async (instance, args, context, info) => {
 
-            // FIXME: apply ACL security checks onto this request to modify a submission
+            // FIXME: apply ACL security checks onto this request (to modify a submission)
 
             const userId = context.user;
             if(!userId) {
@@ -79,10 +81,45 @@ module.exports = {
                 return false;
             }
 
+            if(submission.phase !== "reject") {
+                logger.warn(`unable to resume rejected submission as phase isn't currently marked as being rejected {submissionId = ${submissionId}`);
+                return false;
+            }
+
             submission.phase = "submitted";
             await submission.save();
 
             return !!(await Submission.instanceResolver.restart(submission, "StartEvent_ResumeRejected"));
+        },
+
+        republishSubmission: async (instance, args, context, info) => {
+
+            // FIXME: apply ACL security checks onto this request (to modify a submission)
+
+            const userId = context.user;
+            if(!userId) {
+                return false;
+            }
+
+            const submissionId = args.id;
+            if(!submissionId) {
+                return false;
+            }
+
+            const submission = await Submission.find(submissionId);
+            if(!submission) {
+                return false;
+            }
+
+            if(submission.phase !== "published") {
+                logger.warn(`unable to republish submission as phase isn't currently marked as being published {submissionId = ${submissionId}`);
+                return false;
+            }
+
+            submission.phase = "publish";
+            await submission.save();
+
+            return !!(await Submission.instanceResolver.restart(submission, "StartEvent_RepublishArticle"));
         }
     }
 };
