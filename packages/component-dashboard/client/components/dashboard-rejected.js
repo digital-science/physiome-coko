@@ -4,12 +4,11 @@ import styled from 'styled-components';
 import SubmissionListing from './submission-listing';
 import SubmissionListingHeader, { HeaderHolder } from './submission-listing-header';
 
-const PublishedPhases = [
-    "Publish",
-    "Published"
+const RejectedPhases = [
+    "Reject"
 ];
 
-const _DashboardPublishedSubmissions = ({className, history, children}) => {
+const _DashboardRejectedSubmissions = ({className, history, children}) => {
 
     const [searchText, setSearchText] = useState("");
 
@@ -28,14 +27,14 @@ const _DashboardPublishedSubmissions = ({className, history, children}) => {
 
     return (
         <div className={className}>
-            <SubmissionListing heading="Published Submissions" children={children} phases={PublishedPhases}
+            <SubmissionListing heading="Rejected Submissions" children={children} phases={RejectedPhases}
                 renderHeading={renderHeading} searchText={searchText} />
         </div>
     );
 };
 
-const DashboardPublishedSubmissions = styled(_DashboardPublishedSubmissions)`
+const DashboardRejectedSubmissions = styled(_DashboardRejectedSubmissions)`
   padding: 32px;
 `;
 
-export default DashboardPublishedSubmissions;
+export default DashboardRejectedSubmissions;
