@@ -12,10 +12,8 @@ function _FormFieldListing({ className, elements, fieldRegistry, data, binding, 
         return null;
     }
 
-
     const currentUser = useContext(AuthenticatedUserContext);
     const [generation, setGeneration] = useState(0);
-
 
     const [finalItems, dependentBindings] = useMemo(() => {
 
@@ -91,9 +89,11 @@ function _FormFieldListing({ className, elements, fieldRegistry, data, binding, 
             pushElement(ElementComponent, e, i);
         });
 
-        const simpleDependentKeys = Object.keys(conditionBindings).map(key => key.split('.')[0]);
+        const simpleDependentKeys = Object.keys(conditionBindings)
+            .map(key => key.split('.')[0])
+            .filter((v, i, a) => a.indexOf(v) === i);
 
-        return [items, [...new Set(simpleDependentKeys)]];
+        return [items, simpleDependentKeys];
 
     }, [generation, currentUser, elements, fieldRegistry, data, ...Object.values(elementComponentProps)]);
 
