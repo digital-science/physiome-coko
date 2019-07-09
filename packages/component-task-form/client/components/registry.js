@@ -1,6 +1,7 @@
 import FormFieldDate from './fields/form-field-date';
 import FormFieldTextArea from './fields/form-field-textarea';
 import FormFieldText from './fields/form-field-text';
+import FormFieldBannerMessage from './fields/form-field-banner-message';
 import FormFieldFileUploader from './fields/form-field-file-uploader';
 import FormFieldButton from './fields/form-field-button';
 import FormFieldCheckbox from './fields/form-field-check-box';
@@ -30,6 +31,7 @@ const FormFieldRegistry = {
     'Date' : FormFieldDate,
     'TextArea' : FormFieldTextArea,
     'Text' : FormFieldText,
+    'BannerMessage' : FormFieldBannerMessage,
     'Button' : FormFieldButton,
     'Checkbox' : FormFieldCheckbox,
     'HeroCheckbox' : FormFieldHeroCheckbox,
