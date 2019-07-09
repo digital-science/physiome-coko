@@ -1006,7 +1006,7 @@ formElementOption
     }
 
 formElementOptionValue
- 	= mappingReference / valueArray / value
+ 	= mappingReference / valueArray / value / (begin_object elements:(formElement)* end_object {return elements;})
 
 
 
