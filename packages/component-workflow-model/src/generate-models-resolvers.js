@@ -196,6 +196,10 @@ function createModelForTask(task, enums, lookupModel, extensions) {
                 return aclTargets;
             }
 
+            publishInstanceWasModified() {
+                return this.id ? this.constructor.instanceResolver.publishInstanceWasModified(this.id) : Promise.resolve();
+            }
+
 
             static get relationMappings() {
 
