@@ -21,11 +21,28 @@ class TaskFormData {
         this._relationshipModifierClientKeyId = 1;
     }
 
+    _hasDefaultValue(fieldID) {
+        return this._defaultValues.hasOwnProperty(fieldID);
+    }
+
+    _getDefaultValue(fieldID) {
+        return fieldID ? this._defaultValues[fieldID] : null;
+    }
+
+    _setDefaultValue(fieldID, value) {
+        this._defaultValues[fieldID] = value;
+    }
+
+
     getFieldValue(fieldID) {
 
         if(fieldID.indexOf('.') !== -1) {
             const path = fieldID.split('.');
-            let obj =  (this._modifiedFields.hasOwnProperty(path[0]) ? this._modifiedFields : this._defaultValues);
+
+            let obj =  (this._modifiedFields.hasOwnProperty(path[0]) ? this._modifiedFields[path[0]] : this._getDefaultValue(path[0]));
+            if(!obj) {
+                return null;
+            }
 
             for(let i = 0; i < path.length; i++) {
                 obj = _get(obj, path[i]);
@@ -40,7 +57,7 @@ class TaskFormData {
         if(this._modifiedFields.hasOwnProperty(fieldID)) {
             return this._modifiedFields[fieldID];
         }
-        return this._defaultValues[fieldID] || undefined;
+        return this._getDefaultValue(fieldID) || undefined;
     }
 
     setFieldValue(fieldID, value) {
@@ -49,7 +66,7 @@ class TaskFormData {
             throw new Error(`TaskFormData - setFieldValue doesn't support field paths (${fieldID})`);
         }
 
-        if(this._defaultValues.hasOwnProperty(fieldID) && this._defaultValues[fieldID] === value) {
+        if(this._hasDefaultValue(fieldID) && this._getDefaultValue(fieldID) === value) {
             delete this._modifiedFields[fieldID];
             this.emit(`field.${fieldID}`, this, fieldID, value);
             this.emit(`modified`);
@@ -92,6 +109,10 @@ class TaskFormData {
         ++this._generation;
     }
 
+    resetAllFields() {
+        this._modifiedFields = {};
+    }
+
     getModifiedData() {
         const data = {};
         let isModified = false;
@@ -117,10 +138,10 @@ class TaskFormData {
 
         for(let k in data) {
             if(data.hasOwnProperty(k)) {
-                this._defaultValues[k] = data[k];
+                this._setDefaultValue(k, data[k]);
 
                 // This is not a deep compare!!
-                if(!sameGeneration && this._defaultValues[k] === this._modifiedFields[k]) {
+                if(!sameGeneration && this._getDefaultValue(k) === this._modifiedFields[k]) {
                     delete this._modifiedFields[k];
                 }
             }
@@ -128,6 +149,23 @@ class TaskFormData {
 
         if(sameGeneration) {
             this._modifiedFields = {};
+        }
+    }
+
+    overlayValues(data) {
+
+        let didModify = false;
+
+        for(let k in data) {
+            if(data.hasOwnProperty(k)) {
+                this._setDefaultValue(k, data[k]);
+                delete this._modifiedFields[k];
+                didModify = true;
+            }
+        }
+
+        if(didModify) {
+            this.emit(`modified`);
         }
     }
 

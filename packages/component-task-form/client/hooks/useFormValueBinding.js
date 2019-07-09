@@ -9,13 +9,10 @@ export default function useFormValueBinding(formData, binding, initialState = nu
 
 
     function formDataWasChanged(form, field, v) {
-        console.log(`[hook] form data was changed: ${field} --> "${v}" `);
         setValue(vt(form.getFieldValue(field)));
     }
 
     function handleInputChange(e) {
-        console.log(`[hook] handle input change!!" `);
-
         if(formData && binding) {
             const value = (e.target.type === 'checkbox') ? !!e.target.checked : e.target.value;
             formData.setFieldValue(binding, value);
