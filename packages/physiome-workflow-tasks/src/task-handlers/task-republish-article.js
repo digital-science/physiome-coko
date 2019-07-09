@@ -2,26 +2,23 @@ const FigshareArticlePublisher = require('./util-figshare-article-publisher');
 const { models } = require('component-workflow-model/model');
 const { Submission } = models;
 
-const { FigshareApi } = require('figshare-publish-service');
-const crypto = require('crypto');
-
-const logger = require("workflow-utils/logger-with-prefix")('external-task/publish-article');
+const logger = require("workflow-utils/logger-with-prefix")('external-task/republish-article');
 
 
 module.exports = function _setupPublishArticleTask(client) {
 
     const articlePublisher = new FigshareArticlePublisher();
 
-    client.subscribe('publish-article', async ({ task, taskService }) => {
+    client.subscribe('republish-article', async ({ task, taskService }) => {
 
-        logger.debug(`publish article is starting {submissionId: ${task.businessKey}}`);
+        logger.debug(`republish article is starting {submissionId: ${task.businessKey}}`);
 
         const instanceId = task.businessKey;
         if(!instanceId) {
-            logger.error(`failed to process publish submission due to missing business key (processInstanceId="${task.processInstanceId}")`);
+            logger.error(`failed to process republish submission due to missing business key (processInstanceId="${task.processInstanceId}")`);
             return taskService.handleFailure(task, {
-                errorMessage: "Publish Article Failed",
-                errorDetails: `Publish article task had no valid business key associated with the external service task.`,
+                errorMessage: "Republish article failed",
+                errorDetails: `Republish article task had no valid business key associated with the external service task.`,
                 retries: 0,
                 retryTimeout: 0
             });
@@ -33,7 +30,7 @@ module.exports = function _setupPublishArticleTask(client) {
             return;
         }
 
-        return articlePublisher.publishSubmission(submission).then(() => {
+        return articlePublisher.republishSubmission(submission).then(() => {
 
             const currentDate = new Date();
 
@@ -47,7 +44,7 @@ module.exports = function _setupPublishArticleTask(client) {
 
         }).then(() => {
 
-            logger.debug(`publishing article to figshare has finished, completing external task`);
+            logger.debug(`republishing article to figshare has finished, completing external task`);
             return taskService.complete(task);
 
         }).then(() => {
@@ -56,16 +53,7 @@ module.exports = function _setupPublishArticleTask(client) {
 
         }).catch(err => {
 
-            logger.error(`unable to publish article into figshare due to: ` + err.toString());
-
-            /*return taskService.handleFailure(task, {
-                errorMessage: "Publish Submission Failed",
-                errorDetails: `Unable to publish submission [${submission.manuscriptId}} due to: ${err.toString()}`,
-                retries: 5,
-                retryTimeout: 5000
-            });*/
-
+            logger.error(`unable to re-publish article into figshare due to: ` + err.toString());
         });
-
     });
 };
