@@ -87,6 +87,7 @@ instance Submission {
         submissionDate: DateTime <listing-sortable, input:exclude>,
         publishDate: DateTime <listing-sortable, input:exclude>,
         lastPublishDate: DateTime <listing-sortable, input:exclude>,
+        unpublishedChanges: Boolean <default:false>,
 
         phase: SubmissionPhase <state, input:exclude, listing-filter-multiple, default:SubmissionPhase.Pending>,
         hidden: Boolean <listing-filter, default:false>,
@@ -138,7 +139,7 @@ instance Submission {
         }
 
         fields "curation" {
-            hidden, rejectionReason, rejectionOther,
+            hidden, unpublishedChanges, rejectionReason, rejectionOther,
     	    curator,
     	    allFilesPresent, resultsMatch, modelAnnotated,
     	    primaryPaperExists, resultsInPapersOverlap, sameModelInPapers,
@@ -249,6 +250,16 @@ instance Submission {
     }
 
 
+    layout "admin-submission-editor" {
+
+        { ShadowedEditor, unpublishedChangesFlagField:"unpublishedChanges", children:{
+
+            { Layout, layout:"submission-editor" }
+
+        } }
+    }
+
+
     view "details" extend "MasterDetailEditor" {
 
         elements: {
@@ -265,7 +276,7 @@ instance Submission {
 
                     { Layout, layout:"submission-view" }
 
-                    { Layout, layout:"submission-editor" }
+                    { Layout, layout:"admin-submission-editor" }
 
                 } }
 
@@ -285,6 +296,8 @@ instance Submission {
 
 
             { DetailPanel, children:{
+
+                { BannerMessage, <administrator>, (phase == SubmissionPhase.Published && unpublishedChanges == true), message:"Unpublished Changes" }
 
                 { SubmissionStatusPill => phase, label:"Submission Status" }
 
