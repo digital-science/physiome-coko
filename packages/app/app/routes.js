@@ -5,6 +5,7 @@ import SubmissionApp from './SubmissionApp';
 
 import Index from './Index';
 import Published from './Published';
+import Rejected from './Rejected';
 import SubmissionTaskForm from './SubmissionTaskForm';
 import SubmissionDetailsPage from './SubmissionDetails';
 
@@ -35,6 +36,14 @@ const Routes = () => (
             return (
                 <LoginRequiredRoute message="To start a new submission please login using your ORCID ID." renderApplication={renderAppDefault}>
                     <Published history={props.history} />
+                </LoginRequiredRoute>
+            );
+        }} />
+
+        <Route path="/rejected" render={props => {
+            return (
+                <LoginRequiredRoute message="To start a new submission please login using your ORCID ID." renderApplication={renderAppDefault}>
+                    <Rejected history={props.history} />
                 </LoginRequiredRoute>
             );
         }} />

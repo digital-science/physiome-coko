@@ -4,7 +4,7 @@ import styled from 'styled-components';
 
 import HomeIcon from 'ds-awards-theme/static/home.svg';
 import ExpandIcon from 'ds-awards-theme/static/expand.svg';
-//import AwardIcon from 'ds-awards-theme/static/award.svg';
+import { FaTrashAlt } from 'react-icons/fa'
 
 
 const Sidebar = styled.nav`
@@ -23,6 +23,12 @@ const Sidebar = styled.nav`
         background: #33afbc;
     }
     
+    & svg {
+        color: white;
+        text-decoration: none;
+        font-size: 26px;
+    }
+    
     @media (min-width: 768px) {
         flex: 0 0 76px;
     }
@@ -31,11 +37,12 @@ const Sidebar = styled.nav`
 export default () => {
 
     const pathIsPublished = (window.location.pathname || []).toLowerCase() === '/published';
+    const pathIsRejected = (window.location.pathname || []).toLowerCase() === '/rejected';
 
     return (
         <Sidebar>
 
-            <div className={!pathIsPublished ? "selected" : ""}>
+            <div className={(!pathIsPublished && !pathIsRejected) ? "selected" : ""}>
                 <Link to={`/`}>
                     <img alt="Home" src={HomeIcon} />
                 </Link>
@@ -47,17 +54,12 @@ export default () => {
                 </Link>
             </div>
 
+            <div className={pathIsRejected ? "selected" : ""}>
+                <Link to={`/rejected`}>
+                    <FaTrashAlt />
+                </Link>
+            </div>
+
         </Sidebar>
     );
 };
-
-
-/*
-            <div>
-    <img alt="Expand" src={ExpandIcon} />
-</div>
-<div>
-    <img alt="Award" src={AwardIcon} />
-</div>
-
- */
