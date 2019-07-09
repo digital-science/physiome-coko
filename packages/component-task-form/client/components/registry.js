@@ -15,6 +15,7 @@ import FormFieldStaticText from './fields/form-field-static-text';
 import FormFieldFilesListing from './fields/form-field-files-listing';
 
 import FormFieldGroup from './fields/form-field-group';
+import FormFieldShadowedEditor from './fields/form-field-shadowed-editor';
 
 import FormFieldAuthorsEditor, { FormFieldAuthorsListing } from './fields/form-field-authors';
 import FormFieldFundingEditor, { FormFieldFundingListing } from './fields/form-field-funding';
@@ -60,6 +61,7 @@ const FormFieldRegistry = {
     'StaticText' : FormFieldStaticText,
 
     'Group': FormFieldGroup,
+    'ShadowedEditor' : FormFieldShadowedEditor,
 
     'FishareArticleEmbed' : FormFieldFigshareEmbed
 };

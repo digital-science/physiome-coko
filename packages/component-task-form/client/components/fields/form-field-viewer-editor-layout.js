@@ -17,6 +17,8 @@ import { FaEye, FaPencilAlt } from 'react-icons/fa';
 function FormFieldViewerEditorLayout({className, description, options = {}, ...rest}) {
 
     const [viewerIsPicked, setViewerIsPicked] = useState(true);
+    const [customPanelHeadingContent, setCustomPanelHeadingContent] = useState(null);
+
     const layouts = useMemo(() => {
 
         const { children } = description;
@@ -40,26 +42,43 @@ function FormFieldViewerEditorLayout({className, description, options = {}, ...r
         setViewerIsPicked(!viewerIsPicked);
     };
 
+    const dismissEditor = () => {
+        setViewerIsPicked(true);
+    };
+
+    const setPanelHeadingContent = (content) => {
+        setCustomPanelHeadingContent(content);
+    };
+
     return (
         <FormFieldViewerEditorLayoutHolder className={className}>
             <PanelHeading heading={options.heading}>
-                <InlineButton bordered={true} icon={icon} onClick={toggleViewEditMode}>
-                    {viewerIsPicked ? (options.editLabel || "Edit") : (options.viewLabel || "View")}
-                </InlineButton>
+
+                <ButtonSet>
+                    {customPanelHeadingContent ? customPanelHeadingContent : (
+                        <InlineButton bordered={true} icon={icon} onClick={toggleViewEditMode}>
+                            {viewerIsPicked ? (options.editLabel || "Edit") : (options.viewLabel || "View")}
+                        </InlineButton>
+                    )}
+                </ButtonSet>
+
             </PanelHeading>
 
-            <FieldListing elements={viewerIsPicked ? layouts[0].elements : layouts[1].elements } {...rest} />
+            <FieldListing elements={viewerIsPicked ? layouts[0].elements : layouts[1].elements } dismissEditor={dismissEditor} setPanelHeadingContent={setPanelHeadingContent} {...rest} />
         </FormFieldViewerEditorLayoutHolder>
     );
 }
 
+const ButtonSet = styled.div`
+`;
+
 const FormFieldViewerEditorLayoutHolder = styled.div`
   position: relative;
   
-  & > ${PanelHeading} > ${InlineButton} {
-    float: right;
+  & > ${PanelHeading} {
+    display: flex;
+    justify-content: space-between;
   }
-  
 `;
 
 export default withFormField(FormFieldViewerEditorLayout);
