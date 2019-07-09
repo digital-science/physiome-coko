@@ -84,8 +84,9 @@ instance Submission {
         submitter: Identity <owner-id, join-field:"submitterId">,
         curator: Identity <join-field:"curatorId">,
 
-        submissionDate: DateTime <listing-sortable>,
-        publishDate: DateTime <listing-sortable>,
+        submissionDate: DateTime <listing-sortable, input:exclude>,
+        publishDate: DateTime <listing-sortable, input:exclude>,
+        lastPublishDate: DateTime <listing-sortable, input:exclude>,
 
         phase: SubmissionPhase <state, input:exclude, listing-filter-multiple, default:SubmissionPhase.Pending>,
         hidden: Boolean <listing-filter, default:false>,
@@ -340,12 +341,20 @@ instance Submission {
                 { Checkbox => modelAnnotated, label: "Model is fully annotated", readOnly:true }
             } }
 
-            { DetailPanel, <administrator>, (phase in [SubmissionPhase.Submitted, SubmissionPhase.Decision, SubmissionPhase.Payment, SubmissionPhase.Paid, SubmissionPhase.Reject]),
+            { DetailPanel, <administrator>, (phase in [SubmissionPhase.Submitted, SubmissionPhase.Decision, SubmissionPhase.Payment,
+                                                            SubmissionPhase.Paid, SubmissionPhase.Reject]),
                     heading:"Decisions", children:{
 
                 { InlineTaskForm, form:"decisions", tasks:[ "checks", "payment-decision", "payment", "publish-decision" ] }
 
                 { ResumeRejectedSubmission, (phase == SubmissionPhase.Reject) }
+
+            } }
+
+            { DetailPanel, <administrator>, (phase == SubmissionPhase.Published),
+                    heading:"Publishing", children:{
+
+                { RepublishSubmission, (phase == SubmissionPhase.Published) }
 
             } }
 
