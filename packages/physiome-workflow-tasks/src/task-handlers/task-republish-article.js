@@ -39,6 +39,7 @@ module.exports = function _setupPublishArticleTask(client) {
                 submission.publishDate = currentDate;
             }
             submission.lastPublishDate = currentDate;
+            submission.unpublishedChanges = false;
 
             return submission.save();
 
