@@ -83,6 +83,9 @@ module.exports = {
 
                             await identity.save();
 
+                            // Notify other clients that the identity was updated (will force a current user refresh).
+                            identity.publishIdentityWasModified();
+
                             emailValidationTokenOutcome = CurrentUserEmailValidationOutcome.Successful;
 
                         } else {

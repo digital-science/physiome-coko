@@ -58,6 +58,7 @@ exports.createEmailValidationForIdentity = async function(identity, resend = fal
     identity.emailValidationEmailSendTimes = (identity.emailValidationEmailSendTimes ? [currentDateTimeString, ...identity.emailValidationEmailSendTimes] : [currentDateTimeString]).slice(0, MaximumEmailSendTimesArrayLength);
 
     await identity.save();
+    identity.publishIdentityWasModified();
 
     // We now need to send an email off to the user as well
 

@@ -1,3 +1,5 @@
+import React, { useEffect } from "react";
+
 import LoginRequiredMessage from './LoginRequiredMessage';
 import LoginEmailRequiredMessage from './LoginEmailRequiredMessage';
 
@@ -5,30 +7,36 @@ import NonValidatedEmailMessage from "./NonValidatedEmailMessage";
 import SuccessfullyValidatedEmailMessage from './SuccessfullyValidatedEmailMessage';
 
 import useCurrentUser, { EmailValidationOutcome } from "./withCurrentUser";
+import withCurrentUserModified from './withCurrentUserModified';
 import AuthenticatedUserContext from "./AuthenticatedUserContext";
-import React from "react";
+
+function _findEmailCodeInLocationHash(hash) {
+
+    if(!hash || !hash.length) {
+        return null;
+    }
+
+    const hashParts = hash.replace(/^#/g, "").split(",");
+    const emailCode = hashParts.filter(part => part.match(/^email_code=[0-9]+$/i))
+        .map(code => code.replace(/^email_code=/i, ""))
+        .map(code => parseInt(code))
+        .filter(code => code && !isNaN(code));
+
+    return (emailCode && emailCode.length === 1) ? emailCode[0] : null;
+}
+
 
 export default ({message, renderApplication, renderContent, children}) => {
 
     // If the URL hash includes an email validation code, we want to pass that onto the "current user" request.
 
-    const hash = window.location.hash;
-    let emailValidationCode = null;
-
-    if(hash) {
-
-        const hashParts = hash.replace(/^#/g, "").split(",");
-        const emailCode = hashParts.filter(part => part.match(/^email_code=[0-9]+$/i))
-            .map(code => code.replace(/^email_code=/i, ""))
-            .map(code => parseInt(code))
-            .filter(code => code && !isNaN(code));
-
-        if(emailCode && emailCode.length === 1) {
-            emailValidationCode = emailCode[0];
-        }
-    }
+    const emailValidationCode = _findEmailCodeInLocationHash(window.location.hash);
 
     const { currentUser, emailValidationTokenOutcome, error, loading, refetch } = useCurrentUser(emailValidationCode ? `${emailValidationCode}` : null);
+    withCurrentUserModified((data) => {
+        refetch();
+    });
+
     if(error || loading) {
         return null;
     }
@@ -51,10 +59,6 @@ export default ({message, renderApplication, renderContent, children}) => {
                 )}
             </AuthenticatedUserContext.Provider>
         );
-    }
-
-    if(emailValidationTokenOutcome !== null) {
-        console.dir(emailValidationTokenOutcome);
     }
 
     const loginRelatedContent = (
