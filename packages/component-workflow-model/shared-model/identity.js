@@ -1,4 +1,7 @@
 const { BaseModel } = require('component-model');
+const { pubsubManager } = require("pubsweet-server");
+
+const { AuthorizationError } = require('@pubsweet/errors');
 
 
 class Identity extends BaseModel {
@@ -30,12 +33,36 @@ class Identity extends BaseModel {
             }
         };
     }
+
+    async publishIdentityWasModified() {
+        const pubSub = await pubsubManager.getPubsub();
+        if (pubSub) {
+            const r = {};
+            r[`modifiedIdentity`] = this.id;
+            pubSub.publish(`identity.modified.${this.id}`, r);
+        }
+    }
 }
 
+async function asyncIteratorWasModified(user) {
+
+    if(!user) {
+        return null;
+    }
+
+    const pubSub = await pubsubManager.getPubsub();
+    return pubSub.asyncIterator(`identity.modified.${user}`);
+}
 
 exports.resolvers = {
     IdentityType: {
         ORCiDIdentityType: "orcid"
+    },
+
+    Subscription: {
+        modifiedIdentity: {
+            subscribe: async (_, input, context) => asyncIteratorWasModified(context.user)
+        }
     }
 };
 

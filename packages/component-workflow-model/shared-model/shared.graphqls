@@ -170,3 +170,7 @@ type Identity {
 
     groups: JSON
 }
+
+extend type Subscription {
+    modifiedIdentity : ID!
+}
