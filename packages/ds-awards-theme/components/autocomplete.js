@@ -407,6 +407,15 @@ const _Autocomplete = ({className, ref, value, onChange, onSelect,
             },
 
             Escape: (event) => {
+
+                const input = _holderRefToInput(holderRef);
+                if(input && input.ownerDocument && input === input.ownerDocument.activeElement && !showing) {
+                    event.preventDefault();
+                    setIgnoreBlur(false);
+                    input.blur();
+                    return;
+                }
+
                 event.preventDefault();
                 setIgnoreBlur(false);
                 setShowing(false);
