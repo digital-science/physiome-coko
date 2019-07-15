@@ -211,7 +211,7 @@ instance Submission {
 
         { SelectValue => iupsCommission, label:"Commission Type", options:mapping("DisplayedIUPSCommissionKinds"), placeholder:"Please select a Commission" }
 
-        { KeywordsEditor => keywords, label:"Keywords", placeholder:"Enter Manuscript keywords" }
+        { KeywordsEditor => keywords, label:"Keywords", placeholder:"Keywords associated with manuscript. Press 'Enter' to confirm each keyword" }
 
         { FundingEditor => funding, label:"Funding Acknowledgements" }
 
