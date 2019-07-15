@@ -115,7 +115,7 @@ const _GrantDetailsRow = ({className, grantNumber, onChange, removeGrantNumber, 
                     (
                         <GrantExtraDetails>
                             <div className="grant-info">
-                                <span>{grant.link ? <a href={grant.link} target="_blank">{grant.title}</a> : <React.Fragment>grant.title</React.Fragment>}</span>
+                                <span>{grant.link ? <a href={grant.link} target="_blank">{grant.title}</a> : <React.Fragment>{grant.title}</React.Fragment>}</span>
                             </div>
                             {(grant.funders && grant.funders.length) ?
                                 (
