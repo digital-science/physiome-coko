@@ -169,6 +169,28 @@ const DSAwardsTheme = {
         selectedBackground: "#b3e7ff"
     },
 
+    // Autocomplete
+    autocomplete: {
+        item: {
+            fontFamily: ThemeBaseDefaults.InputFontFamily,
+            fontSize: ThemeBaseDefaults.FontSizeDefault,
+
+            small: {
+                fontSize: ThemeBaseDefaults.FontSizeSmall,
+            }
+        },
+
+        entity: {
+            fontFamily: ThemeBaseDefaults.InputFontFamily,
+            fontSize: ThemeBaseDefaults.FontSizeDefault,
+
+            small: {
+                fontSize: ThemeBaseDefaults.FontSizeSmall,
+            }
+        }
+    },
+
+
     // Tag input
     tagInput: {
         fontFamily: ThemeBaseDefaults.InputFontFamily,
