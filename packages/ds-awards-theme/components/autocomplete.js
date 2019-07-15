@@ -20,12 +20,39 @@ const TooltipHolder = styled.div`
   }
 `;
 
+
+function findParentNodeWithClass(node, className) {
+
+    let currentNode = node.parentElement;
+
+    while(currentNode) {
+        if(currentNode.classList && currentNode.classList.length) {
+            if([...currentNode.classList].indexOf(className) !== -1) {
+                return currentNode;
+            }
+        }
+        currentNode = currentNode.parentElement;
+    }
+
+    return null;
+}
+
+
+
 const _MenuHolder = ({className, holderRef, children}) => {
 
     // Holder reference is the autocomplete div holding the displayed user input.
     const extraStyle = {};
     if(holderRef.current) {
         extraStyle.minWidth = holderRef.current.offsetWidth + 'px';
+
+        const contentParent = findParentNodeWithClass(holderRef.current, "content");
+
+        if(contentParent && contentParent.offsetWidth) {
+            extraStyle.maxWidth = contentParent.offsetWidth + 'px';
+        } else {
+            extraStyle.maxWidth = holderRef.current.offsetWidth + 'px';
+        }
     }
 
     return (
@@ -36,9 +63,6 @@ const _MenuHolder = ({className, holderRef, children}) => {
 };
 
 const MenuHolder = styled(_MenuHolder)`
-`;
-
-const SmallMenuHolder = styled(MenuHolder)`
 `;
 
 
@@ -57,6 +81,10 @@ const SmallMenuItem = styled(MenuItem)`
  & {
    font-size: ${th('autocomplete.item.small.fontSize')};
  }
+`;
+
+const MenuHeader = styled.div`
+  padding: 0.4rem;
 `;
 
 const MenuFooter = styled.div`
@@ -181,14 +209,10 @@ const _Autocomplete = ({className, ref, value, onChange, onSelect,
     useEffect(() => {
 
         return () => {
-            console.log("pending query cleanup called !!!");
-            console.dir(pendingQueryInstancesRef.current);
-
             pendingQueryInstancesRef.current.forEach(pendingQuery => {
                 pendingQuery.resultsHandler = null;
                 pendingQuery.finally = null;
             });
-
             pendingQueryInstancesRef.current = [];
         };
 
@@ -200,7 +224,7 @@ const _Autocomplete = ({className, ref, value, onChange, onSelect,
 
     const select = useCallback((item, value) => {
         if(onSelect) {
-            onSelect(item, value, _holderRefToInput(holderRef));
+            onSelect(value, item, _holderRefToInput(holderRef));
         } else {
             onChange(value, item, _holderRefToInput(holderRef));
         }
@@ -510,14 +534,12 @@ export default Autocomplete;
 
 
 
-const SmallAutocomplete = ({textInputComponent=SmallTextInput, menuItemComponent=SmallMenuItem, menuHolderComponent=SmallMenuHolder, ...rest}) => {
-    return <Autocomplete textInputComponent={textInputComponent} menuItemComponent={menuItemComponent} menuHolderComponent={menuHolderComponent} {...rest} />
+const SmallAutocomplete = ({textInputComponent=SmallTextInput, menuItemComponent=SmallMenuItem, ...rest}) => {
+    return <Autocomplete textInputComponent={textInputComponent} menuItemComponent={menuItemComponent} {...rest} />
 };
 
 
 export { Autocomplete, SmallAutocomplete };
 
 export { MenuItem, SmallMenuItem };
-export { MenuHolder, SmallMenuHolder };
-
-export { MenuFooter };
+export { MenuHolder, MenuHeader, MenuFooter };
