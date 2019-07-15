@@ -24,6 +24,13 @@ const InlineButton = styled(_InlineButton)`
     outline: none;
     user-select: none;
     
+    &:focus:not(:active) {
+        box-shadow: 0 0 2px 2px #2196F3;
+        border-color: #2196F3;
+        outline: 0;
+    }
+
+    
     &.bordered {
         border-radius: 7px;
         padding: 4px 10px;

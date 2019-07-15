@@ -56,6 +56,13 @@ const Button = styled(_Button)`
     ::-moz-focus-inner {
       border: 0;
     }
+    
+    &:focus:not(:active) {
+        box-shadow: 0 0 2px 2px #2196F3;
+        border-color: #2196F3;
+        outline: 0;
+    }
+
 `;
 
 const PlainButtonStyle = css`
