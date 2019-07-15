@@ -10,7 +10,8 @@ const _getItemValue = (item) => item ? item.name : "";
 
 
 const _AutocompleteEntity = ({className, entity, value, onChange, placeholder, readOnly, getItemValue=_getItemValue, renderInput, showRemoveButton=false,
-                              removeEntity, modifyEntityForSelection=null, renderEntityValueRepresentation=null, autocompleteComponent=Autocomplete, ...rest}) => {
+                              removeEntity, modifyEntityForSelection=null, renderEntityValueRepresentation=null, autocompleteComponent=Autocomplete,
+                              onInputFocusChange, onMenuVisibilityChange, ...rest}) => {
 
     const entityRender = useCallback(
         renderEntityValueRepresentation || ((entity) => <React.Fragment>{getItemValue(entity)}</React.Fragment>),
@@ -42,10 +43,25 @@ const _AutocompleteEntity = ({className, entity, value, onChange, placeholder, r
     }, [onChange, modifyEntityForSelection]);
 
 
+    const inputFocusChange = useCallback((f) => {
+        setFocused(f);
+        if(onInputFocusChange) {
+            onInputFocusChange(f);
+        }
+    }, [setOpen, onInputFocusChange]);
+
+    const menuVisChange = useCallback((f) => {
+        setOpen(f);
+        if(onMenuVisibilityChange) {
+            onMenuVisibilityChange(f);
+        }
+    }, [setOpen, onMenuVisibilityChange]);
+
+
     return (
         <div className={`${className} ${entity ? "has-entity" : ""} ${(open || focused) ? "open" : "closed"} ${showRemoveButton ? "remove-button" : ""}`}>
-            <AutocompleteComponent value={value} onChange={onChange} onSelect={onSelect} getItemValue={getItemValue} onInputFocusChange={(f) => setFocused(f)}
-                onMenuVisibilityChange={(f) => setOpen(f)} renderInput={inputRender}  {...rest} />
+            <AutocompleteComponent value={value} onChange={onChange} onSelect={onSelect} getItemValue={getItemValue} onInputFocusChange={inputFocusChange}
+                onMenuVisibilityChange={menuVisChange} renderInput={inputRender}  {...rest} />
         </div>
     );
 };
