@@ -1,4 +1,4 @@
-import React, {Fragment} from 'react';
+import React, { Fragment, useLayoutEffect, useRef, useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 import { FaUpload } from 'react-icons/fa';
@@ -73,11 +73,52 @@ const FileUploadError = styled(_FileUploadError)`
 
 
 
-const _FileUploader = ({greetingComponent, progressComponent, errorComponent, message, progress, error, children, ...props}) => {
+const _FileUploader = ({className, greetingComponent, progressComponent, errorComponent, message, progress, error, children, ...props}) => {
+
+    const dropzoneRef = useRef(null);
+    const [focused, setFocused] = useState(false);
+
+    const onInputFocus = useCallback(() => {
+        setFocused(true);
+    }, [setFocused]);
+
+    const onInputBlur = useCallback(() => {
+        setFocused(false);
+    }, [setFocused]);
+
+    useLayoutEffect(() => {
+
+        if(!dropzoneRef.current || !dropzoneRef.current._dropzone || !dropzoneRef.current._dropzone.fileInputEl) {
+            return;
+        }
+
+        const input = dropzoneRef.current._dropzone.fileInputEl;
+        const inputOnFocus = input.onfocus;
+        const inputOnBlur = input.onblur;
+
+        input.onfocus = function onfocus(...args) {
+            onInputFocus();
+            if(inputOnFocus) {
+                inputOnFocus.call(this, ...args);
+            }
+        };
+
+        input.onblur = function onfocus(...args) {
+            onInputBlur();
+            if(inputOnBlur) {
+                inputOnBlur.call(this, ...args);
+            }
+        };
+
+        return () => {
+            input.onfocus = inputOnFocus;
+            input.onblur = inputOnBlur;
+        };
+    });
 
     if(children) {
         return (
-            <DropzoneS3Uploader {...props}>
+            <DropzoneS3Uploader className={`${className || ''} ${focused ? 'focused' : ''}`} ref={dropzoneRef} {...props}>
                 {greetingComponent || <FileUploadGreeting message={message}/>}
                 {progressComponent || <FileUploadProgress />}
                 {errorComponent || <FileUploadError />}
@@ -87,7 +128,7 @@ const _FileUploader = ({greetingComponent, progressComponent, errorComponent, me
     }
 
     return (
-        <DropzoneS3Uploader {...props}>
+        <DropzoneS3Uploader className={`${className || ''} ${focused ? 'focused' : ''}`} ref={dropzoneRef} {...props}>
             {greetingComponent || <FileUploadGreeting message={message}/>}
             {progressComponent || <FileUploadProgress />}
             {errorComponent || <FileUploadError />}
@@ -105,6 +146,12 @@ const FileUploader = styled(_FileUploader)`
     background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(213,238,245,0.59) 100%);
     
     border: 2px dashed #cbcbcb7a !important;
+    
+    &.focused {
+        box-shadow: 0 0 2px 2px #2196F3;
+        border-color: #2196F3;
+        outline: 0;
+    }
 `;
 
 
