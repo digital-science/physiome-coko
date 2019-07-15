@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-function useDebounce(dependentValue, delay, callback = null, initialValue=undefined) {
+function useDebounce(dependentValue, delay, callback = null, initialValue=undefined, additionalDependentValues=null) {
     // State and setters for debounced value
     const [debouncedValue, setDebouncedValue] = useState(initialValue !== undefined ? initialValue : dependentValue);
 
@@ -21,7 +21,7 @@ function useDebounce(dependentValue, delay, callback = null, initialValue=undefi
             return () => {
                 clearTimeout(handler);
             };
-        }, [dependentValue]
+        }, [dependentValue, ...(additionalDependentValues || [])]
     );
 
     return [debouncedValue];
