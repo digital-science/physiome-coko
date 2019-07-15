@@ -1,9 +1,58 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { EntityAutocomplete, MenuItem, MenuHolder, ApplySmallAutocompleteStyle } from "ds-awards-theme/components/entity-autocomplete";
+import { AutocompleteEntity, SmallAutocompleteEntity } from 'ds-awards-theme/components/autocomplete-entity';
+import { MenuHolder, MenuItem, MenuHeader, MenuFooter } from 'ds-awards-theme/components/autocomplete';
+import Spinner from "ds-awards-theme/components/spinner";
+import { th } from "ds-awards-theme";
 
 import RorLogoSmall from '../static/ror-logo-small.png';
+
+
+const LookupProviderHeader = styled(MenuHeader)`
+`;
+
+const LookupProviderNote = styled(MenuFooter)`
+  font-family: ${th('autocomplete.item.fontFamily')};
+  font-size: 10px;
+  text-align: right;
+
+  & img {
+    height: 1.2em;
+    vertical-align: middle;
+  }  
+`;
+
+const OrganisationMenuHolder = styled(MenuHolder)`  
+  & > ${LookupProviderHeader} + * {
+    margin-top: 2px;
+    border-top: 1px dashed lightgray;
+  }
+  & > * + ${LookupProviderNote} {
+    margin-top: 2px;
+    border-top: 1px dashed lightgray;
+  }
+  
+  & > ${MenuItem} {
+    .acronyms {
+      color: #909090;
+      font-style: italic;
+    }
+    .acronyms:before {
+      content: " ("
+    }
+    .acronyms:after {
+      content: ")"
+    }
+    
+    .country {
+      color: #909090;
+    }
+    .country:before {
+      content: " - "
+    }
+  }
+`;
 
 
 const organisationEntityModifier = (entity) => {
@@ -51,36 +100,27 @@ function organisationEntityLookup(value, maxItems=15) {
     });
 }
 
-const OrganisationMenuItem = styled(MenuItem)`
-    & .acronyms {
-      color: #909090;
-      font-style: italic;
-    }
-    & .acronyms:before {
-      content: " ("
-    }
-    & .acronyms:after {
-      content: ")"
-    }
-    
-    & .country {
-      color: #909090;
-    }
-    & .country:before {
-      content: " - "
-    }
-`;
-
-const renderOrganisationMenuItem = (item, isHighlighted) =>
-    <OrganisationMenuItem key={item.id} className={isHighlighted ? "selected" : ""}>
+const renderOrganisationMenuItem = ({item, index, isSelected}, MenuItemComponent) =>
+    <MenuItemComponent key={item.id} className={isSelected ? "selected" : ""}>
         {item.name}
         {item.acronyms && item.acronyms.length ? <span className="acronyms">{item.acronyms[0]}</span> : null}
         {item.country && item.country.country_name ? <span className="country">{item.country.country_name}</span> : null}
-    </OrganisationMenuItem>;
+    </MenuItemComponent>;
+
+const renderOrganisationMenuHeader = (loading) => loading ? (
+    <LookupProviderHeader>
+        <Spinner message="Loading…" small={true} />
+    </LookupProviderHeader>
+) : null;
+
+const renderOrganisationMenuFooter = (loading) => (
+    <LookupProviderNote>
+        <div><img src={RorLogoSmall} alt="ROR logo" /> Organisation lookup data sourced via ROR</div>
+    </LookupProviderNote>
+);
 
 
 const CountryCodeSpan = styled.span`
-  
   font-style: italic;
   &:before {
     content: " (";
@@ -97,48 +137,25 @@ const renderOrganisationValueRepresentation = (organisationEntity) =>
     </React.Fragment>;
 
 
-const LookupProviderNote = styled(MenuItem)`
+const OrganisationAutocomplete = ({entityModifier=organisationEntityModifier, lookupItems=organisationEntityLookup,
+                                   renderMenuItem=renderOrganisationMenuItem, renderEntityValueRepresentation=renderOrganisationValueRepresentation,
+                                   renderMenuHeader=renderOrganisationMenuHeader, renderMenuFooter=renderOrganisationMenuFooter,
+                                   menuHolderComponent=OrganisationMenuHolder, autocompleteEntityComponent=AutocompleteEntity, ...props}) => {
 
-  font-size: 10px;
-  text-align: right;
+    const AutocompleteEntityComponent = autocompleteEntityComponent;
 
-  & img {
-    height: 1.2em;
-    vertical-align: middle;
-  }  
-`;
-
-
-const OrganisationMenuHolder = styled(MenuHolder)`
-  & > * + ${LookupProviderNote} {
-    margin-top: 2px;
-    border-top: 1px dashed lightgray;
-  }
-`;
-
-const renderOrganisationMenu = function (items, value, style) {
     return (
-        <OrganisationMenuHolder style={{ ...style, ...this.menuStyle }} children={items}>
-            {items}
-            <LookupProviderNote>
-                <img src={RorLogoSmall} alt="ROR logo" /> Organisation lookup data sourced via ROR
-            </LookupProviderNote>
-        </OrganisationMenuHolder>
+        <AutocompleteEntityComponent entityModifier={entityModifier} lookupItems={lookupItems}
+            menuHolderComponent={menuHolderComponent} renderMenuItem={renderMenuItem}
+            renderMenuHeader={renderMenuHeader} renderMenuFooter={renderMenuFooter}
+            renderEntityValueRepresentation={renderEntityValueRepresentation} {...props} />
     );
 };
 
+const SmallOrganisationAutocomplete = ({autocompleteEntityComponent=SmallAutocompleteEntity, ...rest}) => {
 
-
-const OrganisationAutocomplete = ({entityModifier=organisationEntityModifier, entityLookup=organisationEntityLookup,
-                                   renderItem=renderOrganisationMenuItem, renderEntityValueRepresentation=renderOrganisationValueRepresentation,
-                                   renderMenu=renderOrganisationMenu, ...props}) => (
-
-    <EntityAutocomplete entityModifier={entityModifier} entityLookup={entityLookup} renderItem={renderItem}
-        renderMenu={renderMenu} renderEntityValueRepresentation={renderEntityValueRepresentation} {...props} />
-);
+    return <OrganisationAutocomplete autocompleteEntityComponent={autocompleteEntityComponent} {...rest} />;
+};
 
 export default OrganisationAutocomplete;
-
-const SmallOrganisationAutocomplete = ApplySmallAutocompleteStyle(OrganisationAutocomplete);
-
-export { SmallOrganisationAutocomplete };
+export { OrganisationAutocomplete, SmallOrganisationAutocomplete };
