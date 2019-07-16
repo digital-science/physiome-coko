@@ -131,16 +131,11 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, descri
 
             const f = {id: file.id};
 
+            f.metaData = {removed:(file.removed === true)};
+
             if(fileLabels || fileTypes) {
-                f.metaData = {type:null, label:null};
-
-                if(fileTypes) {
-                    f.metaData.type = file.type;
-                }
-
-                if(fileLabels) {
-                    f.metaData.label = file.label;
-                }
+                f.metaData.type = fileTypes ? file.type : null;
+                f.metaData.label = fileLabels ? file.label : null;
             }
 
             return f;
@@ -150,9 +145,6 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, descri
     }
 
     function finishedFileUpload(result) {
-
-        console.log("Finish file upload !!!");
-        console.dir(result);
 
         const confirmFileUploadInput = {
             fileId: result.fileId,
@@ -171,9 +163,10 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, descri
             result.order = newFiles.length;
             newFiles.push(result);
 
+            setFilesModified(true);
             setFieldListingUpdatingFormData(newFiles);
+            data.relationshipWasModified(binding);
             clearValidationIssues();
-            return updateAssociatedFilesWithInstance(instanceId, newFiles);
         });
     }
 
@@ -185,27 +178,19 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, descri
     }
 
     function removeFile(file) {
-
-        // FIXME: the file should be updated so it is considered removed from the owning data set, this could also be a special GraphQL mutation which accomplishes the same thing
-
-        console.log("Remove file !!!");
-        console.dir(file);
-
+        file.removed = true;
         fileWasModified(file);
-        clearValidationIssues();
     }
 
     function changeFileType(file, newType) {
         file.type = newType;
         fileWasModified(file);
-        clearValidationIssues();
         return newType;
     }
 
     function changeFileLabel(file, newLabel) {
         file.label = newLabel;
         fileWasModified(file);
-        clearValidationIssues();
         return newLabel;
     }
 
@@ -226,14 +211,16 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, descri
         uploadRequestHeaders:{}
     };
 
-    // FIXME: hard-coded value below for S3 bucket source
+    const filteredFileListing = (fileListing && fileListing.length) ? fileListing.filter(f => !f.removed) : null;
+    //const hasRemovedFiles = filteredFileListing && filteredFileListing.length !== fileListing.length;
+
     return (
         <FileUploaderHolder className={"form-field-files"}>
             {options.label ? <Label>{options.label}</Label> : null}
 
             <div className={`inner-holder ${validationIssues && validationIssues.length ? 'issues' : ''}`}>
                 <FileUploader
-                    s3Url={'https://ds-innovation-workflow-dev.s3.eu-west-2.amazonaws.com/'}
+                    s3Url={''}
                     isImage={filename => { return false; }}
                     upload={upload}
                     onFinish={finishedFileUpload}
@@ -241,9 +228,10 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, descri
                 >
                 </FileUploader>
 
-                {fileListing && fileListing.length ?
-                    <FileListing files={fileListing} instanceId={instanceId} instanceType={instanceType}
-                        changeFileType={changeFileType} changeFileLabel={changeFileLabel} reorderFile={reorderFile} removeFile={removeFile}
+                {filteredFileListing && filteredFileListing.length ?
+                    <FileListing files={filteredFileListing} instanceId={instanceId} instanceType={instanceType}
+                        changeFileType={changeFileType} changeFileLabel={changeFileLabel} reorderFile={reorderFile}
+                        warnOnFileRemove={true} removeFile={removeFile}
                         fileLabels={fileLabels} fileTypeOptions={fileTypeOptions} /> : null}
             </div>
 
@@ -263,7 +251,7 @@ export default withFormField(FormFieldFileUploader, (element) => {
     const {binding:topLevel, options = {}} = element;
     const { fileLabels, fileTypes } = options;
 
-    const fields = ['id', 'fileName', 'fileDisplayName', 'fileMimeType', 'fileByteSize', 'order'];
+    const fields = ['id', 'fileName', 'fileDisplayName', 'fileMimeType', 'fileByteSize', 'order', 'removed'];
     if(fileLabels) {
         fields.push('label');
     }
