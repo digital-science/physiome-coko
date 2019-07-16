@@ -1,5 +1,8 @@
-import React, { Fragment, useLayoutEffect, useRef, useCallback, useState } from 'react';
+import React, { Fragment, useLayoutEffect, useRef, useCallback, useState, useMemo } from 'react';
 import styled from 'styled-components';
+
+import mimeTypeToIcon from "../helpers/mimeTypeToIcon";
+import humanFormatByteCount from "../helpers/humanFormatByteCount";
 
 import { FaUpload } from 'react-icons/fa';
 
@@ -31,16 +34,30 @@ const FileUploadGreeting = styled(_FileUploadGreeting)`
     }
 `;
 
+const FileUploadProgressMessage = styled.div`
+ & svg {
+   margin-bottom: -3px;
+   padding-right: 2px;
+ }
+`;
 
 
-function _FileUploadProgress({className, progress}) {
+function _FileUploadProgress({className, progress, file, ...rest}) {
 
     if(progress === null || progress === undefined) {
         return <div className={className || ''} />;
     }
+
+    const FileIcon = useMemo(() => file && file.type ? mimeTypeToIcon(file.type) : null, [file]);
+
+    const fileUploadMessage = file ?
+        <FileUploadProgressMessage><div>Uploading file - {FileIcon ? <FileIcon/> : null}{file.name} ({humanFormatByteCount(file.size)})</div></FileUploadProgressMessage>
+        : <FileUploadProgressMessage><div>Uploading file…</div></FileUploadProgressMessage>;
+
     return (
         <div className={`${className || ''} progress-holder`}>
-            <div style={{flexBasis: `${progress}%`}} />
+            {fileUploadMessage}
+            <div className={"progress"} style={{flexBasis: `${progress}%`}} />
         </div>
     );
 }
@@ -53,10 +70,28 @@ const FileUploadProgress = styled(_FileUploadProgress)`
     top: 0;
     bottom: 0;
     display: flex;
+    
+    > ${FileUploadProgressMessage} {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 1;
+        background: white;
+        
+        font-family: ProximaNovaLight, sans-serif;
+        
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-    > div {
-        background: rgba(35,125,0,0.48);
-        border-radius: 5px;
+    > div.progress {
+      background: rgba(130, 255, 81, 0.48);
+      border-radius: 5px;
+      box-shadow: inset 0 0 5px 1px #4caf5054;
+      z-index: 3;
     }
 `;
 
@@ -73,10 +108,11 @@ const FileUploadError = styled(_FileUploadError)`
 
 
 
-const _FileUploader = ({className, greetingComponent, progressComponent, errorComponent, message, progress, error, children, ...props}) => {
+const _FileUploader = ({className, greetingComponent, progressComponent, errorComponent, message, progress, error, children, onProgress, ...props}) => {
 
     const dropzoneRef = useRef(null);
     const [focused, setFocused] = useState(false);
+    const [file, setFile] = useState(null);
 
     const onInputFocus = useCallback(() => {
         setFocused(true);
@@ -116,11 +152,23 @@ const _FileUploader = ({className, greetingComponent, progressComponent, errorCo
         };
     });
 
+    const onFileUploadProgress = (progress, textState, file) => {
+        if(progress !== null && progress !== undefined) {
+            setFile(file);
+        } else {
+            setFile(null);
+        }
+
+        if(onProgress) {
+            onProgress(progress, textState, file);
+        }
+    };
+
     if(children) {
         return (
-            <DropzoneS3Uploader className={`${className || ''} ${focused ? 'focused' : ''}`} ref={dropzoneRef} {...props}>
+            <DropzoneS3Uploader className={`${className || ''} ${focused ? 'focused' : ''}`} ref={dropzoneRef} onProgress={onFileUploadProgress} {...props}>
                 {greetingComponent || <FileUploadGreeting message={message}/>}
-                {progressComponent || <FileUploadProgress />}
+                {progressComponent || <FileUploadProgress file={file} />}
                 {errorComponent || <FileUploadError />}
                 {children}
             </DropzoneS3Uploader>
@@ -128,9 +176,9 @@ const _FileUploader = ({className, greetingComponent, progressComponent, errorCo
     }
 
     return (
-        <DropzoneS3Uploader className={`${className || ''} ${focused ? 'focused' : ''}`} ref={dropzoneRef} {...props}>
+        <DropzoneS3Uploader className={`${className || ''} ${focused ? 'focused' : ''}`} ref={dropzoneRef} onProgress={onFileUploadProgress} {...props}>
             {greetingComponent || <FileUploadGreeting message={message}/>}
-            {progressComponent || <FileUploadProgress />}
+            {progressComponent || <FileUploadProgress file={file} />}
             {errorComponent || <FileUploadError />}
         </DropzoneS3Uploader>
     );
