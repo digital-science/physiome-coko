@@ -5,9 +5,9 @@ import FormValidator from '../../utils/FormValidator';
 
 import { BasicOverlay } from 'component-overlay';
 
-import Button, { PlainButtonStyle, SmallButtonStyle } from 'ds-awards-theme/components/button';
-import { InlineButton } from 'ds-awards-theme/components/inline-button';
-import { th } from 'ds-awards-theme';
+import Button, { PlainButtonStyle, SmallButtonStyle } from 'ds-theme/components/button';
+import { InlineButton } from 'ds-theme/components/inline-button';
+import { th } from 'ds-theme';
 
 import styled from 'styled-components';
 

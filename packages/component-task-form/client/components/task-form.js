@@ -1,5 +1,5 @@
 import React from 'react';
-import Spinner from 'ds-awards-theme/components/spinner';
+import Spinner from 'ds-theme/components/spinner';
 
 import useTimedMinimumDisplay from './../hooks/useTimedMinimumDisplay';
 import useFormInstanceData from './../hooks/useFormInstanceData';

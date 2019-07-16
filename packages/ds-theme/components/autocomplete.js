@@ -9,7 +9,7 @@ import 'react-popper-tooltip/dist/styles.css';
 
 import useDebounce from '../hooks/useDebouncedValue';
 
-import { th } from 'ds-awards-theme';
+import { th } from 'ds-theme';
 
 
 const TooltipHolder = styled.div`

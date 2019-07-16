@@ -4,8 +4,8 @@ import styled from 'styled-components';
 import { withFormField } from 'component-task-form/client';
 import useRepublishSubmissionMutation from './../mutations/republishSubmission';
 
-import { BlockLabel } from 'ds-awards-theme/components/label';
-import { InlineButton } from 'ds-awards-theme/components/inline-button';
+import { BlockLabel } from 'ds-theme/components/label';
+import { InlineButton } from 'ds-theme/components/inline-button';
 
 
 function FormFieldRepublishSubmission({instanceId, instanceType, refetchData, options = {}}) {

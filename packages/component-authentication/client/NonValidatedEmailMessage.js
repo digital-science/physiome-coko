@@ -7,7 +7,7 @@ import { EmailValidationOutcome } from './withCurrentUser';
 import UserMessageHolder, { Message, ErrorMessage } from './UserMessageHolder';
 import ChangeEmailAddressOverlay from './ChangeEmailAddressOverlay';
 
-import { SmallPrimaryInlineButton } from 'ds-awards-theme/components/inline-button';
+import { SmallPrimaryInlineButton } from 'ds-theme/components/inline-button';
 
 
 function messageForUserAndOutcome(currentUser, validationOutcome) {

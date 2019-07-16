@@ -4,9 +4,9 @@ import useFormValueBinding from './../../hooks/useFormValueBinding';
 import useFormValidation from "../../hooks/useFormValidation";
 import withFormField from './withFormField'
 
-import TextInput from 'ds-awards-theme/components/text-input';
-import Label from 'ds-awards-theme/components/label';
-import ValidationIssueListing from 'ds-awards-theme/components/validation-issue-listing';
+import TextInput from 'ds-theme/components/text-input';
+import Label from 'ds-theme/components/label';
+import ValidationIssueListing from 'ds-theme/components/validation-issue-listing';
 
 function FormFieldText({data, binding, description, formDefinition, formValidator, options = {}}) {
 

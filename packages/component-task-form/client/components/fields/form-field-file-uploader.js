@@ -7,10 +7,10 @@ import useSetInstanceAssociatedFilesMutation from './../../mutations/setInstance
 import useFormValidation from "../../hooks/useFormValidation";
 import withFormField, { fetchFields } from './withFormField';
 
-import FileUploader from 'ds-awards-theme/components/file-uploader';
-import FileListing from 'ds-awards-theme/components/file-listing';
-import Label from 'ds-awards-theme/components/label';
-import ValidationIssueListing from 'ds-awards-theme/components/validation-issue-listing';
+import FileUploader from 'ds-theme/components/file-uploader';
+import FileListing from 'ds-theme/components/file-listing';
+import Label from 'ds-theme/components/label';
+import ValidationIssueListing from 'ds-theme/components/validation-issue-listing';
 
 
 const FileUploaderHolder = styled.div`

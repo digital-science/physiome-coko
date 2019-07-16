@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import styled from 'styled-components';
 
-import { Checkbox, CheckboxLabel } from "ds-awards-theme/components/checkbox-input";
+import { Checkbox, CheckboxLabel } from "ds-theme/components/checkbox-input";
 
 import { WorkflowDescriptionContext } from 'client-workflow-model';
 import SubmissionListing from './submission-listing';

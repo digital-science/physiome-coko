@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { SmallTextInput } from "ds-awards-theme/components/text-input";
-import { SmallInlineButton } from "ds-awards-theme/components/inline-button";
+import { SmallTextInput } from "ds-theme/components/text-input";
+import { SmallInlineButton } from "ds-theme/components/inline-button";
 
 import { SmallOrganisationAutocomplete } from './organisation-autocomplete';
 

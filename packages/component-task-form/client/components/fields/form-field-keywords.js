@@ -3,10 +3,10 @@ import useFormValueBinding from './../../hooks/useFormValueBinding';
 import withFormField from './withFormField'
 import styled from 'styled-components';
 
-import Label from 'ds-awards-theme/components/label';
-import TagInput from 'ds-awards-theme/components/tag-input';
+import Label from 'ds-theme/components/label';
+import TagInput from 'ds-theme/components/tag-input';
 
-import { th } from 'ds-awards-theme';
+import { th } from 'ds-theme';
 
 
 function _FormFieldKeywordsEditor({data, binding, options = {}}) {

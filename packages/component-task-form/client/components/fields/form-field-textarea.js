@@ -8,9 +8,9 @@ import useFormValueBinding from './../../hooks/useFormValueBinding';
 import useFormValidation from './../../hooks/useFormValidation';
 import withFormField from './withFormField'
 
-import { BlockLabel } from 'ds-awards-theme/components/label';
-import TextArea from 'ds-awards-theme/components/text-area';
-import ValidationIssueListing from 'ds-awards-theme/components/validation-issue-listing';
+import { BlockLabel } from 'ds-theme/components/label';
+import TextArea from 'ds-theme/components/text-area';
+import ValidationIssueListing from 'ds-theme/components/validation-issue-listing';
 
 
 const FormStyledTextArea = styled(TextArea)`

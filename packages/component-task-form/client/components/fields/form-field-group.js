@@ -5,7 +5,7 @@ import FieldListing from '../field-listing';
 
 import withFormField from './withFormField'
 
-import {BlockLabel} from 'ds-awards-theme/components/label';
+import {BlockLabel} from 'ds-theme/components/label';
 
 
 function FormFieldGroup({className, description, options = {}, ...rest}) {

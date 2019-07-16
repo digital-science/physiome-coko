@@ -6,13 +6,13 @@ import styled from 'styled-components';
 import withFormField from "./withFormField";
 import { useFormValueBindingForComplexObject } from '../../hooks/useFormValueBinding';
 
-import Label, { BlockLabel } from "ds-awards-theme/components/label";
-import InlineButton from "ds-awards-theme/components/inline-button";
-import { DisabledStaticText } from 'ds-awards-theme/components/static-text';
+import Label, { BlockLabel } from "ds-theme/components/label";
+import InlineButton from "ds-theme/components/inline-button";
+import { DisabledStaticText } from 'ds-theme/components/static-text';
 import { FaPlus } from 'react-icons/fa';
 
 import FunderEditorCard from '../funder-editor-card';
-import { th } from "ds-awards-theme";
+import { th } from "ds-theme";
 
 
 const FundingEditorHolder = styled.div`    

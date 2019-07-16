@@ -2,15 +2,15 @@ import React, {Fragment, useEffect} from 'react';
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { nextUniqueIdInArray, assignUniqueIdsToArrayItems } from '../../utils/helpers';
 import styled from 'styled-components';
-import { th } from 'ds-awards-theme';
+import { th } from 'ds-theme';
 
 import withFormField from "./withFormField";
 import { useFormValueBindingForComplexObject } from '../../hooks/useFormValueBinding';
 
-import Label, { BlockLabel } from "ds-awards-theme/components/label";
-import InlineButton from "ds-awards-theme/components/inline-button";
-import { DisabledStaticText } from 'ds-awards-theme/components/static-text';
-import ValidationIssueListing from 'ds-awards-theme/components/validation-issue-listing';
+import Label, { BlockLabel } from "ds-theme/components/label";
+import InlineButton from "ds-theme/components/inline-button";
+import { DisabledStaticText } from 'ds-theme/components/static-text';
+import ValidationIssueListing from 'ds-theme/components/validation-issue-listing';
 import { FaPlus } from 'react-icons/fa';
 
 

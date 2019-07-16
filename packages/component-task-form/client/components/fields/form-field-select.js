@@ -7,9 +7,9 @@ import withFormField from './withFormField'
 
 import { ConfirmationDialogContext } from './form-field-button';
 
-import { Select, SmallSelect } from 'ds-awards-theme/components/select-input';
-import { BlockLabel } from 'ds-awards-theme/components/label';
-import ValidationIssueListing from 'ds-awards-theme/components/validation-issue-listing';
+import { Select, SmallSelect } from 'ds-theme/components/select-input';
+import { BlockLabel } from 'ds-theme/components/label';
+import ValidationIssueListing from 'ds-theme/components/validation-issue-listing';
 
 
 function FormFieldSelect({data, binding, description, formDefinition, formValidator, context, options = {}}) {

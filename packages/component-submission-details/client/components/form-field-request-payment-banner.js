@@ -5,10 +5,10 @@ import useCheckoutSessionForSubmission from '../queries/getCheckoutSessionForSub
 
 import { withFormField } from 'component-task-form/client';
 
-import Card, { CardContent } from 'ds-awards-theme/components/card';
-import StaticText, { LargeStaticText } from 'ds-awards-theme/components/static-text';
-import InlineButton from 'ds-awards-theme/components/inline-button';
-import Spinner from 'ds-awards-theme/components/spinner';
+import Card, { CardContent } from 'ds-theme/components/card';
+import StaticText, { LargeStaticText } from 'ds-theme/components/static-text';
+import InlineButton from 'ds-theme/components/inline-button';
+import Spinner from 'ds-theme/components/spinner';
 
 import config from 'config';
 

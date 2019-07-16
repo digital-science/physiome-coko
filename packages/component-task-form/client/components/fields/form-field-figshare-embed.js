@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import useFormValueBinding from './../../hooks/useFormValueBinding';
 import withFormField from './withFormField'
 
-import {BlockLabel} from 'ds-awards-theme/components/label';
+import {BlockLabel} from 'ds-theme/components/label';
 
 
 function FormFieldFigshareEmbed({data, binding, options = {}}) {

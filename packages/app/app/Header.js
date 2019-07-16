@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 
-import PersonIcon from 'ds-awards-theme/static/person.svg';
+import PersonIcon from 'ds-theme/static/person.svg';
 
 import useCurrentUser from 'component-authentication/client/withCurrentUser';
 import AuthenticatedUserContext from 'component-authentication/client/AuthenticatedUserContext';

@@ -7,8 +7,8 @@ import { FormFieldViewerEditorLayoutHolder } from './fields/form-field-viewer-ed
 
 import AuthenticatedUserContext from "component-authentication/client/AuthenticatedUserContext";
 
-import Spinner from 'ds-awards-theme/components/spinner';
-import { InlineButton, SmallInlineButton } from 'ds-awards-theme/components/inline-button';
+import Spinner from 'ds-theme/components/spinner';
+import { InlineButton, SmallInlineButton } from 'ds-theme/components/inline-button';
 
 
 export default function MasterDetailLayout({ className, elements, data, loading, error, instance, fieldListingProps }) {

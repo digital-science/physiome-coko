@@ -2,8 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
-import HomeIcon from 'ds-awards-theme/static/home.svg';
-import ExpandIcon from 'ds-awards-theme/static/expand.svg';
+import HomeIcon from 'ds-theme/static/home.svg';
+import ExpandIcon from 'ds-theme/static/expand.svg';
 import { FaTrashAlt } from 'react-icons/fa'
 
 

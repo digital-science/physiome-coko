@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import withFormField from './withFormField';
-import { BlockLabel } from 'ds-awards-theme/components/label';
+import { BlockLabel } from 'ds-theme/components/label';
 
 
 const StyledBannerMessage = styled(BlockLabel)`

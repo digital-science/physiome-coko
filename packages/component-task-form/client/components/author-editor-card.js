@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 
-import Card, { CardRemoveButton } from "ds-awards-theme/components/card";
-import { SmallBlockLabel } from "ds-awards-theme/components/label";
-import { SmallTextInput } from "ds-awards-theme/components/text-input";
-import { SmallCheckBox, SmallCheckboxLabel } from "ds-awards-theme/components/checkbox-input";
+import Card, { CardRemoveButton } from "ds-theme/components/card";
+import { SmallBlockLabel } from "ds-theme/components/label";
+import { SmallTextInput } from "ds-theme/components/text-input";
+import { SmallCheckBox, SmallCheckboxLabel } from "ds-theme/components/checkbox-input";
 
 import AffiliationEditor from './affiliation-editor';
 

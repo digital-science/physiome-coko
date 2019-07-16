@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { th } from 'ds-awards-theme';
+import { th } from 'ds-theme';
 
 
 const _ArticleCitation = ({className, citation, children, maximumAuthors=10}) => {

@@ -2,8 +2,8 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { BasicOverlay } from "./overlay";
-import { InlineButton } from "ds-awards-theme/components/inline-button";
-import { th } from "ds-awards-theme";
+import { InlineButton } from "ds-theme/components/inline-button";
+import { th } from "ds-theme";
 
 
 const BasicMessageContent = styled.div`

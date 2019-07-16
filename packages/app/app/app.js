@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import theme from 'ds-awards-theme';
+import theme from 'ds-theme';
 import Root from './Root';
 import { createBrowserHistory } from 'history';
 import Routes from './routes';

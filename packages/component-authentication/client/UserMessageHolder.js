@@ -1,7 +1,7 @@
 import React from "react";
 import styled from 'styled-components';
 
-import { SmallPrimaryInlineButton } from 'ds-awards-theme/components/inline-button';
+import { SmallPrimaryInlineButton } from 'ds-theme/components/inline-button';
 import { FaExclamationCircle } from 'react-icons/fa';
 
 

@@ -4,9 +4,9 @@ import styled from 'styled-components';
 import withFormField, { fetchFields } from './withFormField';
 import withFormFieldData from './withFormFieldData';
 
-import { BlockLabel } from 'ds-awards-theme/components/label';
-import { DisabledStaticText } from 'ds-awards-theme/components/static-text';
-import humanFormatByteCount from "ds-awards-theme/helpers/humanFormatByteCount";
+import { BlockLabel } from 'ds-theme/components/label';
+import { DisabledStaticText } from 'ds-theme/components/static-text';
+import humanFormatByteCount from "ds-theme/helpers/humanFormatByteCount";
 
 import { FaFilePdf } from 'react-icons/fa';
 import config from 'config';

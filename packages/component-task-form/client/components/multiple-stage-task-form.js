@@ -6,8 +6,8 @@ import useFormInstanceData from './../hooks/useFormInstanceData';
 
 import FieldListing from './field-listing';
 
-import Button from 'ds-awards-theme/components/button';
-import Spinner from 'ds-awards-theme/components/spinner';
+import Button from 'ds-theme/components/button';
+import Spinner from 'ds-theme/components/spinner';
 
 
 /* Form has multiple stages, the form definition will consist of a collection of "Stages" and each of these will be used

@@ -1,13 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import styled from 'styled-components';
-import { th } from 'ds-awards-theme';
+import { th } from 'ds-theme';
 
 import useFormValueBinding from './../../hooks/useFormValueBinding';
 import useFormValidation from "../../hooks/useFormValidation";
 import withFormField from './withFormField'
 
-import Checkbox, { CheckboxLabel } from 'ds-awards-theme/components/checkbox-input';
-import ValidationIssueListing from 'ds-awards-theme/components/validation-issue-listing';
+import Checkbox, { CheckboxLabel } from 'ds-theme/components/checkbox-input';
+import ValidationIssueListing from 'ds-theme/components/validation-issue-listing';
 import PopoverTrigger from '../popover';
 
 import { FaQuestionCircle } from 'react-icons/fa';

@@ -3,8 +3,8 @@ import useFormValueBinding from './../../hooks/useFormValueBinding';
 import withFormField from './withFormField';
 import moment from 'moment';
 
-import Label from 'ds-awards-theme/components/label';
-import DateInput from 'ds-awards-theme/components/date-input';
+import Label from 'ds-theme/components/label';
+import DateInput from 'ds-theme/components/date-input';
 
 
 function FormFieldDate({data, binding, options = {}}) {

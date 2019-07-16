@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 import { withFormField, useFormValueBinding } from 'component-task-form/client';
 
-import {BlockLabel} from 'ds-awards-theme/components/label';
+import {BlockLabel} from 'ds-theme/components/label';
 
 import SubmissionStatusPill from './submission-status-pill'
 

@@ -3,10 +3,10 @@ import styled from 'styled-components';
 
 import useGetGrantsForProjectNumber from 'dimensions-lookup-service/client/queries/getGrantsForProjectNumber';
 
-import { AutocompleteEntity, SmallAutocompleteEntity } from 'ds-awards-theme/components/autocomplete-entity';
-import { MenuHolder, MenuHeader, MenuFooter } from 'ds-awards-theme/components/autocomplete';
-import Spinner from "ds-awards-theme/components/spinner";
-import { th } from "ds-awards-theme";
+import { AutocompleteEntity, SmallAutocompleteEntity } from 'ds-theme/components/autocomplete-entity';
+import { MenuHolder, MenuHeader, MenuFooter } from 'ds-theme/components/autocomplete';
+import Spinner from "ds-theme/components/spinner";
+import { th } from "ds-theme";
 
 import DimensionsLogo from "../static/dimensions-logo.svg";
 

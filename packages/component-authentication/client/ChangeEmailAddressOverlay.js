@@ -3,10 +3,10 @@ import styled from 'styled-components';
 
 import { BasicOverlay } from 'component-overlay';
 import { FaExclamationCircle } from 'react-icons/fa';
-import { BlockLabel } from "ds-awards-theme/components/label";
-import { TextInput } from "ds-awards-theme/components/text-input";
-import { InlineButton } from "ds-awards-theme/components/inline-button";
-import { th } from 'ds-awards-theme';
+import { BlockLabel } from "ds-theme/components/label";
+import { TextInput } from "ds-theme/components/text-input";
+import { InlineButton } from "ds-theme/components/inline-button";
+import { th } from 'ds-theme';
 
 import withConfirmCurrentUserEmail, {EmailConfirmationOutcome} from './withConfirmCurrentUserEmail';
 

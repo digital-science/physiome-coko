@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { nextUniqueIdInArray, assignUniqueIdsToArrayItems } from '../utils/helpers';
 import styled from 'styled-components';
 
-import Card, { CardRemoveButton } from "ds-awards-theme/components/card";
-import { SmallBlockLabel } from "ds-awards-theme/components/label";
+import Card, { CardRemoveButton } from "ds-theme/components/card";
+import { SmallBlockLabel } from "ds-theme/components/label";
 import { FaPlus, FaTrashAlt, FaTimesCircle } from 'react-icons/fa';
 
 import { SmallOrganisationAutocomplete } from './organisation-autocomplete';
-import { SmallInlineButton } from "ds-awards-theme/components/inline-button";
+import { SmallInlineButton } from "ds-theme/components/inline-button";
 import { SmallFundingAutocomplete } from './funding-autocomplete';
 
 

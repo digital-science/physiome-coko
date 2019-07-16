@@ -6,9 +6,9 @@ import useClaimSubmissionMutation from './../mutations/claimSubmission';
 import useUnclaimSubmissionMutation from './../mutations/unclaimSubmission';
 import AuthenticatedUserContext from "component-authentication/client/AuthenticatedUserContext";
 
-import { BlockLabel } from 'ds-awards-theme/components/label';
-import { SmallInlineButton } from 'ds-awards-theme/components/inline-button';
-import StaticText from 'ds-awards-theme/components/static-text';
+import { BlockLabel } from 'ds-theme/components/label';
+import { SmallInlineButton } from 'ds-theme/components/inline-button';
+import StaticText from 'ds-theme/components/static-text';
 
 
 function FormFieldSubmissionStatusPill({data, binding, instanceId, instanceType, refetchData, options = {}}) {

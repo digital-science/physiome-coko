@@ -1,10 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { AutocompleteEntity, SmallAutocompleteEntity } from 'ds-awards-theme/components/autocomplete-entity';
-import { MenuHolder, MenuItem, MenuHeader, MenuFooter } from 'ds-awards-theme/components/autocomplete';
-import Spinner from "ds-awards-theme/components/spinner";
-import { th } from "ds-awards-theme";
+import { AutocompleteEntity, SmallAutocompleteEntity } from 'ds-theme/components/autocomplete-entity';
+import { MenuHolder, MenuItem, MenuHeader, MenuFooter } from 'ds-theme/components/autocomplete';
+import Spinner from "ds-theme/components/spinner";
+import { th } from "ds-theme";
 
 import RorLogoSmall from '../static/ror-logo-small.png';
 

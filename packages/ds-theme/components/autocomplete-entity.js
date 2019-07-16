@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import styled from 'styled-components';
 
 import { Autocomplete, SmallAutocomplete } from './autocomplete';
-import { th } from 'ds-awards-theme';
+import { th } from 'ds-theme';
 
 import { FaTimesCircle } from 'react-icons/fa';
 

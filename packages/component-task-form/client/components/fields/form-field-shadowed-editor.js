@@ -19,8 +19,8 @@ import useUpdateInstance from './../../mutations/updateInstance';
 import TaskFormData from '../../utils/TaskFormData';
 import FieldListing from '../field-listing';
 
-import { InlineButton } from 'ds-awards-theme/components/inline-button';
-import Label from 'ds-awards-theme/components/label';
+import { InlineButton } from 'ds-theme/components/inline-button';
+import Label from 'ds-theme/components/label';
 import pick from "lodash/pick";
 
 

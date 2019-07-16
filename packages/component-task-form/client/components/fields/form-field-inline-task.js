@@ -8,7 +8,7 @@ import useSubmitTaskOutcome from "../../hooks/useSubmitTaskOutcome";
 import withFormField from './withFormField'
 
 import FieldListing from '../field-listing';
-import {BlockLabel} from 'ds-awards-theme/components/label';
+import {BlockLabel} from 'ds-theme/components/label';
 
 import ShadowedTaskFormData from '../../utils/ShadowedTaskFormData';
 import resolveFieldsForFormElements from "../../utils/resolveFieldsForFormElements";
@@ -133,6 +133,8 @@ function FormFieldInlineTask({className, description, data, instanceId, instance
     const [formData, inlineSaveData] = useInlineFormData(instanceId, instanceType, data, saveData, topLevelFields);
 
     // FIXME: correctly handle submitDidFail, showing an error reason if required
+    // FIXME: need to apply form validation to inline task as well
+
     const submitTaskOutcome = useSubmitTaskOutcome(instanceId, formDefinition, instanceType, inlineSaveData, null, null,() => {
         if(refetchData) {
             refetchData();

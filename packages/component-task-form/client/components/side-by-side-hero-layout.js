@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import FieldListing from './field-listing';
 import { FormFieldHolder } from './fields/withFormField';
 
-import Spinner from 'ds-awards-theme/components/spinner';
+import Spinner from 'ds-theme/components/spinner';
 
 
 export default function SideBySideHeroLayout({ className, elements, data, loading, error, instance, fieldListingProps }) {

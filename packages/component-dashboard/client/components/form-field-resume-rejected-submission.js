@@ -4,8 +4,8 @@ import styled from 'styled-components';
 import { withFormField } from 'component-task-form/client';
 import useResumeRejectedSubmissionMutation from './../mutations/resumeRejectedSubmission';
 
-import { BlockLabel } from 'ds-awards-theme/components/label';
-import { InlineButton } from 'ds-awards-theme/components/inline-button';
+import { BlockLabel } from 'ds-theme/components/label';
+import { InlineButton } from 'ds-theme/components/inline-button';
 
 
 function FormFieldResumeRejectedSubmission({instanceId, instanceType, refetchData, options = {}}) {

@@ -5,8 +5,8 @@ import useFormValueBinding from './../../hooks/useFormValueBinding';
 import withFormField from './withFormField'
 
 import ArticleCitationEditorCard from '../article-citation-editor-card';
-import { DisabledStaticText } from 'ds-awards-theme/components/static-text';
-import { BlockLabel } from 'ds-awards-theme/components/label';
+import { DisabledStaticText } from 'ds-theme/components/static-text';
+import { BlockLabel } from 'ds-theme/components/label';
 import ArticleCitation from './../article-citation';
 
 

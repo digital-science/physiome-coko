@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
-import useDebouncedValue from "ds-awards-theme/hooks/useDebouncedValue";
-import { SmallTextInput } from "ds-awards-theme/components/text-input";
-import { Checkbox, CheckboxLabel } from "ds-awards-theme/components/checkbox-input";
+import useDebouncedValue from "ds-theme/hooks/useDebouncedValue";
+import { SmallTextInput } from "ds-theme/components/text-input";
+import { Checkbox, CheckboxLabel } from "ds-theme/components/checkbox-input";
 import PopoverTrigger from "component-task-form/client/components/popover";
 
 import { FaFilter } from 'react-icons/fa';

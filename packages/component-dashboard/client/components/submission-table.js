@@ -8,11 +8,11 @@ import useClaimSubmissionMutation from './../mutations/claimSubmission';
 
 import PopoverTrigger from "component-task-form/client/components/popover";
 
-import Spinner from "ds-awards-theme/components/spinner";
+import Spinner from "ds-theme/components/spinner";
 import SubmissionStatusPill from "./submission-status-pill";
-import {SmallInlineButton} from "ds-awards-theme/components/inline-button";
-import Button from "ds-awards-theme/components/button";
-import Pagination from 'ds-awards-theme/components/pagination';
+import {SmallInlineButton} from "ds-theme/components/inline-button";
+import Button from "ds-theme/components/button";
+import Pagination from 'ds-theme/components/pagination';
 
 import BinIconImage from "../static/bin.svg";
 

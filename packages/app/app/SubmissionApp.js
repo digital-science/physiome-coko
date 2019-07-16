@@ -3,7 +3,7 @@ import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import styled, { createGlobalStyle } from 'styled-components';
 
-import { GlobalStyle } from 'ds-awards-theme';
+import { GlobalStyle } from 'ds-theme';
 
 import Header from './Header';
 import Footer from './Footer';

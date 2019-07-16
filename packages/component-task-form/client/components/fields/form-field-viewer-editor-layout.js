@@ -6,7 +6,7 @@ import withFormField from './withFormField'
 
 import { PanelHeading } from '../master-detail-layout';
 
-import { InlineButton } from 'ds-awards-theme/components/inline-button';
+import { InlineButton } from 'ds-theme/components/inline-button';
 import { FaEye, FaPencilAlt } from 'react-icons/fa';
 
 

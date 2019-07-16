@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import styled from 'styled-components';
-import { th } from 'ds-awards-theme';
+import { th } from 'ds-theme';
 
 import ArticleCitation from './article-citation';
 
-import Card, { CardRemoveButton } from "ds-awards-theme/components/card";
-import { SmallBlockLabel } from "ds-awards-theme/components/label";
-import { SmallTextInput } from "ds-awards-theme/components/text-input";
-import { InlineButton, SmallInlineButton } from "ds-awards-theme/components/inline-button";
-import ButtonGroup from "ds-awards-theme/components/button-group";
-import Spinner from "ds-awards-theme/components/spinner";
+import Card, { CardRemoveButton } from "ds-theme/components/card";
+import { SmallBlockLabel } from "ds-theme/components/label";
+import { SmallTextInput } from "ds-theme/components/text-input";
+import { InlineButton, SmallInlineButton } from "ds-theme/components/inline-button";
+import ButtonGroup from "ds-theme/components/button-group";
+import Spinner from "ds-theme/components/spinner";
 
 import useDebounceValue from '../hooks/useDebouncedValue';
 import useGetDetailsForDOI from 'dimensions-lookup-service/client/queries/getDetailsForDOI';

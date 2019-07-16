@@ -5,8 +5,8 @@ import styled from 'styled-components';
 import useFormValueBinding from './../../hooks/useFormValueBinding';
 import withFormField from './withFormField'
 
-import StaticText from 'ds-awards-theme/components/static-text';
-import {BlockLabel} from 'ds-awards-theme/components/label';
+import StaticText from 'ds-theme/components/static-text';
+import {BlockLabel} from 'ds-theme/components/label';
 
 
 function FormFieldStaticText({data, binding, options = {}}) {
