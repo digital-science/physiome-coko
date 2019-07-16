@@ -6,10 +6,14 @@ import Card from './card';
 
 import SelectInput from './select-input';
 import { SmallTextInput } from './text-input';
+import PopoverTrigger from "./popover";
+import { SmallBlockLabel } from "./label";
+import { SmallInlineButton } from "./inline-button";
 
 import { FaTimes } from 'react-icons/fa';
 import humanFormatByteCount from "../helpers/humanFormatByteCount";
 import mimeTypeToIcon from "../helpers/mimeTypeToIcon";
+
 
 
 function _FileDownloadLink({ className, file, children }) {
@@ -29,8 +33,26 @@ const FileDownloadLink = styled(_FileDownloadLink)`
 `;
 
 
+const RemoveFileMessageHolder = styled.div`
+  & ${SmallBlockLabel} {
+    margin-bottom: 5px;
+  }
+  
+  & div.buttons {
+    display: flex;
+    justify-content: flex-end;
+    
+    ${SmallInlineButton} + ${SmallInlineButton} {
+      margin-left: 5px;
+    }
+  }
+`;
 
-function _FileListingRow({className, file, ref, fileLabels, fileTypeOptions, linkForFile, removeFile, changeFileType, changeFileLabel, fileDownloadLinkComponent}) {
+
+
+function _FileListingRow({className, file, ref, fileLabels, fileTypeOptions, linkForFile,
+                          removeFile, warnOnFileRemove, removeFileWarningMessage,
+                          changeFileType, changeFileLabel, fileDownloadLinkComponent}) {
 
     const [label, setLabel] = useState(file.label || "");
     const [type, setType] = useState(file.type || "");
@@ -74,8 +96,25 @@ function _FileListingRow({className, file, ref, fileLabels, fileTypeOptions, lin
 
             {removeFile ?
                 <div className="file-remove">
-                    <FaTimes onClick={() => { return removeFile(file); }} />
+                    {warnOnFileRemove ?
+                        <PopoverTrigger renderContent={({dismissTooltip}) => {
+                            return (
+                                <RemoveFileMessageHolder>
+                                    <SmallBlockLabel>{removeFileWarningMessage}</SmallBlockLabel>
+                                    <div className={"buttons"}>
+                                        <SmallInlineButton bordered={true} onClick={() => dismissTooltip()}>Cancel</SmallInlineButton>
+                                        <SmallInlineButton bordered={true} onClick={() => removeFile(file)}>Remove File</SmallInlineButton>
+                                    </div>
+                                </RemoveFileMessageHolder>
+                            );
+                        }}>
+                            <FaTimes />
+                        </PopoverTrigger>
+                        :
+                        <FaTimes onClick={() => { return removeFile(file); }} />
+                    }
                 </div> : null}
+
         </Card>
     );
 }
@@ -135,6 +174,9 @@ const FileListingRow = styled(_FileListingRow)`
         content: ")"
     }
     
+    & .file-remove > div {
+        height: 100%;
+    }
     
     & .file-remove {
         display: inline-block;
@@ -172,11 +214,14 @@ const FileListingRow = styled(_FileListingRow)`
 `;
 
 
-function _FileUploadFileListing({ className, files, reorderFile, removeFile, changeFileType, changeFileLabel,
-                                  fileLabels, fileTypeOptions, linkForFile, fileDownloadLinkComponent }) {
+function _FileUploadFileListing({ className, files, reorderFile, changeFileType, changeFileLabel,
+                                  fileLabels, fileTypeOptions, linkForFile, fileDownloadLinkComponent,
+                                  removeFile, warnOnFileRemove=false, removeFileWarningMessage='Are you sure you want to remove this file?' }) {
 
     const listingProps = {
         removeFile,
+        warnOnFileRemove,
+        removeFileWarningMessage,
         changeFileType,
         changeFileLabel,
         fileLabels,
