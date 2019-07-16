@@ -69,6 +69,7 @@ type File {
     storageType: FileStorageType
 
     order: Int
+    removed: Boolean
 }
 
 # Note: extended file is used when a file needs to support a type or a label
@@ -88,6 +89,7 @@ type ExtendedFile {
     storageType: FileStorageType
 
     order: Int
+    removed: Boolean
     type: String
     label: String
 }
@@ -132,6 +134,7 @@ extend type Mutation {
 
 
 input LinkedFileMetaDataInput {
+    removed: Boolean
     type: String
     label: String
 }

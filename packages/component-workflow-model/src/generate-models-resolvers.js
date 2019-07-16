@@ -245,7 +245,7 @@ function createModelForTask(task, enums, lookupModel, extensions) {
                             // Files support additional fields on the relations (order, as well as labels and types).
                             if(e.type === "File") {
 
-                                mapping.join.through.extra = ['order'];
+                                mapping.join.through.extra = ['order', 'removed'];
 
                                 if(e.fileLabels === true) {
                                     mapping.join.through.extra.push('label');
@@ -356,7 +356,11 @@ function createResolversForTask(task, enums, models, extensions) {
                     if(e.type === "File") {
 
                         const linkedWithMetaDataFields = linked.map((l, index) => {
-                            const r = {id:l.id, order:index};
+                            const r = {id:l.id, order:index, removed:false};
+
+                            if(l.metaData && l.metaData.removed === true) {
+                                r.removed = true;
+                            }
 
                             if (e.fileLabels === true) {
                                 if(l.metaData) {
