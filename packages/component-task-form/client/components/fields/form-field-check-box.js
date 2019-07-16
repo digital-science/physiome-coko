@@ -8,7 +8,7 @@ import withFormField from './withFormField'
 
 import Checkbox, { CheckboxLabel } from 'ds-theme/components/checkbox-input';
 import ValidationIssueListing from 'ds-theme/components/validation-issue-listing';
-import PopoverTrigger from '../popover';
+import PopoverTrigger from 'ds-theme/components/popover';
 
 import { FaQuestionCircle } from 'react-icons/fa';
 
