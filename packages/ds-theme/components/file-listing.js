@@ -16,11 +16,8 @@ import mimeTypeToIcon from "../helpers/mimeTypeToIcon";
 
 
 
-function _FileDownloadLink({ className, file, children }) {
-
-    // FIXME: need to generate proper download links for files from the GraphQL endpoint
-    // return <a href={generateDownloadLinkForSubmissionFile(submission, file)} target="_blank" rel="noopener noreferrer">{children}</a>;
-    return <a className={className} href={""} target="_blank" rel="noopener noreferrer">{children}</a>;
+function _FileDownloadLink({ className, file, linkForFile , children }) {
+    return <a className={className} href={linkForFile ? linkForFile(file) : ""} target="_blank" rel="noopener noreferrer">{children}</a>;
 }
 
 const FileDownloadLink = styled(_FileDownloadLink)`
