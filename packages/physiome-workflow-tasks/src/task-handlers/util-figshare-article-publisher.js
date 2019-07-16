@@ -16,7 +16,7 @@ class FigshareArticlePublisher {
 
     // Any fields that need to be loaded during the publishing process (see submissionToArticleData).
     get requiredSubmissionRelationFieldsForArticleData() {
-        return ['submitter', 'articleFiles'];
+        return ['submitter', 'articleFiles', 'supplementaryFiles'];
     }
 
 
@@ -127,7 +127,11 @@ class FigshareArticlePublisher {
         }).then(() => {
 
             // Iterate all of the submission files and upload each to the article within figshare.
-            const files = (submission.articleFiles || []).slice(0).filter(f => f.confirmed);
+            // Files must be both confirmed and not marked as being removed.
+
+            const manuscriptFiles = (submission.articleFiles || []).slice(0).filter(f => f.confirmed && f.removed !== true);
+            const supplementaryFiles = (submission.supplementaryFiles || []).slice(0).filter(f => f.confirmed && f.removed !== true);
+            const files = [...manuscriptFiles, ...supplementaryFiles];
 
             const __processNextFile = () => {
                 if(!files.length) {
