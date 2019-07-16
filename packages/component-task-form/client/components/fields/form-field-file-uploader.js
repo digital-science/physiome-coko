@@ -11,6 +11,10 @@ import FileUploader from 'ds-theme/components/file-uploader';
 import FileListing from 'ds-theme/components/file-listing';
 import Label from 'ds-theme/components/label';
 import ValidationIssueListing from 'ds-theme/components/validation-issue-listing';
+import config from 'config';
+
+
+const BaseUrl = config['pubsweet-client'] ? (config['pubsweet-client'].baseUrl || "/") : "/";
 
 
 const FileUploaderHolder = styled.div`
@@ -206,6 +210,10 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, descri
         fileWasModified(movedFile);
     }
 
+    const linkForFile = useCallback((file) => {
+        return `${BaseUrl}/files/download/${instanceType.urlName}/${encodeURI(instanceId)}/${encodeURI(file.id)}/${encodeURI(file.fileName)}`;
+    }, [instanceId, instanceType]);
+
     const upload = {
         getSignedUrl: getSignedUrl,
         uploadRequestHeaders:{}
@@ -229,7 +237,7 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, descri
                 </FileUploader>
 
                 {filteredFileListing && filteredFileListing.length ?
-                    <FileListing files={filteredFileListing} instanceId={instanceId} instanceType={instanceType}
+                    <FileListing files={filteredFileListing} linkForFile={linkForFile} instanceId={instanceId} instanceType={instanceType}
                         changeFileType={changeFileType} changeFileLabel={changeFileLabel} reorderFile={reorderFile}
                         warnOnFileRemove={true} removeFile={removeFile}
                         fileLabels={fileLabels} fileTypeOptions={fileTypeOptions} /> : null}
