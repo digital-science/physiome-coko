@@ -9,6 +9,8 @@
     "moment": "^2.24.0",
     "react-beautiful-dnd": "^11.0.4",
     "react-dates": "18.4.0",
+    "react-icons": "^3.6.1",
+    "react-popper-tooltip": "^2.8.2",
     "react-dropzone-s3-uploader": "^1.1.0",
     "styled-components": "4.1.3"
   }
