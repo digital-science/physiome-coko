@@ -46,6 +46,9 @@ export default function PopoverTrigger(props) {
 
     const dismissTooltip = useCallback(() => {
         setTooltipShown(false);
+        if(props.onVisibilityChange) {
+            props.onVisibilityChange(false);
+        }
     }, [setTooltipShown]);
 
     const renderTooltip = ({arrowRef, tooltipRef, getArrowProps, getTooltipProps, placement}) => {
