@@ -7,8 +7,9 @@ import withFormFieldData from './withFormFieldData';
 import { BlockLabel } from 'ds-theme/components/label';
 import { DisabledStaticText } from 'ds-theme/components/static-text';
 import humanFormatByteCount from "ds-theme/helpers/humanFormatByteCount";
+import mimeTypeToIcon from "ds-theme/helpers/mimeTypeToIcon";
 
-import { FaFilePdf } from 'react-icons/fa';
+import { FaFile } from 'react-icons/fa';
 import config from 'config';
 
 
@@ -32,10 +33,12 @@ const SimpleFileListing = styled(({className, files, instanceId, instanceType}) 
     return (
         <ol className={className}>
             {files.map(file => {
+
+                const FileIcon = mimeTypeToIcon(file.fileMimeType) || FaFile;
                 return (
                     <li key={file.id}>
                         <a href={`${BaseUrl}/files/download/${instanceType.urlName}/${encodeURI(instanceId)}/${encodeURI(file.id)}/${encodeURI(file.fileName)}`}>
-                            <FaFilePdf />
+                            <FileIcon />
                             <span className="file-name">{file.fileDisplayName}</span>
                             <span className="file-size">{humanFormatByteCount(file.fileByteSize)}</span>
                         </a>
