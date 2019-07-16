@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import styled from 'styled-components';
 
@@ -68,9 +68,14 @@ function _FileListingRow({className, file, ref, fileLabels, fileTypeOptions, lin
     };
 
     const FileIcon = useMemo(() => mimeTypeToIcon(file.fileMimeType), [file.fileMimeType]);
+    const [removeTooltipShown, setRemoveTooltipShown] = useState(false);
+
+    const onRemoveTooltipVisibilityChange = useCallback((vis) => {
+        setRemoveTooltipShown(vis);
+    }, [setRemoveTooltipShown]);
 
     return (
-        <Card className={className} reorderingGrabber={true} >
+        <Card className={className} interest={removeTooltipShown} reorderingGrabber={true} >
             <div className="file-index" />
             <div className="file-icon"><FileIcon /></div>
             <div className="file-name">
@@ -94,10 +99,10 @@ function _FileListingRow({className, file, ref, fileLabels, fileTypeOptions, lin
             {removeFile ?
                 <div className="file-remove">
                     {warnOnFileRemove ?
-                        <PopoverTrigger renderContent={({dismissTooltip}) => {
+                        <PopoverTrigger onVisibilityChange={onRemoveTooltipVisibilityChange} renderContent={({dismissTooltip}) => {
                             return (
                                 <RemoveFileMessageHolder>
-                                    <SmallBlockLabel>{removeFileWarningMessage}</SmallBlockLabel>
+                                    <SmallBlockLabel>{(typeof removeFileWarningMessage === 'function') ? removeFileWarningMessage(file) : removeFileWarningMessage}</SmallBlockLabel>
                                     <div className={"buttons"}>
                                         <SmallInlineButton bordered={true} onClick={() => dismissTooltip()}>Cancel</SmallInlineButton>
                                         <SmallInlineButton bordered={true} onClick={() => removeFile(file)}>Remove File</SmallInlineButton>
@@ -171,20 +176,22 @@ const FileListingRow = styled(_FileListingRow)`
         content: ")"
     }
     
-    & .file-remove > div {
-        height: 100%;
-    }
     
     & .file-remove {
-        display: inline-block;
-        margin-right: 10px;
-        color: darkgrey;
-        cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 10px;
+      color: darkgrey;
+      cursor: pointer;
     }
-    
     & .file-remove:hover {
         color: black;
     }
+    & .file-remove > * {
+      height: 1.5em !important;
+    }
+     
     
     & .file-type {
         /*min-width: 120px;*/
@@ -211,9 +218,15 @@ const FileListingRow = styled(_FileListingRow)`
 `;
 
 
+const defaultRemoveFileWarningMessage = (file) => {
+
+    return (file && file.fileDisplayName) ? `Are you sure you want to remove the file named '${file.fileDisplayName}'?` : 'Are you sure you want to remove this file?';
+};
+
+
 function _FileUploadFileListing({ className, files, reorderFile, changeFileType, changeFileLabel,
                                   fileLabels, fileTypeOptions, linkForFile, fileDownloadLinkComponent,
-                                  removeFile, warnOnFileRemove=false, removeFileWarningMessage='Are you sure you want to remove this file?' }) {
+                                  removeFile, warnOnFileRemove=false, removeFileWarningMessage=defaultRemoveFileWarningMessage }) {
 
     const listingProps = {
         removeFile,
