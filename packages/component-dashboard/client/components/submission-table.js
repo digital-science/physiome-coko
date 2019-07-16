@@ -6,7 +6,7 @@ import moment from 'moment';
 import useDestroySubmissionMutation from './../mutations/destroySubmission';
 import useClaimSubmissionMutation from './../mutations/claimSubmission';
 
-import PopoverTrigger from "component-task-form/client/components/popover";
+import PopoverTrigger from "ds-theme/components/popover";
 
 import Spinner from "ds-theme/components/spinner";
 import SubmissionStatusPill from "./submission-status-pill";

@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import useDebouncedValue from "ds-theme/hooks/useDebouncedValue";
 import { SmallTextInput } from "ds-theme/components/text-input";
 import { Checkbox, CheckboxLabel } from "ds-theme/components/checkbox-input";
-import PopoverTrigger from "component-task-form/client/components/popover";
+import PopoverTrigger from "ds-theme/components/popover";
 
 import { FaFilter } from 'react-icons/fa';
 
