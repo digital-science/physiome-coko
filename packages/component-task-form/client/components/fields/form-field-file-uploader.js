@@ -200,7 +200,7 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, descri
 
     function reorderFile(file, newIndex, oldIndex) {
 
-        const newFileListing = Array.from(fileListing);
+        const newFileListing = [...fileListing.filter(f => !f.removed), ...fileListing.filter(f => f.removed)];
         const [movedFile] = newFileListing.splice(oldIndex, 1);
 
         newFileListing.splice(newIndex, 0, movedFile);
