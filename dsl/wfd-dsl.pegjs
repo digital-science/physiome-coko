@@ -907,7 +907,7 @@ formOutcomeSequenceAssignment
     }
 
 formOutcomeDateAssignment
-	= ws ","? ws "assign_date" ws "=>" ws dest:propName ws "=" ws "current()"
+	= ws ","? ws "dateAssignment" ws "=>" ws dest:propName ws "=" ws "current()"
     {
     	return {type:"date-assign", destination:dest};
     }
