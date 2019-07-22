@@ -386,7 +386,7 @@ instance Submission {
                     phase: SubmissionPhase.Submitted
                 },
                 sequence => manuscriptId,
-                assign_date => submissionDate = current(),
+                dateAssignment => submissionDate = current(),
 
                 requiresValidatedSubmitter: true
             },
