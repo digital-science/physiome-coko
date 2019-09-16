@@ -13,7 +13,7 @@ const ORCIDLoginButton = styled(props => {
             <img id="orcid-id-icon" src="https://orcid.org/sites/default/files/images/orcid_24x24.png" width="24" height="24" alt="ORCID iD icon"/>
             Login with your ORCID iD
         </button>
-    )
+    );
 })`
 
 	border: 1px solid #D3D3D3;
