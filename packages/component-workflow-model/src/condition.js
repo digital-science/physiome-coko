@@ -1,9 +1,10 @@
 // FIXME: the client and server code here should be re-used (one in the same)
 // this also applies to the function definitions
 
+const { ConditionFunctions } = require('client-workflow-model/ConditionFunctions');
+
 
 function Condition(condition, resolveEnum) {
-
 
     const allBindings = [];
 
@@ -241,42 +242,5 @@ function _getModelField(data, field) {
 
     return data[field] || undefined;
 }
-
-
-
-
-
-const ConditionFunctions = {};
-
-ConditionFunctions.length = v => {
-    if(v instanceof Array) {
-        return v.length;
-    }
-
-    if(typeof v === "string") {
-        return v.length;
-    }
-
-    return 0;
-};
-
-
-ConditionFunctions.hasValue = v => {
-    return !!v;
-};
-
-ConditionFunctions.correspondingAuthors =  v => {
-    if(!v || !v.length) {
-        return 0;
-    }
-    return v.filter(a => a.isCorresponding === true).length;
-};
-
-ConditionFunctions.validCitations = citations => {
-    if(!citations || !citations.length) {
-        return 0;
-    }
-    return citations.filter(c => c.title && c.title.trim().length).length;
-};
 
 module.exports = Condition;

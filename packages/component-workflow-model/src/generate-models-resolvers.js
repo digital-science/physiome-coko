@@ -12,11 +12,6 @@ const AclSet = require('./acl-set');
 
 
 
-function uppercaseCamelToLowercaseDashed(name) {
-    return name.replace(/^(.)/g, (a) => a.toLowerCase()).replace(/([A-Z])/g, (a) => '-' + a.toLowerCase());
-}
-
-
 /**/
 /* Generate Models & Resolvers for each of the top level defined tasks, enums and top level model objects. */
 /**/
@@ -74,6 +69,8 @@ function createModelForTask(task, enums, lookupModel, extensions) {
     const acl = task.acl ? new AclSet(task.acl, enums) : null;
 
     const relations = filterModelElementsForRelations(model.elements, enums);
+    const relationNames = (relations || []).map(f => f.field);
+
     const props = model.elements.map(element => {
 
         // FIXME: this should be more generalised into a generic lookup table or something of that sort of nature (this current impl smells a little)
@@ -157,6 +154,10 @@ function createModelForTask(task, enums, lookupModel, extensions) {
                 return acl;
             }
 
+            static get taskDefinition() {
+                return task;
+            }
+
             static get modelDescription() {
                 return model;
             }
@@ -169,6 +170,13 @@ function createModelForTask(task, enums, lookupModel, extensions) {
                 return relations.filter(e => e.type === "File");
             }
 
+            static get relationFieldDefinitions() {
+                return relations;
+            }
+
+            static get relationFieldNames() {
+                return relationNames;
+            }
 
             static get instanceResolver() {
                 return this._instanceResolver;
@@ -194,6 +202,10 @@ function createModelForTask(task, enums, lookupModel, extensions) {
             userToAclTargets(user) {
                 const [aclTargets, _] = this.constructor.instanceResolver.userToAclTargets(user, this);
                 return aclTargets;
+            }
+
+            publishInstanceWasCreated() {
+                return this.id ? this.constructor.instanceResolver.publishInstanceWasCreated(this.id) : Promise.resolve();
             }
 
             publishInstanceWasModified() {
@@ -259,17 +271,30 @@ function createModelForTask(task, enums, lookupModel, extensions) {
 
                     } else {
 
-                        if(!e.joinField) {
-                            logger.warn(`Dynamic model ${task.name} has field element ${e.field} specified as a relationship (singular) but no 'join-field' specified.`);
-                            return;
+                        if(e.joinToField) {
+
+                            mapping.relation = BaseModel.HasOneRelation;
+                            mapping.modelClass = lookupModel(e.type);
+                            mapping.join = {
+                                from: `${tableName}.id`,
+                                to: `${destTableName}.${e.joinToField}`
+                            };
+
+                        } else {
+
+                            if(!e.joinField) {
+                                logger.warn(`Dynamic model ${task.name} has field element ${e.field} specified as a relationship (singular) but no 'join-field' specified.`);
+                                return;
+                            }
+
+                            mapping.relation = BaseModel.BelongsToOneRelation;
+                            mapping.modelClass = lookupModel(e.type);
+                            mapping.join = {
+                                from: `${tableName}.${e.joinField}`,
+                                to: `${destTableName}.id`
+                            };
                         }
 
-                        mapping.relation = BaseModel.BelongsToOneRelation;
-                        mapping.modelClass = lookupModel(e.type);
-                        mapping.join = {
-                            from: `${tableName}.${e.joinField}`,
-                            to: `${destTableName}.id`
-                        };
                     }
 
                     relationMappings[e.field] = mapping;
@@ -282,7 +307,7 @@ function createModelForTask(task, enums, lookupModel, extensions) {
     })[name];
 
     const newModelClass = createClass(task.name, BaseModel);
-    newModelClass.instanceResolver = new InstanceResolver(newModelClass, task, enums);
+    newModelClass.instanceResolver = new InstanceResolver(newModelClass, task, enums, lookupModel);
     return newModelClass;
 }
 

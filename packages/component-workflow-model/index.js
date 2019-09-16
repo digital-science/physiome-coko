@@ -8,5 +8,7 @@ function serverSetup(app) {
 module.exports = {
     server: () => serverSetup,
     typeDefs: WorkflowModel.typeDefs,
-    resolvers: WorkflowModel.resolvers
+    resolvers: WorkflowModel.resolvers,
+
+    registerModel: WorkflowModel.registerModel
 };

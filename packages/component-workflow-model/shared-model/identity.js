@@ -1,6 +1,9 @@
 const { BaseModel } = require('component-model');
 const { pubsubManager } = require("pubsweet-server");
 
+const GraphQLFields = require('graphql-fields');
+const logger = require('workflow-utils/logger-with-prefix')('[workflow-model/identity]');
+
 const { AuthorizationError } = require('@pubsweet/errors');
 
 
@@ -54,9 +57,79 @@ async function asyncIteratorWasModified(user) {
     return pubSub.asyncIterator(`identity.modified.${user}`);
 }
 
+
+async function resolveUserForContext(context) {
+
+    if(!context || !context.user) {
+        return null;
+    }
+
+    if(context.resolvedUser) {
+        return context.resolvedUser;
+    }
+
+    return Identity.find(context.user).then((user) => {
+        context.resolvedUser = user;
+        return user;
+    });
+}
+
+
+async function getIdentities(input, context, info) {
+
+    // FIXME: apply user restrictions to looking up users, this will change depending on what group the user belongs to (ie. certain users in a role
+    // maybe allowed to lookup a user within a specific set of roles etc)
+
+    const user = await resolveUserForContext(context);
+
+    const fieldsWithoutTypeName = GraphQLFields(info, {}, { excludedFields: ['__typename'] });
+    const topLevelFields = (fieldsWithoutTypeName && fieldsWithoutTypeName.results) ? Object.keys(fieldsWithoutTypeName.results) : [];
+
+    const limit = input.first || 200;
+    const offset = input.offset || 0;
+    const filter = input.filter;
+
+    logger.debug(`identities (fields=${topLevelFields.length})`);
+
+
+    let query = Identity.query();
+    const knex = Identity.knex();
+
+    query = query.select(topLevelFields).select(knex.raw('count(*) OVER() AS internal_full_count')).limit(limit).offset(offset);
+
+    if(filter) {
+        // correctly apply filtering !!!
+    }
+
+    query = query.skipUndefined();
+
+    const r = await query;
+
+    // For each result, we then apply read ACL rules to it, ensuring only the allowed fields are returned for each instance.
+    const totalCount = (r && r.length ? r[0].internalFullCount : 0);
+
+    return {
+        results:r,
+        pageInfo: {
+            totalCount,
+            offset,
+            pageSize: limit
+        }
+    };
+}
+
+
+
 exports.resolvers = {
+
     IdentityType: {
         ORCiDIdentityType: "orcid"
+    },
+
+    Query: {
+        identities: async (ctxt, input, context, info) => {
+            return getIdentities(input, context, info);
+        }
     },
 
     Subscription: {

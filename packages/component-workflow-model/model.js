@@ -15,6 +15,10 @@ function configureModelsAndGraphQLDescriptions() {
         }
     });
 
+    r.registerModel = (name, model) => {
+        models[name] = model;
+    };
+
     r.urlMapping = urlMapping;
     return r;
 }

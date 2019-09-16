@@ -45,9 +45,10 @@ let InstanceResolverContextLookupUniqueId = 1;
 
 
 
-function InstanceResolver(modelClass, taskDefinition, enums) {
+function InstanceResolver(modelClass, taskDefinition, enums, lookupModel) {
 
     this.contextLookupId = InstanceResolverContextLookupUniqueId++;
+    this.lookupModel = lookupModel;
 
     this.modelClass = modelClass;
     this.acl = modelClass.acl;
@@ -63,8 +64,9 @@ function InstanceResolver(modelClass, taskDefinition, enums) {
     this.modelDef = taskDefinition.model;
     this.enums = enums;
 
-    const relations = filterModelElementsForRelations(this.modelDef.elements, enums);
-    this.relationFields = (relations || []).map(e => e.field);
+    this.relationFields = filterModelElementsForRelations(this.modelDef.elements, enums) || [];
+    this.relationFieldNames = this.relationFields.map(e => e.field);
+    this._resolvedRelationModels = false;
 
     this.ownerFields = filterModelElementsForOwnerFields(this.modelDef.elements);
     this.allowedReadFields = _allowedReadFieldKeysForInstance(this.modelDef);
@@ -81,6 +83,28 @@ function InstanceResolver(modelClass, taskDefinition, enums) {
 }
 
 
+InstanceResolver.prototype._getEagerFieldsForQuery = function(topLevelFields) {
+
+    // Models can specify what they want to have as automatic eager resolve sub-fields, we respect these and apply them
+    // on top of the specified field name.
+
+    if(!this._resolvedRelationModels) {
+        this.relationFields.forEach(f => {
+            f.model = this.lookupModel(f.type);
+        });
+
+        this._resolvedRelationModels = true;
+    }
+
+    const fields = this.relationFields.filter(f => topLevelFields.indexOf(f.field) !== -1);
+
+    return fields.map(f => {
+        const defaultEager = f.model.defaultEager || "";
+        return (defaultEager && defaultEager.length) ? `${f.field}.${defaultEager}` : f.field;
+    });
+};
+
+
 InstanceResolver.prototype.getAllowedReadFields = function(readAcl, includeAdditionalFields=true) {
 
     const allowedFields = (readAcl && readAcl.allowedFields) ? _.pick(this.allowedReadFields, readAcl.allowedFields) : Object.assign({}, this.allowedReadFields);
@@ -91,7 +115,6 @@ InstanceResolver.prototype.getAllowedReadFields = function(readAcl, includeAddit
 
     return allowedFields;
 };
-
 
 
 InstanceResolver.prototype._getInstance = function(instance, aclTargets, topLevelFields) {
@@ -133,8 +156,8 @@ InstanceResolver.prototype.get = async function(input, info, context) {
     const topLevelFields = fieldsWithoutTypeName ? Object.keys(fieldsWithoutTypeName) : [];
     let eagerResolves = null;
 
-    if(this.relationFields && this.relationFields.length && fieldsWithoutTypeName) {
-        eagerResolves = this.relationFields.filter(f => topLevelFields.indexOf(f) !== -1);
+    if(this.relationFieldNames && this.relationFieldNames.length && fieldsWithoutTypeName) {
+        eagerResolves = this._getEagerFieldsForQuery(topLevelFields);
     }
 
     const [object, user] = await Promise.all([
@@ -175,8 +198,8 @@ InstanceResolver.prototype.list = async function(input, info, context) {
     const offset = input.offset || 0;
 
     let eagerResolves = null;
-    if(this.relationFields && this.relationFields.length && fieldsWithoutTypeName) {
-        eagerResolves = this.relationFields.filter(f => topLevelFields.indexOf(f) !== -1);
+    if(this.relationFieldNames && this.relationFieldNames.length && fieldsWithoutTypeName) {
+        eagerResolves = this._getEagerFieldsForQuery(topLevelFields);
     }
 
     logger.debug(`${this.logPrefix} list (fields=${topLevelFields.length}, eager=[${eagerResolves ? eagerResolves.join(",") : ""}])`);
@@ -216,8 +239,8 @@ InstanceResolver.prototype.list = async function(input, info, context) {
     const knex = this.modelClass.knex();
 
     const relationFieldNames = {};
-    if(this.relationFields) {
-        this.relationFields.forEach(f => relationFieldNames[f] = true);
+    if(this.relationFieldNames) {
+        this.relationFieldNames.forEach(f => relationFieldNames[f] = true);
     }
 
     const topLevelFieldsWithoutRelations = topLevelFields.filter(field => !relationFieldNames.hasOwnProperty(field));
@@ -382,10 +405,47 @@ InstanceResolver.prototype.list = async function(input, info, context) {
 
 
     // Eager resolve on any fields inside this request, we also restrict the fields returned down to those requested by the user.
+    // If the eager resolve includes fields which happen to be another relation, then we automatically do a more expensive eager
+    // resolve onto that field as well (but we don't restrict the fields returned from that request).
+
     if(eagerResolves) {
-        eagerResolves.forEach(eagerField => {
-            const eagerFields = Object.keys(fieldsWithoutTypeName.results[eagerField]);
-            query = query.eager(eagerField).modifyEager(eagerField, builder => builder.select(eagerFields));
+
+        const eagerResolveFields = this.relationFields.filter(f => eagerResolves.indexOf(f.field) !== -1);
+
+        eagerResolveFields.forEach(eagerField => {
+
+            // FIXME: if the eager field itself is a relation, we need to skip any field which is eager itself !!!
+
+            const eagerFieldName = eagerField.field;
+            const model = this.lookupModel(eagerField.type);
+            const eagerFields = Object.keys(fieldsWithoutTypeName.results[eagerField.field]);
+
+            if(model && model.relationFieldNames && model.relationFieldNames.length) {
+
+                const modelRelationFieldNames = model.relationFieldNames;
+                const nonRelationEagerFields = [];
+                const relationEagerFields = [];
+
+                eagerFields.forEach(f => {
+                    if(modelRelationFieldNames.indexOf(f) !== -1) {
+                        relationEagerFields.push(f);
+                    } else {
+                        nonRelationEagerFields.push(f);
+                    }
+                });
+
+                if(nonRelationEagerFields.length) {
+                    query = query.eager(eagerFieldName).modifyEager(eagerField.field, builder => builder.select(nonRelationEagerFields));
+                }
+
+                if(relationEagerFields.length) {
+                    query = query.eager(relationEagerFields.length === 1 ? `${eagerFieldName}.${relationEagerFields[0]}` : `${eagerFieldName}.[${relationEagerFields.join(', ')}]`);
+                }
+
+            } else {
+
+                query = query.eager(eagerFieldName).modifyEager(eagerFieldName, builder => builder.select(eagerFields));
+            }
         });
     }
 
@@ -405,7 +465,7 @@ InstanceResolver.prototype.list = async function(input, info, context) {
         results,
         pageInfo: {
             totalCount,
-            offset: 0,
+            offset,
             pageSize: limit
         }
     };
@@ -417,7 +477,7 @@ InstanceResolver.prototype.resolveRelation = async function(element, parent, inf
     // FIXME: when resolving relations, we need to resolve the model instance and gain access
     // to the instance resolver to allow for security ACLs to be applied
 
-    if(!parent || !parent.id) {
+    if(!parent) {
         return null;
     }
 
@@ -425,8 +485,12 @@ InstanceResolver.prototype.resolveRelation = async function(element, parent, inf
         return parent[element.field];
     }
 
-    const instance = await this.resolveInstanceUsingContext(parent.id);
-    return instance.$relatedQuery(element.field);
+    if(parent.id) {
+        const instance = await this.resolveInstanceUsingContext(parent.id, context);
+        return instance.$relatedQuery(element.field);
+    }
+
+    return null;
 };
 
 
@@ -563,7 +627,6 @@ InstanceResolver.prototype.create = async function create(context) {
         return newInstance;
     });
 };
-
 
 
 InstanceResolver.prototype.destroy = async function(input, context) {
@@ -820,7 +883,11 @@ InstanceResolver.prototype.completeTaskForInstance = async function(instance, ta
         await instance.save();
     }
 
-    return taskService.complete(completeTaskOpts).catch((err) => {
+    return taskService.complete(completeTaskOpts).then(() => {
+
+        return this.publishInstanceWasModified(instance.id);
+
+    }).catch((err) => {
 
         logger.error(`Unable to complete business process engine task due to error: ${err.toString()}`);
         throw new Error("Unable to complete task for instance due to business engine error.");
@@ -859,10 +926,9 @@ InstanceResolver.prototype.completeTask = async function completeTask({id, taskI
     // (like the number of files etc) then we need to perform an eager resolve on those when finding the
     // instance.
 
-    if(this.relationFields && this.relationFields.length && validationSet) {
-
+    if(this.relationFieldNames && this.relationFieldNames.length && validationSet) {
         const validationSetBindings = validationSet.bindings();
-        eagerResolves = this.relationFields.filter(f => validationSetBindings.indexOf(f) !== -1);
+        eagerResolves = this.relationFieldNames.filter(f => validationSetBindings.indexOf(f) !== -1);
     }
 
     const [instance, user, tasks] = await Promise.all([
@@ -1057,10 +1123,6 @@ InstanceResolver.prototype.completeTask = async function completeTask({id, taskI
     // state changes and id sequence application).
 
     if(didModify) {
-
-        // FIXME: we need to apply any validations we may have at this point ???
-
-
         await instance.save();
     }
 

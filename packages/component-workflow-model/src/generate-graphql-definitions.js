@@ -132,7 +132,7 @@ extend type Query {
 
     const additionalStatements = [];
 
-    if((listingFilterElements && listingFilterElements.length) || (listingSortingInputTypeName && listingSortingInputTypeName.length)) {
+    if((listingFilterElements && listingFilterElements.length) || (listingSortableElements && listingSortableElements.length)) {
 
         const f = [];
         f.push(`first:Int`);
@@ -141,7 +141,7 @@ extend type Query {
         if(listingFilterElements && listingFilterElements.length) {
             f.push(`filter:${listingFilterInputTypeName}`);
         }
-        if(listingSortingInputTypeName && listingSortingInputTypeName.length) {
+        if(listingSortableElements && listingSortableElements.length) {
             f.push(`sorting:${listingSortingInputTypeName}`);
         }
 
