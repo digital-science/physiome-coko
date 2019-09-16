@@ -13,6 +13,10 @@ const parseEagerRelations = relations =>
 
 class WorkflowBaseModel extends DBErrors(BaseModel) {
 
+    static get defaultEager () {
+        return null;
+    }
+
     static async find(id, eagerLoadRelations) {
         const object = await this.query()
             .findById(id)
