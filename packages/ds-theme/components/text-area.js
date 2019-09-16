@@ -1,10 +1,30 @@
-import React from 'react';
+import React, { useRef, useLayoutEffect } from 'react';
 import styled, { css } from 'styled-components';
 import BorderedElement from './bordered-element'
 import { th } from '../src/index';
 
 
-const _TextArea = ({children=null, issue, ...rest}) => {
+const _TextArea = ({children=null, issue, autoSizeHeight = false, ...rest}) => {
+
+    if(autoSizeHeight) {
+        const elementRef = useRef();
+        const handleKeyDown = (e) => {
+            e.target.style.height = `0px`;
+            e.target.style.height = `${e.target.scrollHeight}px`;
+        };
+
+        useLayoutEffect(() => {
+            if(elementRef.current) {
+                elementRef.current.style.height = `0px`;
+                elementRef.current.style.height = `${elementRef.current.scrollHeight}px`;
+            }
+        });
+
+        return (
+            <textarea ref={elementRef} onKeyDown={handleKeyDown} {...rest}>{children}</textarea>
+        );
+    }
+
     return <textarea{...rest}>{children}</textarea>
 };
 

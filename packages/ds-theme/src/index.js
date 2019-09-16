@@ -29,10 +29,12 @@ const ThemeBaseDefaults = {
     // Labels
     LabelFontFamily: "ProximaNovaLight, sans-serif",
     LabelColor: "#505050",
+    LabelErrorColor: 'red',
 
     // Text Color
     TextColor: "#505050",
     DisabledTextColor: "#9c9c9c",
+    ValidationIssueTextColor: "#a90c00",
 
     // Misc
     ButtonIconColor: "#9c9c9c",
@@ -86,7 +88,8 @@ const DSAwardsTheme = {
         },
         small: {
             fontSize: ThemeBaseDefaults.FontSizeSmall
-        }
+        },
+        validationIssueTextColor: ThemeBaseDefaults.ValidationIssueTextColor
     },
 
     // Input
@@ -152,6 +155,14 @@ const DSAwardsTheme = {
 
         buttonColor: ThemeBaseDefaults.ButtonIconColor,
         hoverButtonColor: ThemeBaseDefaults.HoveredColor
+    },
+
+
+    // Content listing
+    contentListing: {
+        fontFamily: ThemeBaseDefaults.LabelFontFamily,
+        fontSize: "14px",
+        textColor: "black"
     },
 
     // Author listing
@@ -234,6 +245,10 @@ const th = name => props => get(props.theme, name);
 
 
 const GlobalStyle = createGlobalStyle`
+
+div.ReactModal__Overlay {
+  z-index: 100;
+}
 
 @font-face {
     font-family: NovcentoSansWideLight;

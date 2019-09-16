@@ -4,10 +4,10 @@ import { FaTrashAlt } from 'react-icons/fa';
 import { th } from '../src/index';
 
 
-const Card = styled(({Tag = "div", className, issue, interest, reorderingGrabber, children}) => {
+const Card = styled(({Tag = "div", className, issue, interest, simple, reorderingGrabber, children}) => {
 
     return (
-        <Tag className={`${className || ""} ${reorderingGrabber ? "reorder" : ""} ${issue ? 'issue' : ''} ${interest ? 'interest' : ''}`}>
+        <Tag className={`${className || ""} ${simple ? 'simple' : ''} ${reorderingGrabber ? "reorder" : ""} ${issue ? 'issue' : ''} ${interest ? 'interest' : ''}`}>
             <div className="reorder-grabber" />
             <CardContent className="content">
                 {children}
@@ -58,6 +58,14 @@ const Card = styled(({Tag = "div", className, issue, interest, reorderingGrabber
   
   &.reorder.interest:not(.issue) > .reorder-grabber {
     background: #03A9F4;
+  }
+  
+  &.simple {
+    box-shadow: none !important;
+  }
+  
+  &.simple.issue {
+    box-shadow: none !important;
   }
 
 `;

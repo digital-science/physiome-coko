@@ -12,7 +12,7 @@ let DATE_PICKER_ID = 1;
 
 
 const _DateInput = ({className, placeholder, displayFormat, showClearDate, numberOfMonths,
-    hideKeyboardShortcutsPanel, showDefaultInputIcon, small, appendToBody, disableScroll, ...rest}) => {
+                     hideKeyboardShortcutsPanel, showDefaultInputIcon, small, appendToBody = false, disableScroll = false, ...rest}) => {
 
     const pickerID = useMemo(() => {
         return DATE_PICKER_ID++;
@@ -22,24 +22,28 @@ const _DateInput = ({className, placeholder, displayFormat, showClearDate, numbe
         return (modifiers instanceof Set) ? modifiers : new Set()
     };
 
-    return <div className={className}><SingleDatePicker
-        placeholder={placeholder || "DD/MM/YYYY"}
-        id={"ds_awards_date_input_" + pickerID}
-        hideKeyboardShortcutsPanel={hideKeyboardShortcutsPanel !== undefined ? hideKeyboardShortcutsPanel : true}
-        numberOfMonths={numberOfMonths !== undefined ? numberOfMonths : 1}
-        showDefaultInputIcon={showDefaultInputIcon !== undefined ? showDefaultInputIcon : true}
-        small={small !== undefined ? small : true}
-        showClearDate={showClearDate !== undefined ? showClearDate : true}
-        enableOutsideDays={false}
-        isOutsideRange={() => { return false; }}
-        displayFormat={displayFormat || "DD/MM/YYYY"}
-        appendToBody={appendToBody !== undefined ? appendToBody : true}
-        disableScroll={disableScroll !== undefined ? disableScroll : true}
-        renderCalendarDay={({ modifiers, ...props }) => {
-            return <CalendarDay modifiers={safeModifiers(modifiers)} {...props} />
-        }}
-        {...rest}
-    /></div>;
+    return (
+        <div className={className}>
+            <SingleDatePicker
+                placeholder={placeholder || "DD/MM/YYYY"}
+                id={"ds_awards_date_input_" + pickerID}
+                hideKeyboardShortcutsPanel={hideKeyboardShortcutsPanel !== undefined ? hideKeyboardShortcutsPanel : true}
+                numberOfMonths={numberOfMonths !== undefined ? numberOfMonths : 1}
+                showDefaultInputIcon={showDefaultInputIcon !== undefined ? showDefaultInputIcon : true}
+                small={small !== undefined ? small : true}
+                showClearDate={showClearDate !== undefined ? showClearDate : true}
+                enableOutsideDays={false}
+                isOutsideRange={() => { return false; }}
+                displayFormat={displayFormat || "DD/MM/YYYY"}
+                appendToBody={appendToBody || false}
+                disableScroll={disableScroll || false}
+                renderCalendarDay={({ modifiers, ...props }) => {
+                    return <CalendarDay modifiers={safeModifiers(modifiers)} {...props} />
+                }}
+                {...rest}
+            />
+        </div>
+    );
 
 };
 

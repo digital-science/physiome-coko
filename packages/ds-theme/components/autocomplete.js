@@ -202,7 +202,7 @@ const _Autocomplete = ({className, ref, value, onChange, onSelect,
             }
         });
 
-    }, [generationRef, setLoading, displayedGenerationRef, debouncedItemsValuesRef, setDebouncedItems]);
+    }, [lookupItems, generationRef, setLoading, displayedGenerationRef, debouncedItemsValuesRef, setDebouncedItems]);
 
 
     // Cleanup any pending queries that happen to be executing when the component gets destroyed.

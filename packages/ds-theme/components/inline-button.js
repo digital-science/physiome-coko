@@ -50,6 +50,12 @@ const InlineButton = styled(_InlineButton)`
         background: #9E9E9E;
         color: white;
     }
+    
+    
+    &.bordered:disabled:hover {
+        cursor: default;
+        background: white;
+    }
 
 
     & > img {

@@ -11,6 +11,10 @@ const Label = styled(_Label)`
     font-family: ${th("label.fontFamily")};
     font-size: ${th("label.default.fontSize")};
     color: ${th("label.textColor")};
+    
+    &.error {
+        color: ${th("label.validationIssueTextColor")};
+    }
 `;
 
 const BlockLabel = styled(Label)`
