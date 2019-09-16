@@ -6,10 +6,10 @@ import { BasicMessage, BasicMessageButton } from 'component-overlay';
 import useTimedMinimumDisplay from './../hooks/useTimedMinimumDisplay';
 import useFormInstanceData, { SubmitTaskFailureReason } from './../hooks/useFormInstanceData';
 
-import SideBySideHeroLayout, { DecisionPanelHolder } from './side-by-side-hero-layout';
+import SimplePanelLayout, { DecisionPanelHolder } from './simple-panel-layout';
 
 
-const StyledSideBySideHeroLayout = styled(SideBySideHeroLayout)`
+const StyledSimplePanelLayout = styled(SimplePanelLayout)`
 
   & ${DecisionPanelHolder} {
       padding-top: 40px;
@@ -17,7 +17,8 @@ const StyledSideBySideHeroLayout = styled(SideBySideHeroLayout)`
   }
 `;
 
-export default function SideBySideHeroTaskForm({ instanceId, taskId, taskName, instanceType, formDefinition, workflowDescription, submitDidFail, wasSubmitted, autoSave=true }) {
+export default function SimpleTaskForm({ className, instanceId, taskId, taskName, instanceType, formDefinition, workflowDescription,
+                                         submitDidFail, wasSubmitted, renderNoTask, autoSave=true }) {
 
     const [showIsSaving, displayIsSavingMessage, removeIsSavingMessage] = useTimedMinimumDisplay(1500);
     const [showValidatedUserRequired, setShowValidatedUserRequired] = useState(false);
@@ -30,20 +31,21 @@ export default function SideBySideHeroTaskForm({ instanceId, taskId, taskName, i
         if(reason === SubmitTaskFailureReason.RequiresValidatedSubmitter) {
             setShowValidatedUserRequired(true);
         }
+        return Promise.resolve(reason);
     };
 
     const fd = useFormInstanceData({instanceId, taskId, taskName, instanceType, formDefinition, workflowDescription,
-                                    submitDidFail:onSubmitFail, wasSubmitted, autoSave, displayIsSavingMessage,
+                                    submitDidFail:onSubmitFail, wasSubmitted, enableAutoSave:autoSave, displayIsSavingMessage,
                                     removeIsSavingMessage});
-    const {instance, error, loading, resolvedTaskId, submitTaskOutcome, formData, formValidator, refetchFormData, fieldRegistry} = fd;
+    const {instance, error, loading, task, resolvedTaskId, submitTaskOutcome, formData, formValidator, refetchFormData, fieldRegistry} = fd;
 
     const fieldListingProps = {fieldRegistry, data:formData, refetchData:refetchFormData, formValidator, instanceId,
-                               instanceType, taskId:resolvedTaskId, formDefinition, submitTaskOutcome};
+                               instanceType, task, taskId:resolvedTaskId, formDefinition, submitTaskOutcome};
 
     return (
         <React.Fragment>
-            <StyledSideBySideHeroLayout elements={formDefinition.elements} data={formData} loading={loading} error={error}
-                instance={instance} fieldListingProps={fieldListingProps} showIsSaving={showIsSaving} />
+            <StyledSimplePanelLayout className={className} elements={formDefinition.elements} data={formData} loading={loading} error={error}
+                instance={instance} fieldListingProps={fieldListingProps} showIsSaving={showIsSaving} renderNoTask={renderNoTask} />
 
             <BasicMessage isOpen={showValidatedUserRequired} closeOverlay={() => setShowValidatedUserRequired(false)} heading="Email Verification Required"
                 message="Before you can proceed to submitting your manuscript, the email address associated with your account must be verified. Please check your email for a verification link."
@@ -51,7 +53,6 @@ export default function SideBySideHeroTaskForm({ instanceId, taskId, taskName, i
                     <BasicMessageButton onClick={() => setShowValidatedUserRequired(false)}>Continue</BasicMessageButton>
                 }
             />
-
         </React.Fragment>
     );
 };

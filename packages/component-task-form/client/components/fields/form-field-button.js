@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { FormFieldInlineTaskHolder, InlineTaskContext } from './form-field-inline-task';
 import FieldListing from '../field-listing';
 import FormValidator from '../../utils/FormValidator';
+import { SubmitTaskSuccessReason } from './../../hooks/useSubmitTaskOutcome';
 
 import { BasicOverlay } from 'component-overlay';
 
@@ -73,6 +74,7 @@ function FormFieldButton({instanceType, data, taskId, submitTaskOutcome, descrip
         if(submitTaskOutcome && taskOutcome) {
             return submitTaskOutcome(taskId, taskOutcome, options);
         }
+        return SubmitTaskSuccessReason;
     }
 
     const additionalProps = {};
@@ -117,7 +119,11 @@ function FormFieldButton({instanceType, data, taskId, submitTaskOutcome, descrip
             return;
         }
 
-        handleSubmit(options.outcome);
+        handleSubmit(options.outcome).then(reason => {
+            if(reason !== SubmitTaskSuccessReason) {
+                setShowConfirmation(false);
+            }
+        });
     };
 
 

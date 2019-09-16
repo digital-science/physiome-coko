@@ -4,6 +4,8 @@ import useDestroyInstance from './../mutations/destroyInstance';
 import AuthenticatedUserContext from 'component-authentication/client/AuthenticatedUserContext';
 
 
+const SubmitTaskSuccessReason = 'Success';
+
 const SubmitTaskFailureReason = {
     RequiresValidatedSubmitter: 'RequiresValidatedSubmitter',
     FormValidationFailed: 'FormValidationFailed'
@@ -18,9 +20,14 @@ export default  function useSubmitTaskOutcome(instanceId, formDefinition, instan
     const currentUser = useContext(AuthenticatedUserContext);
 
     const _submitDidFail = (reason) => {
-        return submitDidFail && submitDidFail(reason);
+        return (submitDidFail ?
+            submitDidFail(reason).then(() => {
+                return reason;
+            })
+            :
+            Promise.resolve(reason)
+        );
     };
-
 
     return (taskId, outcomeType, options) => {
 
@@ -63,8 +70,11 @@ export default  function useSubmitTaskOutcome(instanceId, formDefinition, instan
                 } else if(result === 'Success') {
 
                     if(wasSubmitted) {
-                        return wasSubmitted(outcome, state);
+                        return wasSubmitted(outcome, state).then(() => {
+                            return SubmitTaskSuccessReason;
+                        });
                     }
+                    return SubmitTaskSuccessReason;
 
                 } else if(result === 'ValidationFailed') {
 
@@ -79,8 +89,11 @@ export default  function useSubmitTaskOutcome(instanceId, formDefinition, instan
             return destroyInstance(instanceId, state).then(result => {
 
                 if(wasSubmitted) {
-                    return wasSubmitted(outcome, state);
+                    return wasSubmitted(outcome, state).then(() => {
+                        return SubmitTaskSuccessReason;
+                    });
                 }
+                return SubmitTaskSuccessReason;
             });
 
 
@@ -88,14 +101,18 @@ export default  function useSubmitTaskOutcome(instanceId, formDefinition, instan
 
             // Save doesn't support state changes, just saves the currently modified data back to the instance.
 
-            saveInstanceData().then(() => {
+            return saveInstanceData().then(() => {
+
                 if(wasSubmitted) {
-                    return wasSubmitted(outcome, {});
+                    return wasSubmitted(outcome, {}).then(() => {
+                        return SubmitTaskSuccessReason;
+                    });
                 }
+                return SubmitTaskSuccessReason;
             });
 
         }
     };
 }
 
-export { SubmitTaskFailureReason };
+export { SubmitTaskSuccessReason, SubmitTaskFailureReason };

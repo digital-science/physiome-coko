@@ -139,6 +139,7 @@ function FormFieldInlineTask({className, description, data, instanceId, instance
         if(refetchData) {
             refetchData();
         }
+        return Promise.resolve();
     });
 
 

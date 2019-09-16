@@ -1,6 +1,8 @@
 import React from "react";
 import styled from 'styled-components';
 
+import { bindingToFetchFields } from '../../utils/helpers';
+
 const FormFieldHolder = styled.div`
 `;
 
@@ -51,6 +53,19 @@ function fetchFields(binding, fields) {
 }
 
 
+function complexFetchFields(binding, fields) {
+
+    const f = fields instanceof Array ? fields : fields.split(',');
+    const r = {};
+
+    f.forEach(field => {
+        mergeFetchFields(r, bindingToFetchFields(`${binding}.${field}`));
+    });
+
+    return r;
+}
+
+
 
 function _mergeAtLevel(dest, src) {
 
@@ -80,4 +95,4 @@ function mergeFetchFields(destFields, srcFields) {
 }
 
 
-export { fetchFields, mergeFetchFields, FormFieldHolder };
+export { fetchFields, complexFetchFields, mergeFetchFields, FormFieldHolder };

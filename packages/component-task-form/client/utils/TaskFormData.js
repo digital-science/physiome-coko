@@ -37,6 +37,7 @@ class TaskFormData {
     getFieldValue(fieldID) {
 
         if(fieldID.indexOf('.') !== -1) {
+
             const path = fieldID.split('.');
 
             let obj =  (this._modifiedFields.hasOwnProperty(path[0]) ? this._modifiedFields[path[0]] : this._getDefaultValue(path[0]));
@@ -44,7 +45,7 @@ class TaskFormData {
                 return null;
             }
 
-            for(let i = 0; i < path.length; i++) {
+            for(let i = 1; i < path.length; i++) {
                 obj = _get(obj, path[i]);
                 if(!obj) {
                     break;

@@ -37,7 +37,8 @@ const SimpleFileListing = styled(({className, files, instanceId, instanceType}) 
                 const FileIcon = mimeTypeToIcon(file.fileMimeType) || FaFile;
                 return (
                     <li key={file.id}>
-                        <a href={`${BaseUrl}/files/download/${instanceType.urlName}/${encodeURI(instanceId)}/${encodeURI(file.id)}/${encodeURI(file.fileName)}`}>
+                        <a href={`${BaseUrl}/files/download/${instanceType.urlName}/${encodeURI(instanceId)}/${encodeURI(file.id)}/${encodeURI(file.fileName)}`}
+                            target="_blank" rel="noopener noreferrer">
                             <FileIcon />
                             <span className="file-name">{file.fileDisplayName}</span>
                             <span className="file-size">{humanFormatByteCount(file.fileByteSize)}</span>

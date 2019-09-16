@@ -7,7 +7,7 @@ import { FormFieldHolder } from './fields/withFormField';
 import Spinner from 'ds-theme/components/spinner';
 
 
-export default function SideBySideHeroLayout({ className, elements, data, loading, error, instance, fieldListingProps }) {
+export default function SimplePanelLayout({ className, elements, data, loading, error, instance, fieldListingProps, renderNoTask }) {
 
     const {panels, decisionPanel} = useMemo(() => {
 
@@ -38,9 +38,13 @@ export default function SideBySideHeroLayout({ className, elements, data, loadin
         return <div>Instance Not Found</div>
     }
 
+    if(!loading && !fieldListingProps.task && renderNoTask) {
+        return renderNoTask();
+    }
+
     return (data && !loading) ? (
 
-        <SideBySideHeroHolder className={className}>
+        <SimplePanelLayoutHolder className={className}>
             <PanelHolder>
                 {panels.map((panel, index) =>
                     <Fragment key={index}>
@@ -59,25 +63,32 @@ export default function SideBySideHeroLayout({ className, elements, data, loadin
                 </DecisionPanelHolder>
             ) : null}
 
-        </SideBySideHeroHolder>
+        </SimplePanelLayoutHolder>
 
     ) : (
-        <SideBySideHeroHolder className={`${className || ""} loading`}>
+        <SimplePanelLayoutHolder className={`${className || ""} loading`}>
             <Spinner center={true} message={"Loading"} />
-        </SideBySideHeroHolder>
+        </SimplePanelLayoutHolder>
     );
 };
 
 
-const SideBySideHeroHolder = styled.div`
+const SimplePanelLayoutHolder = styled.div`
   &.loading {
     text-align: center;
   }
+  
+  display: flex;
+  flex-direction: column;
 `;
 
 
 const Panel = styled.div`
   min-width: 450px;
+  
+  @media screen and (min-width: 900px) {
+    min-width: 600px;
+  }
 `;
 
 const PanelDivider = styled.div`
@@ -104,7 +115,7 @@ const PanelHeading = styled(({className, heading}) => {
 
 const PanelHolder = styled.div`
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   max-width: 940px;
   margin: 0 auto;
   justify-content: center;
@@ -118,6 +129,8 @@ const DecisionPanelHolder = styled.div`
   margin-right: -20px;
   padding: 20px;
   background: #ebebeb;
+  
+  flex-grow: 1; /* the decision panel holder grows to accomodate all remaining space */
 `;
 
 

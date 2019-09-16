@@ -66,6 +66,7 @@ const FormFieldRegistry = {
     'FishareArticleEmbed' : FormFieldFigshareEmbed
 };
 
+
 export default FormFieldRegistry;
 
 export function registerFormFieldType(name, component) {

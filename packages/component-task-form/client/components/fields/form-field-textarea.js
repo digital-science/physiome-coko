@@ -29,6 +29,7 @@ function FormFieldTextArea({data, binding, description, formDefinition, formVali
     const [value, _, handleInputChange] = useFormValueBinding(data, binding, "", (v) => v || "");
     const [validationIssues, clearValidationIssues] = useFormValidation(description, formDefinition, formValidator);
     const isInsideConfirmationDialog = context && context[0] === ConfirmationDialogContext;
+    const { autoSizeHeight = false } = options;
 
     const handleInputChangeWithWarningsClear = (e) => {
         clearValidationIssues();
@@ -37,7 +38,7 @@ function FormFieldTextArea({data, binding, description, formDefinition, formVali
 
     const textInput = (
         <FormStyledTextArea className={isInsideConfirmationDialog ? 'in-dialog' : ''} value={value || ""} onChange={handleInputChangeWithWarningsClear}
-            rows={options.rows || 2} issue={validationIssues && validationIssues.length}  />
+            autoSizeHeight={autoSizeHeight} rows={options.rows || 2} issue={validationIssues && validationIssues.length}  />
     );
 
     return (
