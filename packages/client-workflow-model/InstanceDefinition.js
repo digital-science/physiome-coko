@@ -13,6 +13,15 @@ function uppercaseCamelToLowercaseDashed(name) {
 }
 
 
+function lowerCaseFirstLetter(string) {
+    return string.charAt(0).toLowerCase() + string.slice(1);
+}
+
+function nameToListingAccessor(name) {
+    return `${lowerCaseFirstLetter(name)}s`;
+}
+
+
 class InstanceDefinition {
 
     constructor(taskDef, defaultName, enumResolver, mappingResolver) {
@@ -64,7 +73,7 @@ class InstanceDefinition {
     }
 
     get urlPath() {
-        if(this.options.urlPath) {
+        if(this.options && this.options.urlPath) {
             return this.options.urlPath;
         }
         if(this._cachedUrlPath) {
@@ -135,6 +144,19 @@ class InstanceDefinition {
         });
 
         return allEntries;
+    }
+
+    get listingAccessor() {
+        if(this.options && this.options.listingAccessor) {
+            return this.options.listingAccessor;
+        }
+
+        if(this._cachedListingAccessor) {
+            return this._cachedListingAccessor;
+        }
+        this._cachedListingAccessor = nameToListingAccessor(this.name);
+        return this._cachedListingAccessor;
+
     }
 
 }

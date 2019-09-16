@@ -54,6 +54,10 @@ class WorkflowDescription {
     resolveEnumToValue(enumRef) {
         return resolveEnumFromSet(this.enums, enumRef);
     }
+
+    resolveDisplayMapping(mappingRef) {
+        return this.mappings[mappingRef] || null;
+    }
 }
 
 
