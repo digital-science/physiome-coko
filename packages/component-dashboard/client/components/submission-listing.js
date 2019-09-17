@@ -50,7 +50,7 @@ const _SubmissionListing = ({className, children, heading, showOnHoldSubmissions
         setPage(0);
     }, [filter, searchText]);
 
-    const sorting = { submissionDate: false };
+    const sorting = { submissionDate: true };
 
     const { data, error, loading, refetch } = useGetSubmissions(pageSize, page * pageSize, filter, sorting, (searchText && searchText.length) ? searchText : null);
     const throttledRefetch = debounce(refetch, 2000, { leading: true, trailing: true, maxWait:2000 });
