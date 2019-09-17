@@ -1,6 +1,22 @@
-# Phyisome Submission Prototype
+# Phyisome Submission System
 
-to do
+_Physiome_ publishes reproducible and reusable mathematical models of physiological processes where the experimental details and model validation have been published or accepted for publication in a recognised 'primary' peer-reviewed journal.
+Physiome curators will help authors ensure that models and simulation experiments are made available using appropriate community standards prior to acceptance for publication in Physiome.
+
+More details about the Physiome Journal itself can be found here:<br />
+<https://journal.physiomeproject.org><br />
+<https://auckland.figshare.com/articles/Presentation_COMBINE2019_pdf/9037403>
+
+The piece of software held in this repository is designed to facilitate the submission of manuscripts to the Physiome journal. Submitters
+are able to upload their manuscript file, specify additional metadata such as authors, funding etc. and then submit
+these to the journal for consideration. Subsequently, the journals curators able to use the administrative functions within the software
+platform to manage submissions, make editorial modifications and finally publish accepted manuscripts and models through
+into the Physiome figshare instance.
+
+Videos showing briefly the functions of the software can be found on figshare here:
+<https://figshare.com/articles/Physiome_Submission_System_-_example_videos/9868016>
+
+This development utilises and builds upon the PubSweet application core managed by the Coko Foundation and wider PubSweet community.
 
 PubSweet Project:<br />
 <https://gitlab.coko.foundation/pubsweet/pubsweet>
@@ -12,7 +28,7 @@ Coko Foundation:<br />
 
 ### Prerequisites
 
-For local development the easiest way to get started is to have Docker installed and run the following services on Docker to link to the xpub-awards instance.
+For local development the easiest way to get started is to have Docker installed and run the following services on Docker to link to the Physiome submission system instance.
 
  * NodeJS
  * Yarn
@@ -30,7 +46,7 @@ docker run -d --name physiome-postgres -p 5432:5432 postgres:latest
 
 Create a new Camunda BPM Engine instance
 ```console
-docker run -d --name xpub-awards-camunda -p 8080:8080 camunda/camunda-bpm-platform:latest
+docker run -d --name physiome-camunda -p 8080:8080 camunda/camunda-bpm-platform:latest
 ```
 
 ### Setup
@@ -88,8 +104,8 @@ variables:
 DATABASE=<postgres database name>
 DB_USER=<postgres username>
 DB_PASS=<postgres password>
-DB_HOST=<postgres server hostname/ip address>
-WORKFLOW_API_URI=http://<camunda hostname/ip address>:8080/engine-rest
+DB_HOST=<postgres server hostname>
+WORKFLOW_API_URI=http://<camunda hostname>:8080/engine-rest
 
 ```
 
@@ -122,12 +138,25 @@ Navigate in your local browser of preference to: [http://localhost:3000](http://
 
 ## Notes
 
-to do
+The code relating to how the DSL language takes the data model and transforms this into a representation 
+used within the PubSweet core is in need of a refactoring, so please ignore the code smell that lingers in these parts.
 
-## Screenshots
 
-to do
+
+## Videos/Screenshots
+
+Screenshot: Manuscript submission form
+![Screenshot, Manuscript Submission](docs/screen-submission.png)
+
+Screenshot: Administration view with submissions listing
+![Screenshot, Admin Listing](docs/screen-admin-list.png)
+
+Screenshot: Administration view, submission details
+![Screenshot, Admin Submission details](docs/screen-admin-details.png)
+
+Video: basic run through of functionality
+<video controls="" autoplay="" name="media" style="max-width: 600px;"><source src="https://ndownloader.figshare.com/files/17694719/preview/17694719/video_preview.mp4" type="video/mp4"></video>
 
 ## Contact
 
-Please feel free to contact Jared Watts (j.watts@digital-science.com) about this project.
+Please feel free to contact Jared Watts (j.watts@digital-science.com) about this project. To contact the Physiome journal, physiome@physiomeproject.org.
