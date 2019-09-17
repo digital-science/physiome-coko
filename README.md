@@ -138,6 +138,21 @@ Navigate in your local browser of preference to: [http://localhost:3000](http://
 
 ## Notes
 
+![BPM workflow example](docs/screen-workflow-exmaple.png)
+
+The BPMN workflow (as seen above from the Camunda Modeller) describes the workflow and possible actions at each stage a submission
+may go through during its lifetime. It also describes any third-party integrations, defining where and when they are enacted
+during the process of a submission. Each task within the BPM definition has specific attributes which tie into the workflow description
+(expressed in our custom DSL) which defines what form is associated with a task. The workflow description also includes
+details relating to user interface elements, data models, validations and access control restrictions on data.
+
+![DSL example](docs/screen-dsl-example.png)
+
+The above example workflow description shows validations that are applied during the manuscript submission phase, including
+the end-user warnings that are displayed when a validation fails. The example layout also shows how the
+submission form itself is generated, including the links between a form element and the data model it targets.
+
+<br />
 The code relating to how the DSL language takes the data model and transforms this into a representation 
 used within the PubSweet core is in need of a refactoring, so please ignore the code smell that lingers in these parts.
 
