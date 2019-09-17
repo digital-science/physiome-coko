@@ -169,8 +169,8 @@ Screenshot: Administration view with submissions listing
 Screenshot: Administration view, submission details
 ![Screenshot, Admin Submission details](docs/screen-admin-details.png)
 
-Video: basic run through of functionality
-<video controls="" autoplay="" name="media" style="max-width: 600px;"><source src="https://ndownloader.figshare.com/files/17694719/preview/17694719/video_preview.mp4" type="video/mp4"></video>
+Videos of functionality can be seen here:
+<https://figshare.com/articles/Physiome_Submission_System_-_example_videos/9868016>
 
 ## Contact
 
