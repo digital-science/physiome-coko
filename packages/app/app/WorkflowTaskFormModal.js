@@ -19,6 +19,7 @@ function WorkflowTaskFormModal({ match, history }) {
 
     const wasSubmitted = () => {
         history.push("/");
+        return Promise.resolve();
     };
 
     const modalHeading = formDefinition && formDefinition.options ? formDefinition.options.heading : null;

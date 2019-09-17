@@ -19,6 +19,7 @@ function WorkflowTaskFormHero({ match, history, children }) {
 
     const wasSubmitted = () => {
         history.push("/");
+        return Promise.resolve();
     };
 
     const heading = formDefinition && formDefinition.options ? formDefinition.options.heading : null;
