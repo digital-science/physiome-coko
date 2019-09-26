@@ -1,7 +1,7 @@
 [
   "@pubsweet/component-send-email",
   "component-authentication",
-  "component-dashboard",
+  "physiome-ui",
   "component-model",
   "component-task-form",
   "physiome-model-extensions",

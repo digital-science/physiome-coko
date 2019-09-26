@@ -17,8 +17,9 @@ export { TaskTable, TaskTableColumn, TaskTableRow };
 
 // Column management
 // ----
-import { createColumn } from "./components/task-table-column";
+import { createColumn, TaskTableColumnContentComponent } from "./components/task-table-column";
 import { createIdentifierColumn, createDateColumn, createIdentityColumn, createStatusColumn, createTextColumn, createMappedTextColumn } from './components/task-table-common-columns';
 
 export { createColumn };
+export { TaskTableColumnContentComponent };
 export { createIdentifierColumn, createDateColumn, createIdentityColumn, createStatusColumn, createTextColumn, createMappedTextColumn };

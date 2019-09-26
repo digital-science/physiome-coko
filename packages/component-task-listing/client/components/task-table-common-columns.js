@@ -4,6 +4,7 @@ import moment from "moment";
 import get from 'lodash/get';
 
 
+import TaskTable from './task-table';
 import TaskTableColumn, { TaskTableColumnHeaderComponent, TaskTableColumnContentComponent, convertDependentFields } from "./task-table-column";
 
 import { mergeFetchFields, bindingToFetchFields } from 'component-task-form/client/utils/helpers'
@@ -161,6 +162,9 @@ export { createIdentifierColumn };
 // ----
 
 const DateColumnHeader = styled(TaskTableColumnHeaderComponent)`
+  ${TaskTable} &.small {
+    width: 125px;
+  }
 `;
 const DateColumnContent = styled(TaskTableColumnContentComponent)`
   & > span {

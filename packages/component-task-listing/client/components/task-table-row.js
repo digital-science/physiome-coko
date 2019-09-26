@@ -16,12 +16,9 @@ const TaskRow = styled.tr`
 
 const TaskTableRow = ({columns, task, refreshListing, history, workflowDescription, ...rest}) => {
 
-    const renderedColumns = useMemo(() => {
-        return columns.map((col, index) => {
-
-            return col.renderRowContent({columnIndex: index, task, refreshListing, history, workflowDescription})
-        });
-    }, [columns, task, refreshListing]);
+    const renderedColumns = columns.map((col, index) => {
+        return col.renderRowContent({columnIndex: index, task, refreshListing, history, workflowDescription})
+    });
 
     return (
         <TaskRow {...rest}>
