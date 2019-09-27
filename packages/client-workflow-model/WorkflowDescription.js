@@ -26,7 +26,6 @@ class WorkflowDescription {
         this.mappings = mappings;
 
         const enumResolver = function(enumRef, audience) {
-            console.log(`enumResolver: ${enumRef} [${audience}]`);
             return resolveEnumFromSet(enums, enumRef, audience);
         };
 

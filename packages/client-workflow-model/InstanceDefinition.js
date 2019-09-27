@@ -3,6 +3,7 @@ const FormDefinition = require('./FormDefinition');
 const ViewDefinition = require('./ViewDefinition');
 const LayoutDefinition = require('./LayoutDefinition');
 const ValidationDefinition = require('./ValidationDefinition');
+const AclSet = require('./AclSet');
 
 const pick = require('lodash/pick');
 
@@ -64,6 +65,8 @@ class InstanceDefinition {
         this.views = views;
         this.layouts = layouts;
         this.validations = validations;
+
+        this.acl = taskDef.acl ? new AclSet(taskDef.acl, enumResolver) : null;
 
         Object.values(forms).forEach(form => form._resolveValidations(validations));
 
