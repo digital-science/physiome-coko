@@ -19,7 +19,6 @@ class AclSet {
         }
 
         const lookup = (name, type) => {
-            console.log(`lookup: [${name}] of type [${type}]`);
             return (type === AclFieldSet.type) ? this.fieldSets[name] : this.taskSets[name];
         };
 
