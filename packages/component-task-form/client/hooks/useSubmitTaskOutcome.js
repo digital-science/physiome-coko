@@ -54,7 +54,7 @@ export default  function useSubmitTaskOutcome(instanceId, formDefinition, instan
             }
 
 
-            const state = instanceType.filterObjectToStateVariables(outcome._graphqlState || {});
+            const state = instanceType.filterObjectToStateVariables(outcome._clientState || {});
 
             return saveInstanceData().then(() => {
 
@@ -84,7 +84,7 @@ export default  function useSubmitTaskOutcome(instanceId, formDefinition, instan
 
         } else if(outcome.result === "Destroy") {
 
-            const state = instanceType.filterObjectToStateVariables(outcome._graphqlState || {});
+            const state = instanceType.filterObjectToStateVariables(outcome._clientState || {});
 
             return destroyInstance(instanceId, state).then(result => {
 

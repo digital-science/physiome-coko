@@ -62,7 +62,7 @@ export default function MasterDetailLayout({ className, elements, data, loading,
                     if(!panel.userIsTargetOfElement(currentUser)) {
                         return null;
                     }
-                    if(panel.condition && !panel.condition.evaluate(data)) {
+                    if(panel.condition && !panel.condition.evaluate(data, 'client')) {
                         return null;
                     }
                     return (
@@ -81,7 +81,7 @@ export default function MasterDetailLayout({ className, elements, data, loading,
                         if(!panel.userIsTargetOfElement(currentUser)) {
                             return null;
                         }
-                        if(panel.condition && !panel.condition.evaluate(data)) {
+                        if(panel.condition && !panel.condition.evaluate(data, 'client')) {
                             return null;
                         }
                         return (
@@ -98,7 +98,7 @@ export default function MasterDetailLayout({ className, elements, data, loading,
                         if(!panel.userIsTargetOfElement(currentUser)) {
                             return null;
                         }
-                        if(panel.condition && !panel.condition.evaluate(data)) {
+                        if(panel.condition && !panel.condition.evaluate(data, 'client')) {
                             return null;
                         }
                         return (

@@ -27,7 +27,7 @@ function useFormValidation(description, formDefinition, formValidator) {
         const interest = formValidator.createInterest((data) => {
 
             const newWarnings = validations.map(v => {
-                if(!v.evaluateCondition(data)) {
+                if(!v.evaluateCondition(data, 'client')) {
                     return v.evaluateWarning(data);
                 }
                 return null;

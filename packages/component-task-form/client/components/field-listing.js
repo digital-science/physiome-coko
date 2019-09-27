@@ -64,7 +64,7 @@ function _FormFieldListing({ className, elements, fieldRegistry, data, binding, 
                             }
 
                             pushConditionBindings(layoutElement.condition);
-                            if(layoutElement.condition && !layoutElement.evaluate(data)) {
+                            if(layoutElement.condition && !layoutElement.condition.evaluate(data, 'client')) {
                                 return;
                             }
 
@@ -82,7 +82,7 @@ function _FormFieldListing({ className, elements, fieldRegistry, data, binding, 
             }
 
             pushConditionBindings(e.condition);
-            if(e.condition && !e.condition.evaluate(data)) {
+            if(e.condition && !e.condition.evaluate(data, 'client')) {
                 return;
             }
 
