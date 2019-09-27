@@ -19,7 +19,7 @@ class FormDefinition extends LayoutDefinition {
                 return;
             }
 
-            outcome._graphqlState = {};
+            outcome._clientState = {};
 
             Object.keys(outcome.state).forEach(k => {
 
@@ -27,10 +27,10 @@ class FormDefinition extends LayoutDefinition {
 
                 if(pair.type === "enum") {
                     outcome.state[k] = enumResolver(pair.value, 'server');
-                    outcome._graphqlState[k] = enumResolver(pair.value, 'client');
+                    outcome._clientState[k] = enumResolver(pair.value, 'client');
                 } else {
                     outcome.state[k] = pair.value;
-                    outcome._graphqlState[k] = pair.value;
+                    outcome._clientState[k] = pair.value;
                 }
             });
         });
