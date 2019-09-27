@@ -1,6 +1,13 @@
+const IdentityFieldType = 'Identity';
+
+const DateTimeFieldType = 'DateTime';
+
+const BaseElementTypes = ['String', 'Integer', 'ID', DateTimeFieldType, 'Boolean', 'JSON'];
+
+
 class Model {
 
-    constructor(definition) {
+    constructor(definition, enumResolver = null) {
         this.fields = definition.elements || [];
     }
 
@@ -18,6 +25,62 @@ class Model {
     inputFields() {
         return (this.fields || []).filter(f => f.input !== false && (!f.accessors || f.accessors.length === 0));
     }
+
+
+
+    relationFields(workflowDef) {
+
+        return this.fields.filter(f => {
+
+            if(BaseElementTypes.indexOf(f.type) !== -1) {
+                return false;
+            }
+            return !workflowDef.enums.hasOwnProperty(f.type);
+        });
+    }
+
+    basicTypeFields(workflowDef) {
+
+        return this.fields.filter(f => {
+            return (BaseElementTypes.indexOf(f.type) !== -1 || workflowDef.enums.hasOwnProperty(f.type));
+        });
+    }
+
+    listingFilterFields() {
+
+        return this.fields.filter(f => {
+            return (f.listingFilter === true);
+        });
+    }
+
+    listingSortableFields() {
+
+        return this.fields.filter(f => {
+            return (f.listingSorting === true);
+        });
+    }
+
+    ownerFields() {
+
+        return this.fields.filter(f => {
+            return (f.holdsOwnerId === true && f.type === IdentityFieldType && f.joinField);
+        });
+    }
+
+    idSequenceFields() {
+
+        return this.fields.filter(f => {
+            return (f.idSequence);
+        });
+    }
+
+    dateTimeFields() {
+
+        return this.fields.filter(f => {
+            return (f.type === DateTimeFieldType);
+        });
+    }
+
 }
 
 module.exports = Model;

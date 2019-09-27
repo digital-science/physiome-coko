@@ -27,8 +27,8 @@ class ValidationEntry {
         return this.condition.bindings;
     }
 
-    evaluateCondition(data) {
-        return this.condition.evaluate(data);
+    evaluateCondition(data, audience) {
+        return this.condition.evaluate(data, audience);
     }
 
     evaluateWarning(data) {

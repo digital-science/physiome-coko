@@ -25,8 +25,9 @@ class WorkflowDescription {
         this.enums = enums;
         this.mappings = mappings;
 
-        const enumResolver = function(enumRef) {
-            return resolveEnumFromSet(enums, enumRef);
+        const enumResolver = function(enumRef, audience) {
+            console.log(`enumResolver: ${enumRef} [${audience}]`);
+            return resolveEnumFromSet(enums, enumRef, audience);
         };
 
         const mappingResolver = function(mappingRef) {
@@ -52,8 +53,8 @@ class WorkflowDescription {
         return Object.values(this.instanceTypes).find(instanceType => instanceType.urlPath === name);
     }
 
-    resolveEnumToValue(enumRef) {
-        return resolveEnumFromSet(this.enums, enumRef);
+    resolveEnumToValue(enumRef, audience) {
+        return resolveEnumFromSet(this.enums, enumRef, audience);
     }
 
     resolveDisplayMapping(mappingRef) {
@@ -62,19 +63,19 @@ class WorkflowDescription {
 }
 
 
-function resolveEnumFromSet(set, enumRef) {
+function resolveEnumFromSet(set, enumRef, audience = 'client') {
 
     if(!enumRef) {
         return undefined;
     }
 
-    const [name, _] = enumRef.split(".");
+    const [name, clientValue] = enumRef.split(".");
     const enumDef = set[name];
     if(!enumDef) {
         return undefined;
     }
 
-    return enumDef.resolve(enumRef);
+    return (audience === 'client') ? clientValue : enumDef.resolve(enumRef);
 }
 
 module.exports = WorkflowDescription;

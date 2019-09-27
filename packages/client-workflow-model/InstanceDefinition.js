@@ -8,10 +8,8 @@ const pick = require('lodash/pick');
 
 
 function uppercaseCamelToLowercaseDashed(name) {
-
     return name.replace(/^(.)/g, (a) => a.toLowerCase()).replace(/([A-Z])/g, (a) => '-' + a.toLowerCase());
 }
-
 
 function lowerCaseFirstLetter(string) {
     return string.charAt(0).toLowerCase() + string.slice(1);

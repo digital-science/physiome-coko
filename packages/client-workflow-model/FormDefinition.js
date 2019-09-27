@@ -26,8 +26,8 @@ class FormDefinition extends LayoutDefinition {
                 const pair = outcome.state[k];
 
                 if(pair.type === "enum") {
-                    outcome.state[k] = enumResolver(pair.value);
-                    outcome._graphqlState[k] = pair.value.split(".")[1];
+                    outcome.state[k] = enumResolver(pair.value, 'server');
+                    outcome._graphqlState[k] = enumResolver(pair.value, 'client');
                 } else {
                     outcome.state[k] = pair.value;
                     outcome._graphqlState[k] = pair.value;

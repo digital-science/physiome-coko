@@ -22,20 +22,18 @@ class Condition {
             }
         }
 
-        function _enumResolve(v) {
-            return v.split(".")[1];
-        }
-
         function _resolveEnumsOnValue(value) {
             if(!value) {
                 return;
             }
             if(value.type === "enum") {
-                value.value = _enumResolve(value.value);
+                value._clientValue = enumResolver(value.value, 'client');
+                value._serverValue = enumResolver(value.value, 'server');
             } else if(value.type === "enum-set") {
-                value.value = value.value.map(v => _enumResolve(v));
+                value._clientValue = value.value.map(v => enumResolver(v, 'client'));
+                value._serverValue = value.value.map(v => enumResolver(v, 'server'));
             } else if(value.type === "function" && value.argument) {
-                _resolveEnumsOnValue(value.argument, _enumResolve);
+                _resolveEnumsOnValue(value.argument);
             }
         }
 
@@ -67,7 +65,14 @@ class Condition {
         this._bindings = allBindings;
     }
 
-    evaluate(data) {
+
+    // Note: the audience here is either 'client' or 'server'. Because of the way GraphQL works, the value we get for an
+    // enum client-side is not the same as the value that is used server-side. In order to share this code between
+    // the front-end and back-end components we need to specify what format the data we are passing to it is in.
+    // When we initialise a condition, we cache both the client and server side values and then use here the value
+    // based on the audience.
+
+    evaluate(data, audience) {
 
         if(!this.expression || !this.expression.length) {
             return true;
@@ -79,6 +84,8 @@ class Condition {
             } else if(v.type === "function") {
                 const arg = v.argument ? _resolveValue(v.argument) : undefined;
                 return _resolveFunction(v.function, arg);
+            } else if(v.type === "enum" || v.type === "enum-set") {
+                return audience === 'client' ? v._clientValue : v._serverValue;
             }
             return v.value;
         }
@@ -167,6 +174,55 @@ class Condition {
         return this._bindings;
     }
 
+    get description() {
+        return expressionDescription(this.expression);
+    };
+
 }
+
+
+
+function _printValue(v) {
+    if(v.type === "model") {
+        return v.value;
+    } else if(v.type === "function") {
+        return `${v.function}(${_printValue(v.argument)})`;
+    }
+    return `'${v.value}'`;
+}
+
+function expressionDescription(expression) {
+
+    if(expression instanceof Array) {
+
+        const joined = expression.map((e, index) => {
+
+            if(index === 0) {
+                return expressionDescription(e);
+            }
+
+            return "" + e.op + " " + expressionDescription(e);
+        });
+
+        return "(" + joined.join(" ") + ")"
+    }
+
+    if(expression.op === "function") {
+
+        return `${expression.function}(${_printValue(expression.argument)})`;
+
+    } else if(expression.op === "!=" || expression.op === "==" || expression.op === "in" ||
+        expression.op === ">=" || expression.op === "<=" || expression.op === ">" || expression.op === "<") {
+
+        return _printValue(expression.lhs) + " " + expression.op + " " + _printValue(expression.rhs);
+    }
+
+    if(expression.expression) {
+        return expressionDescription(expression.expression);
+    }
+
+    return "";
+}
+
 
 module.exports = Condition;
