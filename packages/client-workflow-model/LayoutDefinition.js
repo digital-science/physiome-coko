@@ -1,4 +1,4 @@
-import FormElement from "./FormElement";
+const FormElement = require('./FormElement');
 
 class LayoutDefinition {
 
@@ -10,4 +10,4 @@ class LayoutDefinition {
 
 }
 
-export default LayoutDefinition;
+module.exports = LayoutDefinition;

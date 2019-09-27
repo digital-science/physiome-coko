@@ -1,4 +1,4 @@
-import LayoutDefinition from './LayoutDefinition';
+const LayoutDefinition = require('./LayoutDefinition');
 
 class FormDefinition extends LayoutDefinition {
 
@@ -74,4 +74,4 @@ class FormDefinition extends LayoutDefinition {
     }
 }
 
-export default FormDefinition;
+module.exports = FormDefinition;

@@ -1,6 +1,7 @@
-import InstanceDefinition from './InstanceDefinition';
-import EnumDefinition from './EnumDefinition';
-import MappingDefinition from './MappingDefinition';
+const InstanceDefinition = require('./InstanceDefinition');
+const EnumDefinition = require('./EnumDefinition');
+const MappingDefinition = require('./MappingDefinition');
+
 
 class WorkflowDescription {
 
@@ -76,6 +77,4 @@ function resolveEnumFromSet(set, enumRef) {
     return enumDef.resolve(enumRef);
 }
 
-
-
-export default WorkflowDescription;
+module.exports = WorkflowDescription;

@@ -1,10 +1,10 @@
-import Model from './Model';
-import FormDefinition from './FormDefinition';
-import ViewDefinition from './ViewDefinition';
-import LayoutDefinition from './LayoutDefinition';
-import ValidationDefinition from './ValidationDefinition';
+const Model = require('./Model');
+const FormDefinition = require('./FormDefinition');
+const ViewDefinition = require('./ViewDefinition');
+const LayoutDefinition = require('./LayoutDefinition');
+const ValidationDefinition = require('./ValidationDefinition');
 
-import pick from 'lodash/pick';
+const pick = require('lodash/pick');
 
 
 function uppercaseCamelToLowercaseDashed(name) {
@@ -161,4 +161,4 @@ class InstanceDefinition {
 
 }
 
-export default InstanceDefinition;
+module.exports = InstanceDefinition;

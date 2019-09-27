@@ -1,5 +1,4 @@
-import Condition from './Condition';
-
+const Condition = require('./Condition');
 
 class ValidationDefinition {
 
@@ -8,7 +7,6 @@ class ValidationDefinition {
         this.entries = (definition.entries || []).map(entry => new ValidationEntry(entry, enumResolver, mappingResolver));
     }
 }
-
 
 
 class ValidationEntry {
@@ -38,8 +36,6 @@ class ValidationEntry {
     }
 }
 
-
-
 class ValidationWarning {
 
     constructor(def) {
@@ -55,6 +51,4 @@ class ValidationWarning {
     }
 }
 
-
-export default ValidationDefinition;
-export { ValidationDefinition, ValidationEntry, ValidationWarning };
+module.exports = ValidationDefinition;

@@ -34,4 +34,4 @@ class MappingDefinition {
 
 }
 
-export default MappingDefinition;
+module.exports = MappingDefinition;

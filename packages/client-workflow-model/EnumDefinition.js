@@ -29,4 +29,4 @@ class EnumDefinition {
     }
 }
 
-export default EnumDefinition;
+module.exports = EnumDefinition;

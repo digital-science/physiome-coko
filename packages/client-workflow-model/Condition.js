@@ -1,4 +1,4 @@
-import { ConditionFunctions } from './ConditionFunctions';
+const { ConditionFunctions } = require('./ConditionFunctions');
 
 class Condition {
 
@@ -169,4 +169,4 @@ class Condition {
 
 }
 
-export default Condition;
+module.exports = Condition;

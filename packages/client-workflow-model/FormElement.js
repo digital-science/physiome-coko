@@ -1,4 +1,4 @@
-import Condition from './Condition'
+const Condition = require('./Condition');
 
 class FormElement {
 
@@ -62,4 +62,4 @@ class FormElement {
     }
 }
 
-export default FormElement;
+module.exports = FormElement;
