@@ -25,7 +25,6 @@ class AclSet {
         if(data.rules) {
             this.rules = data.rules.map(rule => new AclRule(rule, lookup, resolveEnum));
         }
-
     }
 
 

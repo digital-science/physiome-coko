@@ -3,7 +3,24 @@ const AclFieldSet = require('./AclFieldSet');
 const AclTaskSet = require('./AclTaskSet');
 
 
+const AclActions = {
+    Access: "access",
+    Write: "write",
+    Read: "read",
+
+    Create: "create",
+    Destroy: "destroy",
+
+    Task: "task"
+};
+
+
 class AclRule {
+
+    static get Actions() {
+        return AclActions;
+    }
+
 
     constructor(data, lookupGrouping, resolveEnum) {
 

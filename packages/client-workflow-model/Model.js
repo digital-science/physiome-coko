@@ -11,9 +11,28 @@ class Model {
         this.fields = definition.elements || [];
     }
 
-    stateFields() {
-        return (this.fields || []).filter(f => f.state === true);
+
+    static filterFieldsForStateFields(fields) {
+        return (fields || []).filter(f => f.state === true);
     }
+
+    stateFields() {
+        return this.constructor.filterFieldsForStateFields(this.fields);
+    }
+
+
+    static filterFieldsForBasicTypes(fields, enums) {
+
+        return fields.filter(f => {
+            return (BaseElementTypes.indexOf(f.type) !== -1 || enums.hasOwnProperty(f.type));
+        });
+    }
+
+    basicTypeFields(workflowDef) {
+        return this.constructor.filterFieldsForBasicTypes(this.fields, workflowDef.enums);
+    }
+
+
 
     enumFields(workflowDef) {
         if(!workflowDef || !workflowDef.enums || !this.fields || !this.fields.length) {
@@ -26,8 +45,6 @@ class Model {
         return (this.fields || []).filter(f => f.input !== false && (!f.accessors || f.accessors.length === 0));
     }
 
-
-
     relationFields(workflowDef) {
 
         return this.fields.filter(f => {
@@ -39,11 +56,9 @@ class Model {
         });
     }
 
-    basicTypeFields(workflowDef) {
+    relationFieldsWithAccessors(workflowDef) {
 
-        return this.fields.filter(f => {
-            return (BaseElementTypes.indexOf(f.type) !== -1 || workflowDef.enums.hasOwnProperty(f.type));
-        });
+        return this.relationFields(workflowDef).filter(f => f.accessors && f.accessors.length);
     }
 
     listingFilterFields() {
