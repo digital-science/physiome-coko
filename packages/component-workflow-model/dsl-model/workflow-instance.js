@@ -110,7 +110,7 @@ class WorkflowInstance extends WorkflowUpdatableModel {
 
                     const enumDef = workflowDescription.enums[e.defaultEnum];
                     if(enumDef) {
-                        const v = enumDef.resolve(e.defaultEnumKey);
+                        const v = enumDef.lookup(e.defaultEnumKey);
                         if(v) {
                             newInstance[e.field] = v;
                         }
