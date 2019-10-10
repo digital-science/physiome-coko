@@ -7,6 +7,7 @@ import { useInstanceWasCreatedSubscription, useInstanceWasModifiedSubscription }
 
 import { mergeFetchFields } from 'component-task-form/client/utils/helpers'
 
+import Spinner from "ds-theme/components/spinner";
 import TaskTable from './task-table';
 
 
@@ -17,7 +18,7 @@ const TaskListingHeader = styled.div`
 `;
 
 const _TaskListing = ({className, children, heading, workflowDescription, instanceType, columns, history,
-                       renderHeading=null, filter = null, sorting = {}, pageSize = 10, additionalQueryFields = null,
+                       renderHeading=null, renderEmptyResults=null, filter = null, sorting = {}, pageSize = 10, additionalQueryFields = null,
                        additionalQueryValues = null}) => {
 
     const dependentFields = useMemo(() => {
@@ -54,6 +55,8 @@ const _TaskListing = ({className, children, heading, workflowDescription, instan
 
     }, [page, pageSize, filter, sorting, additionalQueryValues]);
 
+    const [initialLoad, setInitialLoad] = useState(true);
+
 
     const { data, error, loading, refetch } = useGetInstances(instanceType, dependentFields, variables, additionalQueryFields);
     const throttledRefetch = debounce(refetch, 2000, { leading: true, trailing: true, maxWait:2000 });
@@ -74,8 +77,28 @@ const _TaskListing = ({className, children, heading, workflowDescription, instan
         setPage(page - 1);
     };
 
+    if(initialLoad && !loading && (data || error)) {
+        setInitialLoad(false);
+    }
+
+    if(initialLoad) {
+        return (
+            <div className={'initial-load ' + className}>
+                <Spinner center={true} message={"Loading…"} />
+            </div>
+        );
+    }
 
     const header = <TaskListingHeader>{heading}</TaskListingHeader>;
+
+    if(renderEmptyResults && data && data.results && (!data.results.results || data.results.results.length === 0)) {
+
+        return (
+            <div className={className}>
+                {renderEmptyResults(data.results, {filter, additionalQueryValues})}
+            </div>
+        );
+    }
 
     return (
         <div className={className}>
