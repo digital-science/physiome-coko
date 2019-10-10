@@ -24,6 +24,10 @@ class EnumDefinition {
         return this.values[key];
     }
 
+    lookup(key) {
+        return this.values[key] || null;
+    }
+
     inverse(value) {
         return this.inverseValues[value];
     }
