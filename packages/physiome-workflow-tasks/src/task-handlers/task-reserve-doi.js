@@ -31,7 +31,9 @@ module.exports = function _setupReserveDoiTask(client) {
             }
 
             submission.figshareArticleDoi = article.doi;
-            await submission.save();
+
+            await submission.patchFields(['figshareArticleDoi']);
+            await submission.publishWasModified();
 
             logger.debug(`reserve doi completed, completing external task`);
             return taskService.complete(task);

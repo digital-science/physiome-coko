@@ -23,6 +23,7 @@ module.exports = function _setupTimeoutSubmissionTask(client) {
 
         submission.phase = "cancelled";
         await submission.save();
+        await submission.publishWasModified();
 
         logger.debug(`timeout submission completed, completing external task`);
         return taskService.complete(task);

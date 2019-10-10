@@ -50,7 +50,7 @@ module.exports = function _setupPublishArticleTask(client) {
 
         }).then(() => {
 
-            return submission.publishInstanceWasModified();
+            return submission.publishWasModified();
 
         }).catch(err => {
 
