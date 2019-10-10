@@ -3,6 +3,8 @@ const { Identity } = models;
 const config = require('config');
 
 const { createEmailValidationForIdentity, TooManyValidationEmailsSentError } = require('./emailValidation');
+const AdminORCIDIdentities = config.get('identity.adminIdentities');
+
 
 async function lookupIdentity(userId) {
     return await Identity.findOneByField('id', userId);
@@ -45,7 +47,7 @@ module.exports = {
                 const user = {
                     id:identity.id,
                     username:identity.displayName,
-                    groups:["administrator"],  // FIXME: hard-coded for testing purposes currently
+                    groups: identity.finalisedAccessGroups,
 
                     email:identity.email,
                     emailIsValidated:!!identity.isValidatedEmail,
