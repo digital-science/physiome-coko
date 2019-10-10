@@ -20,6 +20,16 @@ const MessageHolder = styled.div`
   span.message:before {
     content: " "
   }
+  
+  &.center {
+    display: block;
+  }
+  &.center span.message {
+    display: block;
+    text-align: center;
+    margin-top: 5px;
+  }
+
 `;
 
 const _Spinner = ({className, center, small, message, clear}) => {
@@ -28,7 +38,7 @@ const _Spinner = ({className, center, small, message, clear}) => {
 
     if(message) {
         return (
-            <MessageHolder className={className}>
+            <MessageHolder className={(center ? 'center ' : '') + className}>
                 <div className={cn} /> <span className="message">{message}</span>
             </MessageHolder>
         );
