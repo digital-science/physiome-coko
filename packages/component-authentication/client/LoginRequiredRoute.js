@@ -45,7 +45,8 @@ export default ({message, renderApplication, renderContent, children}) => {
         return (
             <AuthenticatedUserContext.Provider value={currentUser}>
                 {renderApplication(
-                    <LoginRequiredMessage message={message} />
+                    <LoginRequiredMessage message={message} />,
+                    currentUser
                 )}
             </AuthenticatedUserContext.Provider>
         );
@@ -55,7 +56,8 @@ export default ({message, renderApplication, renderContent, children}) => {
         return (
             <AuthenticatedUserContext.Provider value={currentUser}>
                 {renderApplication(
-                    <LoginEmailRequiredMessage currentUser={currentUser} refetchUser={refetch} />
+                    <LoginEmailRequiredMessage currentUser={currentUser} refetchUser={refetch} />,
+                    currentUser
                 )}
             </AuthenticatedUserContext.Provider>
         );
@@ -70,7 +72,10 @@ export default ({message, renderApplication, renderContent, children}) => {
 
     return (
         <AuthenticatedUserContext.Provider value={currentUser}>
-            {renderApplication(renderContent ? renderContent(loginRelatedContent) : <React.Fragment>{loginRelatedContent}{children}</React.Fragment>)}
+            {renderApplication(
+                renderContent ? renderContent(loginRelatedContent, currentUser) : <React.Fragment>{loginRelatedContent}{children}</React.Fragment>,
+                currentUser
+            )}
         </AuthenticatedUserContext.Provider>
     );
 };
