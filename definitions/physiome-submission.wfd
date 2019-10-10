@@ -134,7 +134,7 @@ instance Submission {
         }
 
         fields "read-only" {
-            phase, manuscriptId, submissionDate, figshareArticleDoi,
+            phase, manuscriptId, submitter, submissionDate, figshareArticleDoi,
             publishDate, figshareArticleId
         }
 
@@ -152,6 +152,7 @@ instance Submission {
         }
 
         allow <user> [create]
+        allow <user> [access:own]
         allow <owner> [access:own]
         allow <administrator> [access:all]
 
