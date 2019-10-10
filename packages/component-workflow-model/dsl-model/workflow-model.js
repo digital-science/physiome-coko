@@ -500,6 +500,8 @@ class WorkflowModel extends BaseModel {
             });
         }
 
+        this.logger.debug(`listing query: ${query.toSql()}`);
+
         const r = await query;
         this.addModelInstanceToGraphQLContext(context, r, this);
 
@@ -752,7 +754,7 @@ class WorkflowModel extends BaseModel {
             return true;
         }
 
-        return (isOwner && restrictions.indexOf("owner") !== -1);
+        return (isOwner && restrictions.indexOf("own") !== -1);
     }
 
 
