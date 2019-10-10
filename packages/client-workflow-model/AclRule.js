@@ -39,6 +39,10 @@ class AclRule {
         }
     }
 
+    targetAndActionMatch(targets, action) {
+        return targets.indexOf(this.target) !== -1 && this.actions.filter(a => a.type === action).length;
+    }
+
     doesApply(targets, action, object, audience = 'server') {
 
         // Is the target included in the possible set of allowed targets that this rule applies to.
@@ -70,12 +74,7 @@ class AclRule {
             r.restrictions = actionRestrictions;
         }
 
-        if(this.grouping) {
-            r.grouping = this.grouping;
-        } else {
-            r.grouping = null;
-        }
-
+        r.grouping = this.grouping || null;
         return r;
     }
 
