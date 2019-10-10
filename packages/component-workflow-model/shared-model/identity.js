@@ -1,10 +1,12 @@
 const { BaseModel } = require('component-model');
 const { pubsubManager } = require("pubsweet-server");
+const config = require('config');
 
 const GraphQLFields = require('graphql-fields');
 const logger = require('workflow-utils/logger-with-prefix')('[workflow-model/identity]');
 
-const { AuthorizationError } = require('@pubsweet/errors');
+
+const AdminORCIDIdentities = config.get('identity.adminIdentities');
 
 
 class Identity extends BaseModel {
@@ -44,6 +46,16 @@ class Identity extends BaseModel {
             r[`modifiedIdentity`] = this.id;
             pubSub.publish(`identity.modified.${this.id}`, r);
         }
+    }
+
+    get finalisedAccessGroups() {
+
+        const groups = this.groups;
+        if(groups && groups instanceof Array) {
+            return groups;
+        }
+
+        return (this.identityId && AdminORCIDIdentities.indexOf(this.identityId) !== -1) ? ["administrator"] : [];
     }
 }
 
