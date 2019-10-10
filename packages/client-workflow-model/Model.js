@@ -9,6 +9,8 @@ class Model {
 
     constructor(definition, enumResolver = null) {
         this.fields = definition.elements || [];
+        this.input = definition.hasOwnProperty('input') ? !!definition.input : false;
+        this.noCreate = definition.hasOwnProperty('noCreate') ? !!definition.noCreate : false;
     }
 
 
@@ -77,7 +79,11 @@ class Model {
 
     ownerFields() {
 
-        return this.fields.filter(f => {
+        if(this._cachedOwners) {
+            return this._cachedOwners;
+        }
+
+        return this._cachedOwners = this.fields.filter(f => {
             return (f.holdsOwnerId === true && f.type === IdentityFieldType && f.joinField);
         });
     }
