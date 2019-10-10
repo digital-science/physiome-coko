@@ -11,6 +11,14 @@ const parseEagerRelations = relations =>
     Array.isArray(relations) ? `[${relations.join(', ')}]` : relations;
 
 
+function _get(obj, key) {
+    if(obj && obj.hasOwnProperty(key)) {
+        return obj[key];
+    }
+    return null;
+}
+
+
 class WorkflowBaseModel extends DBErrors(BaseModel) {
 
     static get defaultEager () {
@@ -50,7 +58,7 @@ class WorkflowBaseModel extends DBErrors(BaseModel) {
     }
 
 
-    async patchRestrictingOnFields(fieldList, where = null, providedTrx = null) {
+    async patchFields(fieldList, where = null, providedTrx = null) {
 
         const data = _.pick(this, fieldList);
         data.updated = new Date().toISOString();
@@ -74,6 +82,32 @@ class WorkflowBaseModel extends DBErrors(BaseModel) {
         }
 
         return saved;
+    }
+
+
+    getFieldValue(field) {
+
+        // Note: getFieldValue is used to ensure support for "Condition" evaluations server-side.
+        if(field.indexOf('.') !== -1) {
+
+            const path = field.split('.');
+
+            let obj =  this[path[0]];
+            if(!obj) {
+                return null;
+            }
+
+            for(let i = 1; i < path.length; i++) {
+                obj = _get(obj, path[i]);
+                if(!obj) {
+                    break;
+                }
+            }
+
+            return obj;
+        }
+
+        return this[field];
     }
 
 }
