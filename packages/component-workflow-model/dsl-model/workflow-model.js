@@ -369,7 +369,6 @@ class WorkflowModel extends BaseModel {
             }
 
             const ownerFields = this.modelDefinition.ownerFields();
-
             if(ownerFields && ownerFields.length) {
 
                 const ownerFieldStatementBuilder = builder => {
@@ -716,14 +715,17 @@ class WorkflowModel extends BaseModel {
         const targets = ["anonymous"];
         let isOwner = false;
 
-        // FIXME: important, all users are currently assigned admin access for testing and development purposes
         if(user && user.id) {
-            targets.push("administrator");
+
+            targets.push("user");
+
+            const groups = user.finalisedAccessGroups;
+            if(groups && groups.length) {
+                targets.push.apply(targets, groups);
+            }
         }
 
         if(user && user.id && object) {
-
-            targets.push("user");
 
             this.modelDefinition.ownerFields().forEach(field => {
                 const ownerId = object[field.joinField];
