@@ -1,27 +1,15 @@
-const generateGraphQLDefs = require('./src/generate-graphql-definitions');
-
+const loadWorkflowDescription = require('./dsl-model/loader');
+const { models } = require('./dsl-model/model-registry');
 
 function configureModelsAndGraphQLDescriptions() {
 
     const workflowDesc = require('./../app/config/description');
+    const r = loadWorkflowDescription(workflowDesc);
 
-    const r = generateGraphQLDefs(workflowDesc);
-    const { models } = r;
-    const urlMapping = {};
-
-    Object.values(models).forEach(model => {
-        if(model.urlName) {
-            urlMapping[model.urlName] = model;
-        }
-    });
-
-    r.registerModel = (name, model) => {
-        models[name] = model;
+    return {
+        models,
+        ...r
     };
-
-    r.urlMapping = urlMapping;
-    return r;
 }
-
 
 module.exports = configureModelsAndGraphQLDescriptions();

@@ -1,6 +1,10 @@
 const { BaseModel } = require('component-model');
 const { Identity } = require('./identity');
-const { AclActions, debugAclMatching } = require('../src/instance-resolver');
+
+const AclRule = require('client-workflow-model/AclRule');
+const AclActions = AclRule.Actions;
+
+const { lookupInstanceByUrlMapping } = require('./../dsl-model/instance-registry');
 
 const jwt = require('jsonwebtoken');
 const AWS = require('aws-sdk');
@@ -169,12 +173,6 @@ function _forwardS3Object(s3Object, response, next) {
         .pipe(response);
 }
 
-function _resolveUrlOwnerTypeToModel(urlOwnerType) {
-
-    const { urlMapping } = require('component-workflow-model/model');
-    return urlMapping[urlOwnerType] || null;
-}
-
 
 function _verifyFileToken(fileAccessToken) {
 
@@ -213,19 +211,19 @@ function clientDownloadFileHandler(app) {
                 return response.status(400).send("Invalid parameters");
             }
 
-            const ownerTypeModel = _resolveUrlOwnerTypeToModel(urlOwnerType);
+            const ownerTypeModel = lookupInstanceByUrlMapping(urlOwnerType);
             if(!ownerTypeModel) {
                 return response.status(400).send("Invalid parameters");
             }
 
             // Resolve the listing of fields associated with the model that are associated to files.
-            const fileProperties = ownerTypeModel.fileProperties;
-            if(!fileProperties.length) {
+            const fileRelations = (ownerTypeModel.relationFields || []).filter(f => (f.type === "File" || f.type === "ExtendedFile"));
+            if(!fileRelations.length) {
                 return response.status(404).send("File not found");
             }
 
             const [object, user] = await Promise.all([
-                ownerTypeModel.find(ownerId, fileProperties.map(f => f.field)),
+                ownerTypeModel.find(ownerId, fileRelations.map(f => f.field)),
                 Identity.find(identityId),
             ]);
 
@@ -241,9 +239,9 @@ function clientDownloadFileHandler(app) {
             let matchingFile = null;
             let matchingField = null;
 
-            for(let i = 0; i < fileProperties.length; i++) {
+            for(let i = 0; i < fileRelations.length; i++) {
 
-                const f = fileProperties[i];
+                const f = fileRelations[i];
                 const v = object[f.field];
                 if(!v) {
                     continue;
@@ -270,23 +268,25 @@ function clientDownloadFileHandler(app) {
             // the owning object, then we check to see if the user has read access onto the field which
             // stores the file.
 
-            if(ownerTypeModel.acl) {
+            const aclSet = ownerTypeModel.aclSet;
 
-                const [aclTargets, isOwner] = ownerTypeModel.instanceResolver.userToAclTargets(user, object);
+            if(aclSet) {
 
-                const accessMatch = ownerTypeModel.acl.applyRules(aclTargets, AclActions.Access, object);
-                debugAclMatching(user, aclTargets, isOwner, AclActions.Access, accessMatch);
+                const [aclTargets, isOwner] = ownerTypeModel.userToAclTargets(user, object);
+
+                const accessMatch = aclSet.applyRules(aclTargets, AclActions.Access, object);
+                //debugAclMatching(user, aclTargets, isOwner, AclActions.Access, accessMatch);
                 if(!accessMatch.allow) {
                     return response.status(403).send("File access not allowed");
                 }
 
-                const readMatch = ownerTypeModel.acl.applyRules(aclTargets, AclActions.Read, object);
-                debugAclMatching(user, aclTargets, isOwner, AclActions.Read, readMatch);
+                const readMatch = aclSet.applyRules(aclTargets, AclActions.Read, object, 'server');
+                //debugAclMatching(user, aclTargets, isOwner, AclActions.Read, readMatch);
                 if(!readMatch.allow) {
                     return response.status(403).send("File read not allowed");
                 }
 
-                const allowedFields = ownerTypeModel.instanceResolver.getAllowedReadFields(readMatch, false);
+                const allowedFields = object.allowedReadFieldsForReadAcl(readMatch, false);
                 if(!allowedFields.hasOwnProperty(matchingField.field)) {
                     return response.status(403).send("File read not allowed");
                 }

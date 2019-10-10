@@ -1,14 +1,16 @@
 const WorkflowModel = require('./model');
 
+/*
 function serverSetup(app) {
     const File = require('./shared-model/file');
     File.serverSetup(app);
 }
+*/
 
 module.exports = {
-    server: () => serverSetup,
-    typeDefs: WorkflowModel.typeDefs,
-    resolvers: WorkflowModel.resolvers,
-
-    registerModel: WorkflowModel.registerModel
+    server: () => function(app) {
+        return WorkflowModel.setupServer(app);
+    },
+    typeDefs: WorkflowModel.gqlTypeDef,
+    resolvers: WorkflowModel.gqlResolvers
 };

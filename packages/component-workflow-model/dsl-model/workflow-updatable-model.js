@@ -1,8 +1,12 @@
 const WorkflowModel = require('./workflow-model');
+const AclRule = require('client-workflow-model/AclRule');
+const _ = require("lodash");
+
+const { AuthorizationError } = require('@pubsweet/errors');
 
 const GraphQLHelper = require('./graphql-helper');
 const _Tab = GraphQLHelper.Tab;
-
+const AclActions = AclRule.Actions;
 
 
 
@@ -14,6 +18,28 @@ class WorkflowUpdatableModel extends WorkflowModel {
 
     static get allowsUpdate() {
         return !!this.modelDefinition.input;
+    }
+
+    static get allowsSubscriptions() {
+        return true;
+    }
+
+
+    static get allowedInputFields() {
+
+        if(this._cachedAllowedInputFields) {
+            return this._cachedAllowedInputFields;
+        }
+
+        const allowedInputFields = {};
+
+        this.modelDefinition.fields.forEach(e => {
+            if(e.field && e.input !== false) {
+                allowedInputFields[e.field] = e;
+            }
+        });
+
+        return (this._cachedAllowedInputFields = allowedInputFields);
     }
 
 
@@ -31,7 +57,6 @@ class WorkflowUpdatableModel extends WorkflowModel {
 
         // Mutations
         // ---
-        const mutations = {};
 
         if(this.allowsCreate) {
             Mutation[`create${implementationName}`] = async function(ctxt, input, context, info) {
@@ -62,7 +87,7 @@ class WorkflowUpdatableModel extends WorkflowModel {
                 let niceFieldName = e.field.charAt(0).toUpperCase() + e.field.slice(1);
                 const mutationName = `set${implementationName}${niceFieldName}`;
 
-                mutations[mutationName] = async function(ctxt, input, context, info) {
+                Mutation[mutationName] = async function(ctxt, input, context, info) {
                     return ModelClass.relationAccessorSetMutationEndpoint(ctxt, input, context, info, e);
                 };
             });
@@ -70,24 +95,82 @@ class WorkflowUpdatableModel extends WorkflowModel {
 
         resolvers[implementationName] = fieldResolvers;
 
-
         return resolvers;
     }
 
 
     static async createMutationResolver(ctxt, input, context, info) {
 
-
+        this.logger.error(`createMutationResolver - not yet implemented`);
     }
 
     static async destroyMutationEndpoint(ctxt, input, context, info) {
 
-
+        this.logger.error(`createMutationResolver - not yet implemented`);
     }
 
-    static async updateMutationEndpoint(ctxt, input, context, info) {
+    static async updateMutationEndpoint(ctxt, {input}, context, info) {
+
+        if(!this.allowsUpdate) {
+            throw new Error("Model is not defined as an allowing updates.");
+        }
+
+        const [object, user] = await Promise.all([
+            this.find(input.id),
+            this.resolveUserForContext(context)
+        ]);
 
 
+        let aclWriteMatch = null;
+
+        if(this.aclSet) {
+
+            const [aclTargets, isOwner] = this.userToAclTargets(user, object);
+
+            const accessMatch = this.aclSet.applyRules(aclTargets, AclActions.Access, object);
+            //_debugAclMatching(user, aclTargets, isOwner, AclActions.Access, accessMatch);
+
+            if(!accessMatch.allow) {
+                throw new AuthorizationError("You do not have access to this object.");
+            }
+
+            if(!this.restrictionsApplyToUser(accessMatch.allowedRestrictions, isOwner)) {
+                throw new AuthorizationError("You do not have access to this object.");
+            }
+
+            aclWriteMatch = this.aclSet.applyRules(aclTargets, AclActions.Write, object);
+            //_debugAclMatching(user, aclTargets, isOwner, AclActions.Write, aclWriteMatch);
+
+            if(!aclWriteMatch.allow) {
+                throw new AuthorizationError("You do not have write access to this object.");
+            }
+        }
+
+        const instanceId = input.id;
+        delete input.id;
+
+
+        // Create a listing of fields that can be updated, then we apply the update to the model object
+        // provided that it is within the list of allowed fields.
+
+        const allowedFields = (aclWriteMatch && aclWriteMatch.allowedFields) ? _.pick(this.allowedInputFields, aclWriteMatch.allowedFields) : this.allowedInputFields;
+        const restrictedFields = [];
+
+        Object.keys(input).forEach(key => {
+            if(allowedFields.hasOwnProperty(key)) {
+                object[key] = input[key];
+            } else {
+                restrictedFields.push(key);
+            }
+        });
+
+        if(restrictedFields.length) {
+            throw new AuthorizationError(`You do not have write access on the following fields: ${restrictedFields.join(", ")}`);
+        }
+
+        await object.save();
+        await this.publishWasModified(instanceId);
+        return true;
     }
 
 
@@ -109,7 +192,7 @@ class WorkflowUpdatableModel extends WorkflowModel {
 
         if(linked && ((element.array === true && linked.length) || element.array === false)) {
 
-            if(e.type === "File") {
+            if(element.type === "File") {
 
                 const linkedWithMetaDataFields = linked.map((l, index) => {
                     const r = {id:l.id, order:index, removed:false};
@@ -150,6 +233,8 @@ class WorkflowUpdatableModel extends WorkflowModel {
 
 
 
+    // GraphQL TypeDef generation
+    // ---
 
     static graphQLTypeDefinition() {
 
@@ -178,16 +263,10 @@ class WorkflowUpdatableModel extends WorkflowModel {
         }
 
         if(stateFields && stateFields.length) {
-
-            mutationStatements.push(`completeTaskFor${implementationName}(id:ID!, taskId:ID!, form:String!, outcome:String!, state:${stateInputTypeName}) : CompleteTaskOutcome`);
             mutationStatements.push(`destroy${implementationName}(id:ID, state:${stateInputTypeName}) : Boolean`);
-
             typeStatements.push(this.graphQLStateInputDefinition());
-
         } else {
-
             mutationStatements.push(`completeTaskFor${implementationName}(id:ID!, taskId:ID!, form:String!, outcome:String!) : CompleteTaskOutcome`);
-            mutationStatements.push(`destroy${implementationName}(id:ID) : Boolean`);
         }
 
         if(relationAccessorFields && relationAccessorFields.length) {
@@ -216,8 +295,8 @@ class WorkflowUpdatableModel extends WorkflowModel {
 
         return baseTypeDef
             + (this.allowsUpdate ? this.graphQLModelInputDefinition() + '\n\n' : "")
-            + (mutationStatements.length ?  `\nextend type Mutation {\n\t${mutationStatements.join('\n\t')}\n}` + '\n\n' : "")
-            + (typeStatements.length ? typeStatements.join('\n') + '\n\n' : "");
+            + (typeStatements.length ? typeStatements.join('\n') + '\n\n' : "")
+            + (mutationStatements.length ?  `\nextend type Mutation {\n${_Tab + mutationStatements.join('\n' + _Tab)}\n}` + '\n\n' : "");
     }
 
 
@@ -231,18 +310,18 @@ class WorkflowUpdatableModel extends WorkflowModel {
             ...GraphQLHelper.gqlTypeListingForFields(model.fields, this.workflowDescription, GraphQLHelper.TypeListingRestriction.Input)
         ];
 
-        return `type ${modelInputTypeName} {\n${typeListings.map(v => '\t' + v).join("\n")}\n}`;
+        return `input ${modelInputTypeName} {\n${typeListings.map(v => _Tab + v).join("\n")}\n}`;
     }
 
 
     static graphQLStateInputDefinition() {
 
         const model = this.modelDefinition;
-        const stateInputTypeName = `${this.graphQLModelName}Input`;
+        const stateInputTypeName = `${this.graphQLModelName}StateInput`;
 
         const typeListings = GraphQLHelper.gqlTypeListingForFields(model.fields, this.workflowDescription, GraphQLHelper.TypeListingRestriction.State);
 
-        return `type ${stateInputTypeName} {\n${typeListings.map(v => '\t' + v).join("\n")}\n}`;
+        return `input ${stateInputTypeName} {\n${typeListings.map(v => _Tab + v).join("\n")}\n}`;
     }
 
 }

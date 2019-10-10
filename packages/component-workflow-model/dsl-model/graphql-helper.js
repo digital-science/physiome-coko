@@ -27,7 +27,7 @@ class GraphQLHelper {
 
         const inputFilter = restriction === TypeListingRestriction.Input;
         const listingFilter = restriction === TypeListingRestriction.Listing;
-        const stateFilter = restriction === TypeListingRestriction.Listing;
+        const stateFilter = restriction === TypeListingRestriction.State;
         const filteredElements = inputFilter ? Model.filterFieldsForBasicTypes(fields, workflowDescription.enums) : (stateFilter ? Model.filterFieldsForStateFields(fields) : fields);
 
         return filteredElements.map(e => {
