@@ -28,7 +28,7 @@ module.exports = {
 
             submission.curatorId = userId;
             await submission.save();
-            await Submission.instanceResolver.publishInstanceWasModified(submissionId);
+            await submission.publishWasModified();
 
             return true;
         },
@@ -56,7 +56,7 @@ module.exports = {
 
                 submission.curatorId = null;
                 await submission.save();
-                await Submission.instanceResolver.publishInstanceWasModified(submissionId);
+                await submission.publishWasModified();
             }
 
             return true;
@@ -89,7 +89,7 @@ module.exports = {
             submission.phase = "submitted";
             await submission.save();
 
-            return !!(await Submission.instanceResolver.restart(submission, "StartEvent_ResumeRejected"));
+            return !!(await submission.restartWorkflow("StartEvent_ResumeRejected"));
         },
 
         republishSubmission: async (instance, args, context, info) => {
@@ -119,7 +119,7 @@ module.exports = {
             submission.phase = "publish";
             await submission.save();
 
-            return !!(await Submission.instanceResolver.restart(submission, "StartEvent_RepublishArticle"));
+            return !!(await submission.restartWorkflow("StartEvent_RepublishArticle"));
         }
     }
 };
