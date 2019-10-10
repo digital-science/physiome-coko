@@ -4,8 +4,10 @@ import styled from 'styled-components';
 import { WorkflowDescriptionContext } from 'client-workflow-model';
 import useCreateSubmissionMutation from "../mutations/createSubmission";
 
-import { Checkbox, CheckboxLabel } from "ds-theme/components/checkbox-input";
 import SubmissionsListing from '../listings/submissions-listing';
+import Card from "ds-theme/components/card";
+import { BlockLabel } from "ds-theme/components/label";
+import { PrimaryInlineButton } from "ds-theme/components/inline-button";
 
 
 const AllPhases = [
@@ -13,7 +15,10 @@ const AllPhases = [
     "Submitted",
     "Decision",
     "Payment",
-    "Paid"
+    "Paid",
+    "Publish",
+    "Published",
+    "Reject"
 ];
 
 const ActivePhases = [
@@ -21,7 +26,10 @@ const ActivePhases = [
     "Submitted",
     "Decision",
     "Payment",
-    "Paid"
+    "Paid",
+    "Publish",
+    "Published",
+    "Reject"
 ];
 
 
@@ -45,21 +53,34 @@ const CreateNewSubmissionButton = styled.button`
     }
 `;
 
-const SubmissionListingAdditionalSectionHolder = styled.div`
-    margin-top: 10px;
-    padding-top: 5px;
-    border-top: 1px solid #b9b9b9;
+
+const EmptySubmissionsListHolder = styled.div`
+
+  display: flex;
+  justify-content: center;
+
+  & > div {
+    max-width: calc(100vw / 2);
+  }
+`;
+
+const EmptySubmissionsCardContent = styled.div`
+  padding: 0.5em 1em;
+  text-align: center;
+  
+  & ${PrimaryInlineButton} {
+    margin-top: 1.5em;
+  }
 `;
 
 
 
-const _DashboardActiveSubmissions = ({className, history, children}) => {
+
+const _DashboardSubmitterSubmissions = ({className, history, children}) => {
 
     const workflowDescription = useContext(WorkflowDescriptionContext);
     const submissionInstanceType = useMemo(() => workflowDescription.findInstanceType('Submission'), [workflowDescription]);
     const createNewSubmission = useCreateSubmissionMutation(submissionInstanceType);
-
-    const [showOnHoldSubmissions, setShowOnHoldSubmissions] = useState(false);
 
 
     function handleCreateNewSubmission() {
@@ -69,30 +90,28 @@ const _DashboardActiveSubmissions = ({className, history, children}) => {
         });
     }
 
-    const renderAdditionalFilters = (saveCurrentFilters, restoreSavedFilters, deactivateAllFilters) => {
-
-        const handleOnChangeOnHoldSubmissions = (e) => {
-            if(e.target.checked) {
-                saveCurrentFilters();
-                deactivateAllFilters();
-            } else {
-                restoreSavedFilters();
-            }
-            setShowOnHoldSubmissions(e.target.checked);
-        };
-
+    const renderNoSubmissions = () => {
         return (
-            <SubmissionListingAdditionalSectionHolder>
-                <CheckboxLabel><Checkbox checked={showOnHoldSubmissions} onChange={handleOnChangeOnHoldSubmissions} />On-hold</CheckboxLabel>
-            </SubmissionListingAdditionalSectionHolder>
+            <EmptySubmissionsListHolder>
+                <div>
+                    <Card>
+                        <EmptySubmissionsCardContent>
+                            <BlockLabel>You do not currently have any manuscript submissions underway.</BlockLabel>
+                            <PrimaryInlineButton bordered={true} onClick={handleCreateNewSubmission}>
+                                Begin Manuscript Submission
+                            </PrimaryInlineButton>
+                        </EmptySubmissionsCardContent>
+                    </Card>
+                </div>
+            </EmptySubmissionsListHolder>
         );
     };
 
     return (
         <div className={className}>
 
-            <SubmissionsListing history={history} heading='Active Submissions' allFilterPhases={AllPhases} defaultActiveFilterPhases={ActivePhases}
-                showOnHoldSubmissions={showOnHoldSubmissions} renderAdditionalFilters={renderAdditionalFilters}>
+            <SubmissionsListing history={history} heading='Submissions' allFilterPhases={AllPhases} defaultActiveFilterPhases={ActivePhases}
+                showFilter={false} showOnHoldSubmissions={null} renderNoSubmissions={renderNoSubmissions}>
 
                 <CreateNewSubmissionButton onClick={handleCreateNewSubmission}>
                     <span>+</span>Create New Submission&hellip;
@@ -106,9 +125,9 @@ const _DashboardActiveSubmissions = ({className, history, children}) => {
     );
 };
 
-const DashboardActiveSubmissions = styled(_DashboardActiveSubmissions)`
+const DashboardSubmitterSubmissions = styled(_DashboardSubmitterSubmissions)`
 `;
 
-export default DashboardActiveSubmissions;
+export default DashboardSubmitterSubmissions;
 
 

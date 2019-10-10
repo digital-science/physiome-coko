@@ -16,6 +16,7 @@ registerFormFieldType('RequestPaymentBanner', FormFieldRequestPaymentBanner);
 import PageDashboardActiveSubmissions from './pages/dashboard-active-submissions';
 import PageDashboardPublishedSubmissions from './pages/dashboard-published-submissions';
 import PageDashboardRejectedSubmissions from './pages/dashboard-rejected-submissions';
+import PageDashboardSubmitterSubmissions from './pages/dashboard-submitter-submissions'
 
 import PageSubmissionForm from './pages/submission-form';
 import PageSubmissionDetails from './pages/submission-details';
@@ -24,6 +25,7 @@ export {
     PageDashboardActiveSubmissions,
     PageDashboardPublishedSubmissions,
     PageDashboardRejectedSubmissions,
+    PageDashboardSubmitterSubmissions,
 
     PageSubmissionForm,
     PageSubmissionDetails

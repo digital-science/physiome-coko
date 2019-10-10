@@ -31,7 +31,7 @@ const SubmissionListingColumns = [
 
 const _SubmissionsListing = ({className, history, heading, allFilterPhases=[], defaultActiveFilterPhases=[], pageSize=10,
                               showSearch=true, showFilter=true, columns=SubmissionListingColumns, renderAdditionalFilters=null,
-                              showOnHoldSubmissions=undefined, searchPlaceholder='Search submissions…', children=null}) => {
+                              showOnHoldSubmissions=undefined, searchPlaceholder='Search submissions…', renderNoSubmissions=null, children=null}) => {
 
     const workflowDescription = useContext(WorkflowDescriptionContext);
     const instanceType = workflowDescription.findInstanceType('Submission');
@@ -84,7 +84,7 @@ const _SubmissionsListing = ({className, history, heading, allFilterPhases=[], d
         <div className={className}>
             <TaskListing heading={heading} columns={columns} workflowDescription={workflowDescription} instanceType={instanceType}
                 history={history} renderHeading={renderHeading} pageSize={pageSize} filter={filter} sorting={sorting} additionalQueryFields={additionalQueryFields}
-                additionalQueryValues={additionalQueryValues}>
+                additionalQueryValues={additionalQueryValues} renderEmptyResults={renderNoSubmissions}>
 
                 {children}
 
