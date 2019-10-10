@@ -8,11 +8,16 @@ import withFormField from './withFormField'
 import StaticText from 'ds-theme/components/static-text';
 import {BlockLabel} from 'ds-theme/components/label';
 
+const ISODateStringRegex = /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/;
 
-function FormFieldStaticText({data, binding, options = {}}) {
+
+
+function FormFieldStaticText({data, binding, options = {}, ...rest}) {
 
     const [value] = useFormValueBinding(data, binding, "");
     const { format, mapping } = options;
+
+    // FIXME: an alternative to below, is allowing the binding to be resolved to a model field type directly and seeing if it is "DateTime".
 
     const transformedValue = useMemo(() => {
 
@@ -20,10 +25,13 @@ function FormFieldStaticText({data, binding, options = {}}) {
             return mapping.mapping[value] || null;
         }
 
-        const d = new Date(value);
-        if(d !== "Invalid Date" && !isNaN(d)) {
-            return moment(d).format(format || "MMM DD, YYYY");
+        if(value && typeof value ==="string" && value.match(ISODateStringRegex)) {
+            const d = new Date(value);
+            if (d !== "Invalid Date" && !isNaN(d)) {
+                return moment(d).format(format || "MMM DD, YYYY");
+            }
         }
+
         return (value !== null && value !== undefined) ? '' + value : null;
 
     }, [value, options, format, mapping]);
