@@ -128,7 +128,7 @@ class WorkflowUpdatableModel extends WorkflowModel {
             const [aclTargets, isOwner] = this.userToAclTargets(user, object);
 
             const accessMatch = this.aclSet.applyRules(aclTargets, AclActions.Access, object);
-            //_debugAclMatching(user, aclTargets, isOwner, AclActions.Access, accessMatch);
+            this._debugAclMatching(user, aclTargets, isOwner, AclActions.Access, accessMatch);
 
             if(!accessMatch.allow) {
                 throw new AuthorizationError("You do not have access to this object.");
@@ -139,7 +139,7 @@ class WorkflowUpdatableModel extends WorkflowModel {
             }
 
             aclWriteMatch = this.aclSet.applyRules(aclTargets, AclActions.Write, object);
-            //_debugAclMatching(user, aclTargets, isOwner, AclActions.Write, aclWriteMatch);
+            this._debugAclMatching(user, aclTargets, isOwner, AclActions.Write, aclWriteMatch);
 
             if(!aclWriteMatch.allow) {
                 throw new AuthorizationError("You do not have write access to this object.");

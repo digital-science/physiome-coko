@@ -75,7 +75,7 @@ class WorkflowInstance extends WorkflowUpdatableModel {
             const [aclTargets, _] = this.userToAclTargets(user, newInstance);
 
             const match = this.aclSet.applyRules(aclTargets, AclActions.Create, newInstance);
-            //_debugAclMatching(user, aclTargets, null, AclActions.Create, match);
+            this._debugAclMatching(user, aclTargets, null, AclActions.Create, match);
 
             if(!match.allow) {
                 throw new AuthorizationError("You do not have rights to create a new instance.");
@@ -156,7 +156,7 @@ class WorkflowInstance extends WorkflowUpdatableModel {
             const [aclTargets, isOwner] = this.userToAclTargets(user, object);
 
             const accessMatch = this.aclSet.applyRules(aclTargets, AclActions.Access, object);
-            //_debugAclMatching(user, aclTargets, isOwner, AclActions.Access, accessMatch);
+            this._debugAclMatching(user, aclTargets, isOwner, AclActions.Access, accessMatch);
             if(!accessMatch.allow) {
                 throw new AuthorizationError("You do not have access to this workflow instance.");
             }
@@ -166,7 +166,7 @@ class WorkflowInstance extends WorkflowUpdatableModel {
             }
 
             const destroyAclMatch = this.aclSet.applyRules(aclTargets, AclActions.Destroy, object);
-            //_debugAclMatching(user, aclTargets, isOwner, AclActions.Destroy, destroyAclMatch);
+            this._debugAclMatching(user, aclTargets, isOwner, AclActions.Destroy, destroyAclMatch);
             if(!destroyAclMatch.allow) {
                 throw new AuthorizationError("You do not have the rights allowed to destroy this workflow instance.");
             }
@@ -309,7 +309,7 @@ class WorkflowInstance extends WorkflowUpdatableModel {
             const [aclTargets, isOwner] = this.userToAclTargets(user, instance);
 
             const accessMatch = this.aclSet.applyRules(aclTargets, AclActions.Access, instance);
-            //_debugAclMatching(user, aclTargets, isOwner, AclActions.Access, accessMatch);
+            this._debugAclMatching(user, aclTargets, isOwner, AclActions.Access, accessMatch);
             if(!accessMatch.allow) {
                 throw new AuthorizationError("You do not have access to this object.");
             }
@@ -319,7 +319,7 @@ class WorkflowInstance extends WorkflowUpdatableModel {
             }
 
             tasksAclMatch = this.aclSet.applyRules(aclTargets, AclActions.Task, instance);
-            //_debugAclMatching(user, aclTargets, isOwner, AclActions.Task, tasksAclMatch);
+            this._debugAclMatching(user, aclTargets, isOwner, AclActions.Task, tasksAclMatch);
             if(!tasksAclMatch.allow) {
                 throw new AuthorizationError("You do not have the rights allowed to destroy this object.");
             }
@@ -527,7 +527,7 @@ class WorkflowInstance extends WorkflowUpdatableModel {
             const [aclTargets, isOwner] = this.userToAclTargets(user, object);
 
             tasksAclMatch = this.aclSet.applyRules(aclTargets, AclActions.Task, object);
-            //_debugAclMatching(user, aclTargets, isOwner, AclActions.Task, tasksAclMatch);
+            this._debugAclMatching(user, aclTargets, isOwner, AclActions.Task, tasksAclMatch);
             if(!tasksAclMatch.allow) {
                 throw new AuthorizationError("You do not have the rights allowed to destroy this object.");
             }

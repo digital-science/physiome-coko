@@ -2,6 +2,7 @@ const { BaseModel } = require('component-model');
 const { pubsubManager } = require("pubsweet-server");
 const GraphQLFields = require('graphql-fields');
 const AclRule = require('client-workflow-model/AclRule');
+const config = require('config');
 const _ = require("lodash");
 
 const { AuthorizationError, NotFoundError } = require('@pubsweet/errors');
@@ -189,13 +190,12 @@ class WorkflowModel extends BaseModel {
             return new NotFoundError("Instance not found.");
         }
 
-        //this.addInstancesToContext([object], context);
         const [aclTargets, isOwner] = this.userToAclTargets(user, object);
 
         if(this.aclSet) {
 
             const accessMatch = this.aclSet.applyRules(aclTargets, AclActions.Access, object);
-            //_debugAclMatching(user, aclTargets, isOwner, AclActions.Access, accessMatch);
+            this._debugAclMatching(user, aclTargets, isOwner, AclActions.Access, accessMatch);
             if(!accessMatch.allow) {
                 throw new AuthorizationError("You do not have access to this object.");
             }
@@ -236,7 +236,7 @@ class WorkflowModel extends BaseModel {
             const [aclTargets, _] = this.userToAclTargets(user, null);
 
             const accessMatch = this.aclSet.applyRules(aclTargets, AclActions.Access);
-            //_debugAclMatching(user, aclTargets, null, AclActions.Access, accessMatch);
+            this._debugAclMatching(user, aclTargets, null, AclActions.Access, accessMatch);
             if(!accessMatch.allow) {
                 throw new AuthorizationError("You do not have access to this object.");
             }
@@ -1172,6 +1172,8 @@ class WorkflowModel extends BaseModel {
 
 
     // Logging assistance
+    // ---
+
     static get logger() {
         if(this._logger) {
             return this._logger;
@@ -1181,6 +1183,35 @@ class WorkflowModel extends BaseModel {
 
     get logger() {
         return this.constructor.logger;
+    }
+
+    static get _debugAclRules() {
+        return config.get("logging.debugAclRules") === true;
+    }
+
+    static _debugAclMatching(user, userTargets, isOwner, action, match) {
+
+        if(!this._debugAclRules) {
+            return;
+        }
+
+        let msg = `acl-match: action:(${action}) user(${user ? user.id : "anon"}) acl-targets:(${userTargets.join(", ")}) is-owner:(${isOwner ? "true" : "false"})`;
+        if(match) {
+
+            if(match.matchingRules) {
+                match.matchingRules.forEach(rule => msg += `\n    + ${rule.description}`);
+            } else {
+                msg += `\n    no matching rules found`;
+            }
+
+            if(match.allowedRestrictions && match.allowedRestrictions.length) {
+                msg += `\n    allowed restriction: ${match.allowedRestrictions.join(', ')}`;
+            }
+
+            msg += `\n    outcome: ${match.allow ? "allow" : "disallow"}`;
+        }
+
+        this.logger.debug(msg);
     }
 }
 
