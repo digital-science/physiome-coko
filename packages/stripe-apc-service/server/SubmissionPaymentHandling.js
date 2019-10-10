@@ -68,6 +68,7 @@ async function checkCheckoutSession(checkoutSessionId) {
 
 async function createCheckoutSession(submissionId, emailAddress = null) {
 
+    // FIXME: shift this into main config.
     const checkoutDetails = {
         client_reference_id: `${submissionId}`,
         success_url: `${config.get('pubsweet-client.baseUrl')}/payment/${encodeURI(submissionId)}/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -96,7 +97,7 @@ async function createCheckoutSession(submissionId, emailAddress = null) {
 exports.generateCheckoutSessionForSubmission = async function generateCheckoutSessionForSubmission(submissionId, identity) {
 
     const submission = await Submission.find(submissionId);
-    const aclTargets = submission.userToAclTargets(identity);
+    const [aclTargets, isOwner] = Submission.userToAclTargets(identity, submission);
 
     if(!submission) {
         logger.debug(`unable to find submission to creaye checkout session (submissionId = ${submissionId}) `);
@@ -144,7 +145,7 @@ exports.generateCheckoutSessionForSubmission = async function generateCheckoutSe
 
             try {
 
-                const r = await submission.patchRestrictingOnFields(['paymentSessionId'], {
+                const r = await submission.patchFields(['paymentSessionId'], {
                     paymentSessionId: originalSubmissionId
                 });
 
@@ -267,7 +268,7 @@ async function processSuccessfulPayment(submissionId, checkoutSessionId, session
 
                 // FIXME: do we want to have a retry attempt here, with some sort of back-off applied
 
-                const updatedSubmission = await submission.patchRestrictingOnFields(['paymentCompleted'], {
+                const updatedSubmission = await submission.patchFields(['paymentCompleted'], {
                     paymentSessionId: checkoutSessionId
                 });
 
@@ -287,7 +288,7 @@ async function processSuccessfulPayment(submissionId, checkoutSessionId, session
 
         }).then(submission => {
 
-            return submission.tasksForInstance().then(async tasks => {
+            return submission.getTasks().then(async tasks => {
 
                 const matchingTasks = tasks.filter(t => t.formKey === "custom:payment");
                 if(!matchingTasks.length) {
@@ -306,14 +307,14 @@ async function processSuccessfulPayment(submissionId, checkoutSessionId, session
 
                 return Promise.all([
 
-                    submission.patchRestrictingOnFields(['phase'], {
+                    submission.patchFields(['phase'], {
                         phase: originalPhase
                     }).catch(e => {
                         logger.error(`processing successful payment, patch phase failed due to: ${e.toString()}`);
                         return Promise.reject(e);
                     }),
 
-                    submission.completeTaskForInstance(taskId, stateChange).catch(e => {
+                    submission.completeTask(taskId, stateChange).catch(e => {
                         logger.error(`processing successful payment, complete task failed due to: ${e.toString()}`);
                         return Promise.reject(e);
                     })
@@ -327,7 +328,7 @@ async function processSuccessfulPayment(submissionId, checkoutSessionId, session
                         return Promise.reject(err);
                     }
 
-                    await submission.instanceResolver.publishInstanceWasModified(submissionId);
+                    await submission.publishWasModified();
 
                 }).catch(async err => {
 
@@ -400,7 +401,6 @@ exports.handleCancelUrl = function(request, response) {
         return response.status(500).send("Server Error");
     });
 };
-
 
 
 exports.registerCheckoutCompletedWebhookHandler = (app, urlPath = '/payments/webhooks') => {
