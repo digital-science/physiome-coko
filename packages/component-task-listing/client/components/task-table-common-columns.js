@@ -241,12 +241,13 @@ const StatusColumnContent = styled(TaskTableColumnContentComponent)`
   width: 150px;
 `;
 
-function createStatusColumn(heading, dependentFields, statusComponent, opts = {}) {
+function createStatusColumn(heading, dependentFields, statusComponent, opts = {}, componentOpts = {}) {
 
     const { className = "small status" } = opts;
     const Status = statusComponent;
 
-    return new TaskTableColumn(heading, convertDependentFields(dependentFields), className, ({task}) => <Status task={task} />, StatusColumnHeader, StatusColumnContent);
+    return new TaskTableColumn(heading, convertDependentFields(dependentFields), className,
+                               ({task}) => <Status task={task} {...componentOpts} />, StatusColumnHeader, StatusColumnContent);
 }
 
 export { createStatusColumn };
