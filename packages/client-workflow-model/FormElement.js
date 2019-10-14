@@ -38,11 +38,6 @@ class FormElement {
             return true;
         }
 
-
-        console.log(`userIsTargetOfElement: `);
-        console.dir(this.targets);
-        console.dir(user.groups);
-
         // Iterate the groups for the user, and then find it that matches any of the targeted groups for the element.
         const userGroups = user.groups || [];
 
@@ -64,19 +59,16 @@ class FormElement {
                         didMatch = false;
                         break;
                     } else {
-                        console.log(`did match (exact): ${JSON.stringify(this.targets)} -> ${JSON.stringify(user.groups)}`);
                         return true;
                     }
                 }
             }
 
             if(didMatch) {
-                console.log(`did match (for invert): ${JSON.stringify(this.targets)} -> ${JSON.stringify(user.groups)}`);
                 return true;
             }
         }
 
-        console.log(`no match (no targets matched): ${JSON.stringify(this.targets)} -> ${JSON.stringify(user.groups)}`);
         return false;
     }
 }
