@@ -75,13 +75,13 @@ SubmissionStatusMapping[SubmissionStatus.Cancelled] = {
 };
 
 
-function _SubmissionStatusPill({className, phase, task, onHold=false, curator=null}) {
+function _SubmissionStatusPill({className, phase, task, onHold=false, curator=null, ignoreHidden=false}) {
 
     const usedPhase = task ? task.phase : phase;
-    const isOnHold = task ? task.hidden : onHold;
+    const isOnHold = (task ? task.hidden : onHold);
     const hasCuratorAssigned = !!(task ? task.curator : curator);
 
-    if(isOnHold) {
+    if(isOnHold && ignoreHidden !== true) {
         return <div className={`${className} on-hold`}>On-hold</div>
     }
 

@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { WorkflowDescriptionContext } from 'client-workflow-model';
 import useCreateSubmissionMutation from "../mutations/createSubmission";
 
-import SubmissionsListing from '../listings/submissions-listing';
+import SubmissionsListing, { SimpleSubmissionListingColumns } from '../listings/submissions-listing';
 import Card from "ds-theme/components/card";
 import { BlockLabel } from "ds-theme/components/label";
 import { PrimaryInlineButton } from "ds-theme/components/inline-button";
@@ -110,8 +110,9 @@ const _DashboardSubmitterSubmissions = ({className, history, children}) => {
     return (
         <div className={className}>
 
-            <SubmissionsListing history={history} heading='Submissions' allFilterPhases={AllPhases} defaultActiveFilterPhases={ActivePhases}
-                showFilter={false} showOnHoldSubmissions={null} renderNoSubmissions={renderNoSubmissions}>
+            <SubmissionsListing history={history} columns={SimpleSubmissionListingColumns} heading='Submissions'
+                allFilterPhases={AllPhases} defaultActiveFilterPhases={ActivePhases} showFilter={false}
+                showOnHoldSubmissions={null} renderNoSubmissions={renderNoSubmissions}>
 
                 <CreateNewSubmissionButton onClick={handleCreateNewSubmission}>
                     <span>+</span>Create New Submission&hellip;

@@ -16,7 +16,7 @@ const SubmissionListingColumns = [
 
     createIdentifierColumn("ID", 'manuscriptId', linkSubmissionElement, ["manuscriptId", "id", "phase"]),
 
-    createSubmissionTitleColumn('Submission Title'),
+    createSubmissionTitleColumn('Manuscript Title'),
 
     createDateColumn("Date", 'submissionDate'),
 
@@ -25,6 +25,20 @@ const SubmissionListingColumns = [
     createIdentityColumn("Submitter", "submitter"),
 
     createCuratorClaimableIdentityColumn("Assigned", "curator")
+];
+
+
+const SimpleSubmissionListingColumns = [
+
+    createIdentifierColumn("ID", 'manuscriptId', linkSubmissionElement, ["manuscriptId", "id", "phase"]),
+
+    createSubmissionTitleColumn('Manuscript Title'),
+
+    createDateColumn("Date", 'submissionDate'),
+
+    createStatusColumn("Status", ['phase', 'hidden', 'curator.id'], SubmissionStatusPill, {}, {ignoreHidden:true}),
+
+    createIdentityColumn("Submitter", "submitter")
 ];
 
 
@@ -99,4 +113,4 @@ const SubmissionsListing = styled(_SubmissionsListing)`
 
 export default SubmissionsListing;
 
-export { SubmissionListingColumns };
+export { SubmissionListingColumns, SimpleSubmissionListingColumns };
