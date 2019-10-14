@@ -26,7 +26,7 @@ function _findEmailCodeInLocationHash(hash) {
 }
 
 
-export default ({message, renderApplication, renderContent, children}) => {
+export default ({message, renderApplication, renderContent, children, ...props}) => {
 
     // If the URL hash includes an email validation code, we want to pass that onto the "current user" request.
 
@@ -46,7 +46,8 @@ export default ({message, renderApplication, renderContent, children}) => {
             <AuthenticatedUserContext.Provider value={currentUser}>
                 {renderApplication(
                     <LoginRequiredMessage message={message} />,
-                    currentUser
+                    currentUser,
+                    props
                 )}
             </AuthenticatedUserContext.Provider>
         );
@@ -57,7 +58,8 @@ export default ({message, renderApplication, renderContent, children}) => {
             <AuthenticatedUserContext.Provider value={currentUser}>
                 {renderApplication(
                     <LoginEmailRequiredMessage currentUser={currentUser} refetchUser={refetch} />,
-                    currentUser
+                    currentUser,
+                    props
                 )}
             </AuthenticatedUserContext.Provider>
         );
@@ -74,7 +76,8 @@ export default ({message, renderApplication, renderContent, children}) => {
         <AuthenticatedUserContext.Provider value={currentUser}>
             {renderApplication(
                 renderContent ? renderContent(loginRelatedContent, currentUser) : <React.Fragment>{loginRelatedContent}{children}</React.Fragment>,
-                currentUser
+                currentUser,
+                props
             )}
         </AuthenticatedUserContext.Provider>
     );
