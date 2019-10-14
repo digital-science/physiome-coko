@@ -16,8 +16,18 @@ import {
 
 
 
-const renderAppDefault = (children, currentUser, props={}) => <SubmissionApp {...props}>{children}</SubmissionApp>;
+const renderAppWithSidebar = (children, currentUser, props={}) => <SubmissionApp {...props}>{children}</SubmissionApp>;
 const renderAppHideSidebar = (children, currentUser, props={}) => <SubmissionApp hideSidebar={true} {...props}>{children}</SubmissionApp>;
+
+function _userIsAdmin(user) {
+    return (user && user.groups && user.groups.indexOf("administrator") !== -1);
+}
+
+const renderAppDefault = (children, currentUser, p) => {
+    const isAdmin = _userIsAdmin(currentUser);
+    return isAdmin ? renderAppWithSidebar(children, currentUser, p) : renderAppHideSidebar(children, currentUser, p);
+};
+
 
 const Routes = () => (
 
@@ -25,22 +35,14 @@ const Routes = () => (
 
         <Route path="/submission/:instanceId" render={props=> {
             return (
-                <LoginRequiredRoute message="You must login before being able to finish submitting details of your in-progress submission. Login using your ORCID credentials." renderApplication={renderAppHideSidebar}
-                    renderContent={children => <PageSubmissionForm children={children} {...props} />} />
+                <LoginRequiredRoute message="You must login before being able to finish submitting details of your in-progress submission. Login using your ORCID credentials."
+                    renderApplication={renderAppHideSidebar} renderContent={children => <PageSubmissionForm children={children} {...props} />} />
             );
         }} />
 
         <Route path="/details/:instanceId" render={props=> {
-
-            const renderAppDetails = (children, currentUser, p = {}) => {
-                if(currentUser.groups && currentUser.groups.indexOf("administrator") !== -1) {
-                    return renderAppDefault(children, currentUser, p);
-                }
-                return renderAppHideSidebar(children, currentUser, p);
-            };
-
             return (
-                <LoginRequiredRoute message="You must login to be able to view details of the requested submission. Login using your ORCID credentials." renderApplication={renderAppDetails}
+                <LoginRequiredRoute message="You must login to be able to view details of the requested submission. Login using your ORCID credentials." renderApplication={renderAppDefault}
                     renderContent={children => <PageSubmissionDetails children={children} {...props} />} />
             );
         }} />
@@ -63,24 +65,22 @@ const Routes = () => (
 
         <Route path="/" render={props => {
 
-            const renderMainDashboard = (children, currentUser) => {
-
-                if(currentUser.groups && currentUser.groups.indexOf("administrator") !== -1) {
-                    return (
-                        <SubmissionApp>
-                            <PageDashboardActiveSubmissions history={props.history} />
-                        </SubmissionApp>
-                    );
-                }
+            const renderContent = (loginContent, currentUser) => {
+                const isAdmin = _userIsAdmin(currentUser);
+                const page = isAdmin ? <PageDashboardActiveSubmissions history={props.history} /> : <PageDashboardSubmitterSubmissions history={props.history} />;
 
                 return (
-                    <SubmissionApp hideSidebar={true}>
-                        <PageDashboardSubmitterSubmissions history={props.history} />
-                    </SubmissionApp>
+                    <React.Fragment>
+                        {loginContent || null}
+                        {page}
+                    </React.Fragment>
                 );
             };
 
-            return <LoginRequiredRoute message="To start a new submission please login using your ORCID ID." renderApplication={renderMainDashboard} />;
+            return (
+                <LoginRequiredRoute message="To start a new submission please login using your ORCID ID."
+                    renderApplication={renderAppDefault} renderContent={renderContent} />
+            );
         }} />
 
     </Switch>
