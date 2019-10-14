@@ -1655,14 +1655,6 @@
     objection "^1.2.3"
     uuid "^3.3.2"
 
-"@pubsweet/component-send-email@^0.2.8":
-  version "0.2.16"
-  resolved "https://registry.yarnpkg.com/@pubsweet/component-send-email/-/component-send-email-0.2.16.tgz#c4253396e3ed676fba1043a93539d872e215abb4"
-  integrity sha512-3dhLI/aYgIkXzMYpqJLPVXC8uf1nVp8YChryyiy2gusGRDgdC+3sDyQ2n80EQ/Ynwt0uqeVNkKFBd8U6uc4+Yw==
-  dependencies:
-    aws-sdk "^2.185.0"
-    nodemailer "^4.4.2"
-
 "@pubsweet/db-manager@^2.2.3":
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/@pubsweet/db-manager/-/db-manager-2.3.0.tgz#718ebe7438de3b2578e75b9c1aef517d213854be"
@@ -2907,7 +2899,7 @@ authsome@^0.1.0:
   resolved "https://registry.yarnpkg.com/authsome/-/authsome-0.1.0.tgz#4152e666afcaa7f7c51ddbed94145ad7105904d9"
   integrity sha512-iS1xnWjtY5yRRkGAQNveteZJGi87FfJ8ZcC0Y9jo/xNxGKzHL6MPvP6+BPVWpqtYwEjZKmPDZqwKHtrcUIiFVg==
 
-aws-sdk@2.x, aws-sdk@^2.185.0, aws-sdk@^2.293.0, aws-sdk@^2.387.0:
+aws-sdk@2.x, aws-sdk@^2.293.0, aws-sdk@^2.387.0:
   version "2.453.0"
   resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.453.0.tgz#7f1ada4efc78d255dfd43adc3decd5f01a21ac2c"
   integrity sha512-UsofQeX8XVElr4+bqw47jOZUGNiwUdFVTNyOdOHcK14RHH2ySsve6JWyvQT8L2rS//XQP1OBIQo20PAl1Zf7ig==
@@ -10874,11 +10866,6 @@ nodemailer-ses-transport@^1.5.1:
   integrity sha1-3AWYwb9T6GUuYy6PMWks4CLX3qk=
   dependencies:
     aws-sdk "^2.2.36"
-
-nodemailer@^4.4.2:
-  version "4.7.0"
-  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-4.7.0.tgz#4420e06abfffd77d0618f184ea49047db84f4ad8"
-  integrity sha512-IludxDypFpYw4xpzKdMAozBSkzKHmNBvGanUREjJItgJ2NYcK/s8+PggVhj7c2yGFQykKsnnmv1+Aqo0ZfjHmw==
 
 nodemailer@^6.1.1:
   version "6.1.1"

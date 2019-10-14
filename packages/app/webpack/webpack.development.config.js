@@ -36,8 +36,6 @@ module.exports = [
                 'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
             }),
             new webpack.ContextReplacementPlugin(/./, __dirname, {
-                [config.authsome.mode]: config.authsome.mode,
-                [config.validations]: config.validations,
             }),
             new CopyWebpackPlugin([{ from: '../static' }]),
         ],

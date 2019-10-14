@@ -35,7 +35,7 @@ module.exports = [
                 root: path.join(__dirname, '..', '_build'),
             }),
             new HtmlWebpackPlugin({
-                title: 'Digital Science Awards Prototype',
+                title: 'Physiome Submission Portal',
                 buildTime: new Date().toString(),
                 template: '../app/index-production.html',
                 inject: 'body',
@@ -45,8 +45,6 @@ module.exports = [
                 'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
             }),
             new webpack.ContextReplacementPlugin(/./, __dirname, {
-                [config.authsome.mode]: config.authsome.mode,
-                [config.validations]: config.validations,
             }),
             new ExtractTextPlugin('styles/main.css'),
             new CopyWebpackPlugin([{ from: '../static' }]),

@@ -1,11 +1,10 @@
 {
-  "name": "ds-awards",
+  "name": "physiome-submission-app",
   "version": "1.0.0",
-  "description": "xpub configured for Awarding Bodies",
+  "description": "Manuscript Submission web application for the Physiome Project",
   "license": "MIT",
   "author": "Digital Science and Research Ltd",
   "dependencies": {
-    "@pubsweet/component-send-email": "^0.2.8",
     "babel-core": "^6.26.0",
     "bluebird": "^3.5.3",
     "config": "^1.26.2",

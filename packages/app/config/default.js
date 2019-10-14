@@ -29,8 +29,6 @@ const values = {
     authsome: {
         mode: path.resolve(__dirname, 'authsome-mode.js')
     },
-    validations: path.resolve(__dirname, 'validations.js'),
-    
     pubsweet: {
         components
     },
@@ -54,20 +52,7 @@ const values = {
         'login-redirect': '/',
         theme: process.env.PUBSWEET_THEME
     },
-    'mail-transport': {
-        sendmail: true
-    },
-    'pubsweet-component-aws-s3': {
-        secretAccessKey: process.env.AWS_S3_SECRET_KEY,
-        accessKeyId: process.env.AWS_S3_ACCESS_KEY,
-        region: process.env.AWS_S3_REGION,
-        bucket: process.env.AWS_S3_BUCKET,
-        validations: path.resolve(__dirname, 'upload-validations.js')
-    },
-    mailer: {
-        from: 'j.watts@digital-science.com',
-        path: `${__dirname}/mailer`
-    },
+
     SES: {
         accessKey: process.env.AWS_SES_ACCESS_KEY,
         secretKey: process.env.AWS_SES_SECRET_KEY,
@@ -104,7 +89,8 @@ physiome-curators@physiomeproject.org`
 
     identity: {
         validationTokenExpireDays: 15,
-        maximumEmailValidationsPerDay: 5
+        maximumEmailValidationsPerDay: 5,
+        adminIdentities: process.env.IDENTITY_ADMIN_USERS ? `${process.env.IDENTITY_ADMIN_USERS}`.split(",").map(s => s.trim()) : []
     },
 
     orcid: {
