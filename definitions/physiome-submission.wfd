@@ -302,7 +302,7 @@ instance Submission {
 
                 { SubmissionStatusPill => phase, label:"Submission Status" }
 
-                { ClaimSubmission => curator, label:"Assigned Curator" }
+                { ClaimSubmission => curator, <administrator>, label:"Assigned Curator" }
 
                 { StaticText => submissionDate, label:"Submission Date" }
 
