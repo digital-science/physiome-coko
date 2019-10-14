@@ -34,30 +34,49 @@ class FormElement {
 
     userIsTargetOfElement(user) {
 
-        if(!this.targets) {
+        if(!this.targets || !this.targets.length) {
             return true;
         }
 
-        if(!user.groups) {
-            return false;
-        }
+
+        console.log(`userIsTargetOfElement: `);
+        console.dir(this.targets);
+        console.dir(user.groups);
 
         // Iterate the groups for the user, and then find it that matches any of the targeted groups for the element.
-        for(let i = 0; i < user.groups.length; i++) {
+        const userGroups = user.groups || [];
 
-            const lookupGroup = user.groups[i];
+        for(let i = 0; i < this.targets.length; i++) {
 
-            for(let ii = 0; ii < this.targets.length; ii++) {
+            const t = this.targets[i];
 
-                const t = this.targets[ii];
-                const r = t.invert ? t.group !== lookupGroup : t.group === lookupGroup;
+            let didMatch = !!t.invert;
 
-                if(r) {
-                    return true;
+            for(let ii = 0; ii < userGroups.length; ii++) {
+
+                const lookupGroup = userGroups[ii];
+                const match = t.group === lookupGroup;
+
+                if(match) {
+
+                    // If this is an invert, then this target has failed.
+                    if(t.invert) {
+                        didMatch = false;
+                        break;
+                    } else {
+                        console.log(`did match (exact): ${JSON.stringify(this.targets)} -> ${JSON.stringify(user.groups)}`);
+                        return true;
+                    }
                 }
+            }
+
+            if(didMatch) {
+                console.log(`did match (for invert): ${JSON.stringify(this.targets)} -> ${JSON.stringify(user.groups)}`);
+                return true;
             }
         }
 
+        console.log(`no match (no targets matched): ${JSON.stringify(this.targets)} -> ${JSON.stringify(user.groups)}`);
         return false;
     }
 }
