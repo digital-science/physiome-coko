@@ -1,7 +1,7 @@
 // Note: we use Knex migration scripts to also manage the currently deployed version of the
 //
 
-const CurrentBPMFileName = 'physiome-submission-v7.bpmn';
+const CurrentBPMFileName = 'physiome-submission.bpmn';
 
 const path = require('path');
 const fs = require('fs');
