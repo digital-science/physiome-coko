@@ -71,6 +71,19 @@ mapping "DisplayedRejectionReason" on RejectionReason {
 }
 
 
+enum ModelSourceType {
+    PMRWorkspace => "pmr-workspace",
+    OtherRepository => "other-workspace",
+    UserUploaded => "user-uploaded"
+}
+
+mapping "DisplayedModelSourceType" on ModelSourceType {
+    PMRWorkspace => "PMR Workspace",
+    OtherRepository => "Link to External Repository",
+    UserUploaded => "Manually Uploaded Model"
+}
+
+
 
 extension "physiome-model-extensions"
 
@@ -100,10 +113,14 @@ instance Submission {
         abstract: String,
         primaryPapers: JSON,
         authors: JSON,
-        pmrWorkspace: String,
         priceAcknowledged: Boolean,
         keywords: JSON,
         funding: JSON,
+
+        modelSource: ModelSourceType <default:ModelSourceType.PMRWorkspace>,
+        modelPmrWorkspaceUri: String,
+        modelRepositoryUri: String,
+        modelFiles: [File] <set>,
 
         allFilesPresent: Boolean,
         resultsMatch: Boolean,
@@ -111,6 +128,7 @@ instance Submission {
         primaryPaperExists: Boolean,
         resultsInPapersOverlap: Boolean,
         sameModelInPapers: Boolean,
+        manuscriptAccepted: Boolean,
         curationNotes: String,
 
         articleFiles: [File] <set>,
@@ -128,7 +146,8 @@ instance Submission {
 
         fields "submit" {
     	    kind, title, abstract, primaryPapers, authors, funding,
-    	    pmrWorkspace, keywords, iupsCommission,
+    	    keywords, iupsCommission,
+    	    modelSource, modelPmrWorkspaceUri, modelRepositoryUri, modelFiles,
     	    articleFiles, supplementaryFiles,
             priceAcknowledged
         }
@@ -206,19 +225,32 @@ instance Submission {
 
         { TextArea => abstract, label:"Abstract", rows:6 }
 
-        { ArticleCitationListEditor => primaryPapers, label:"Primary Papers" }
+        { ArticleCitationListEditor => primaryPapers, label:"Primary Papers", note:"The primary publication is an experimental/modelling paper with model validation that has been accepted to a peer-reviewed physiology, bioengineering or biophysics journal. Every Physiome paper needs to be associated with at least one primary paper." }
 
-        { AuthorsEditor => authors, label:"Authors" }
+        { AuthorsEditor => authors, label:"Authors", note:"Decide the order of the authors by dragging and dropping the corresponding author box. There can only be one corresponding author per submission." }
 
-        { SelectValue => iupsCommission, label:"Commission Type", options:mapping("DisplayedIUPSCommissionKinds"), placeholder:"Please select a Commission" }
+        { SelectValue => iupsCommission, label:"Commission Type", options:mapping("DisplayedIUPSCommissionKinds"), placeholder:"Please select a Commission",
+            message:"Commissions detailed by IUPS: <a target='_blank' rel='noopener noreferrer' href='http://www.iups.org/about-us/commissions/'>http://www.iups.org/about-us/commissions/</a>"
+        }
 
         { KeywordsEditor => keywords, label:"Keywords", placeholder:"Keywords associated with manuscript. Press 'Enter' to confirm each keyword" }
 
         { FundingEditor => funding, label:"Funding Acknowledgements" }
 
-        { Text => pmrWorkspace, label:"Associated PMR Workspace" }
-
         { FileUploader => articleFiles, label:"Manuscript" }
+
+        { Group, heading:"Model Files", children: {
+
+            { SelectValue => modelSource, label:"File Location Type", options:mapping("DisplayedModelSourceType"), placeholder:"Please select a file location type" }
+
+            { Text => modelPmrWorkspaceUri, (modelSource == ModelSourceType.PMRWorkspace), label:"PMR Workspace URL" }
+
+            { Text => modelRepositoryUri, (modelSource == ModelSourceType.OtherRepository), label:"Repository URL" }
+
+            { FileUploader => modelFiles, (modelSource == ModelSourceType.UserUploaded), label:"Model Files" }
+
+            { Note, message:"You can either provide a link to a workspace in an open, version controlled repository where our curators can access the files present at the time of submission without creating an account, or submit your files directly below. If you are not already using a repository, we recommend the Physiome Model Repository (<a target='_blank' rel='noopener noreferrer' href='https://models.physiomeproject.org/'>https://models.physiomeproject.org/</a>), which is already tied to this journal. If you provide a link to a workspace, the files present in the workspace at the time of submission will be curated, and later changes will not be taken into regard." }
+        } }
 
         { FileUploader => supplementaryFiles, label:"Supplementary Files",
             fileLabels:true, fileTypes:mapping("DisplayedSupplementaryFileTypes") }
@@ -243,7 +275,7 @@ instance Submission {
 
         { FundingListing => funding, label:"Funding Acknowledgements" }
 
-        { StaticText => pmrWorkspace, label:"Associated PMR Workspace" }
+        { StaticText => modelPmrWorkspaceUri, label:"Associated PMR Workspace" }
 
         { FilesListing => articleFiles, label:"Manuscript Files" }
 
@@ -304,7 +336,7 @@ instance Submission {
 
                 { ClaimSubmission => curator, <administrator>, label:"Assigned Curator" }
 
-                { StaticText => submissionDate, label:"Submission Date" }
+                { StaticText => submissionDate, label:"Submission Date", format:"" }
 
                 { StaticText => publishDate, (phase == SubmissionPhase.Published), label:"Published Date" }
 
@@ -312,28 +344,31 @@ instance Submission {
 
                 { TextArea => curationNotes, <administrator>, label:"Notes" }
 
-                { Checkbox => hidden, <administrator>, (phase in [SubmissionPhase.Submitted, SubmissionPhase.Decision]), label:"Place submission on-hold" }
+                { Checkbox => hidden, <administrator>, (phase in [SubmissionPhase.Submitted, SubmissionPhase.Decision]), label:"Place submission on-hold",
+                    help: "Will hide submission from the active list. Use only if the authors cease communication for more than 4 weeks." }
             } }
 
             { DetailPanel, <administrator>, (phase == SubmissionPhase.Submitted), heading:"Curation Checks", children:{
 
-                { Checkbox => primaryPaperExists, label: "Primary paper exists",
-                    help:"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." }
+                { Checkbox => primaryPaperExists, label: "Primary paper exists" }
 
                 { Checkbox => sameModelInPapers, label: "Same model in manuscript and primary paper",
-                    help:"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." }
+                    help:"The same constituents equations are the same and the experimental design is the same in both papers. Additional modifications are allowed in the Physiome paper." }
 
-                { Checkbox => resultsMatch, label: "Results of of the model match the results present in primary article",
-                    help:"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." }
+                { Checkbox => resultsMatch, label: "Results of the model match the results present in primary article",
+                    help:"The results presented in the Physiome paper are reproducible from the primary paper, using the submitted files." }
 
                 { Checkbox => resultsInPapersOverlap, label: "Results in manuscript and primary paper overlap",
-                    help:"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." }
+                    help:"Some of the results simulated by the model files and presented in the Physiome paper are the same as presented in the primary paper." }
 
                 { Checkbox => allFilesPresent, label: "All files are present within the model and successfully execute",
-                    help:"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." }
+                    help:"All files needed to reproduce the results are submitted and works." }
 
                 { Checkbox => modelAnnotated, label: "Model is fully annotated",
-                    help:"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris." }
+                    help:"This is not required for acceptance and publication of the Physiome paper, but will provide a record for future curation." }
+
+                { Checkbox => manuscriptAccepted, label: "Manuscript accepted",
+                    help:"Manuscript is in legible and follows the template." }
 
             } }
 
@@ -346,13 +381,15 @@ instance Submission {
 
                 { Checkbox => sameModelInPapers, label: "Same model in manuscript and primary paper", readOnly:true }
 
-                { Checkbox => resultsMatch, label: "Results of of the model match the results present in primary article", readOnly:true }
+                { Checkbox => resultsMatch, label: "Results of the model match the results present in primary article", readOnly:true }
 
                 { Checkbox => resultsInPapersOverlap, label: "Results in manuscript and primary paper overlap", readOnly:true }
 
                 { Checkbox => allFilesPresent, label: "All files are present within the model and successfully execute", readOnly:true }
 
                 { Checkbox => modelAnnotated, label: "Model is fully annotated", readOnly:true }
+
+                { Checkbox => manuscriptAccepted, label: "Manuscript accepted", readOnly:true }
             } }
 
             { DetailPanel, <administrator>, (phase in [SubmissionPhase.Submitted, SubmissionPhase.Decision, SubmissionPhase.Payment,
