@@ -11,7 +11,15 @@ console.log(
     `Compile Workflow Form Description: ${sourceFile} to file ${destFile}`
 );
 
-const parsed = wfd.parse(toParse);
+let parsed;
+try {
+    parsed = wfd.parse(toParse);
+} catch(err) {
+    console.error(`Unable to parse workflow description due to :`);
+    console.error(`${err.toString()}`);
+    console.error(`\tfound: ${err.found}`);
+    console.error(`\tlocation: ${err.location.start.line}:${err.location.start.column} => ${err.location.end.line}:${err.location.end.column}`);
+}
 
 if (!parsed) {
     console.error('Error parsing file.');
