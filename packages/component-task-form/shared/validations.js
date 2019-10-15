@@ -27,3 +27,34 @@ function validIdentity(identity) {
 }
 
 exports.validIdentity = validIdentity;
+
+
+
+function validUri(uri) {
+
+    if(!uri) {
+        return false;
+    }
+
+    if(typeof uri !== 'string') {
+        return false;
+    }
+
+    return !!uri.match(/^(https?:\/\/)?([\w\-])+\.{1}([a-zA-Z]{2,63})([\/\w-]*)*\/?\??([^#\n\r]*)?#?([^\n\r]*)$/);
+}
+
+exports.validUri = validUri;
+
+
+function fileCount(files) {
+
+    console.dir(files);
+
+    if(!files || !files.length) {
+        return 0;
+    }
+    return files.filter(a => a.removed !== true).length;
+
+}
+
+exports.fileCount = fileCount;
