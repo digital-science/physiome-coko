@@ -5,7 +5,8 @@ import FieldListing from '../field-listing';
 
 import withFormField from './withFormField'
 
-import {BlockLabel} from 'ds-theme/components/label';
+import Card, { CardContent } from 'ds-theme/components/card';
+import { BlockLabel } from 'ds-theme/components/label';
 
 
 function FormFieldGroup({className, description, options = {}, ...rest}) {
@@ -14,29 +15,24 @@ function FormFieldGroup({className, description, options = {}, ...rest}) {
         <FormFieldGroupHolder className={className}>
             {options.heading ? <BlockLabel>{options.heading}</BlockLabel> : null}
             {description.children ? (
-                <div>
+                <Card simple={true}>
                     <FieldListing elements={description.children} {...rest} />
-                </div>
+                </Card>
             ) : null}
         </FormFieldGroupHolder>
     );
 }
 
-const FormFieldGroupHolder = styled.div`  
-    
-    padding: 10px 15px;
-    border: 1px solid #adadad;
-    border-radius: 5px;
-    background: #f9f9f9;
+const FormFieldGroupHolder = styled.div`
 
-    margin-bottom: 15px;
-    
-    & > label {
-        padding: 10px 15px;
-        background: #adadad;
-        color: white;
-        margin: -10px -15px 20px;
-    }
+   & > ${Card} > ${CardContent} {
+    padding: 10px 10px;
+    box-sizing: border-box;
+   }
+   
+   & > ${Card} > ${CardContent} > ${FieldListing} .form-field:last-child {
+    margin-bottom: 0;
+   }  
 `;
 
 export default withFormField(FormFieldGroup);
