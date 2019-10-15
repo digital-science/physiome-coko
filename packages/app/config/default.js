@@ -73,18 +73,13 @@ const values = {
     },
 
     'workflow-send-email' : {
-        from: `Jared Watts <jaredwatts@gmail.com>`,
-        prefix: '[DEV] Physiome submission system: ',
+        from: process.env.EMAIL_SEND_FROM,
+        prefix: process.env.EMAIL_SUBJECT_PREFIX,
         templateDirectory: `${__dirname}/../../../definitions/email-templates`,
-        restrictedEmailAddresses: [
-            "jaredwatts@gmail.com",
-            /^.+@digital-science\.com$/i,
-            /^.+@auckland\.ac\.nz$/i,
-            /^.+@coko\.foundation/i
-        ],
-        signature:`Kind regards,
-Physiome curation team
-physiome-curators@physiomeproject.org`
+        signature: process.env.EMAIL_SIGNATURE,
+
+        // Note: restricted email addresses, env variable parsed as JSON array of addresses, for a regex match it should look like: "regex:^.+@digital-science\\.com$"
+        restrictedEmailAddresses: process.env.EMAIL_RESTRICTED_TO ? JSON.parse(process.env.EMAIL_RESTRICTED_TO).map(v => v.indexOf("regex:") === 0 ? new RegExp(v.split(':')[1], 'i') : v) : null
     },
 
     identity: {
