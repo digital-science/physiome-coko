@@ -348,9 +348,9 @@ instance Submission {
 
                 { ClaimSubmission => curator, <administrator>, label:"Assigned Curator" }
 
-                { StaticText => submissionDate, label:"Submission Date", format:"" }
+                { StaticText => submissionDate, label:"Submission Date", format:"MMM DD, YYYY h:mm:ss a" }
 
-                { StaticText => publishDate, (phase == SubmissionPhase.Published), label:"Published Date" }
+                { StaticText => publishDate, (phase == SubmissionPhase.Published), label:"Published Date", format:"MMM DD, YYYY h:mm:ss a" }
 
                 { StaticText => figshareArticleDoi, (hasValue(figshareArticleDoi) == true), label: "Article DOI" }
 
