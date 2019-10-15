@@ -9,7 +9,7 @@ import { DisabledStaticText } from 'ds-theme/components/static-text';
 import humanFormatByteCount from "ds-theme/helpers/humanFormatByteCount";
 import mimeTypeToIcon from "ds-theme/helpers/mimeTypeToIcon";
 
-import { FaFile } from 'react-icons/fa';
+import { FaFile, FaDownload } from 'react-icons/fa';
 import config from 'config';
 
 
@@ -30,19 +30,24 @@ const SimpleFileListing = styled(({className, files, instanceId, instanceType}) 
         return null;
     }
 
+
     return (
         <ol className={className}>
             {files.map(file => {
 
+                const fileUrl = `${BaseUrl}/files/download/${instanceType.urlName}/${encodeURI(instanceId)}/${encodeURI(file.id)}/${encodeURI(file.fileName)}`;
                 const FileIcon = mimeTypeToIcon(file.fileMimeType) || FaFile;
+
                 return (
                     <li key={file.id}>
-                        <a href={`${BaseUrl}/files/download/${instanceType.urlName}/${encodeURI(instanceId)}/${encodeURI(file.id)}/${encodeURI(file.fileName)}`}
-                            target="_blank" rel="noopener noreferrer">
-                            <FileIcon />
-                            <span className="file-name">{file.fileDisplayName}</span>
-                            <span className="file-size">{humanFormatByteCount(file.fileByteSize)}</span>
-                        </a>
+                        <div>
+                            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+                                <FileIcon />
+                                <span className="file-name">{file.fileDisplayName}</span>
+                                <span className="file-size">{humanFormatByteCount(file.fileByteSize)}</span>
+                            </a>
+                            <a className={'force-download'} href={fileUrl} target="_blank" rel="noopener noreferrer" download={file.fileName}><FaDownload /></a>
+                        </div>
                     </li>
                 )
             })}
@@ -64,12 +69,15 @@ const SimpleFileListing = styled(({className, files, instanceId, instanceType}) 
         margin-bottom: 5px;
     }
     
-    > li > a {
+    > li > div {
       display: inline-block;
       padding: 5px 5px;
       background: aliceblue;
       border-radius: 5px;
       border: 1px dashed #9dcef8;
+    }
+    
+    > li > div a {
       color: initial;
       text-decoration: none;
     }
@@ -93,6 +101,12 @@ const SimpleFileListing = styled(({className, files, instanceId, instanceType}) 
     > li span.file-size:after {
       content: ")";
       color: #b3b3b3;
+    }
+    
+    > li a.force-download {
+      color: initial;
+      text-decoration: none;
+      margin-left: 5px;
     }
 `;
 
