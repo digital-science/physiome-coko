@@ -159,10 +159,8 @@ instance Submission {
 
         fields "curation" {
             hidden, unpublishedChanges, rejectionReason, rejectionOther,
-    	    curator,
-    	    allFilesPresent, resultsMatch, modelAnnotated,
-    	    primaryPaperExists, resultsInPapersOverlap, sameModelInPapers,
-    	    curationNotes
+    	    allFilesPresent, resultsMatch, modelAnnotated, primaryPaperExists, resultsInPapersOverlap, sameModelInPapers, manuscriptAccepted,
+    	    curator, curationNotes
         }
 
         tasks "owner-submit" {
