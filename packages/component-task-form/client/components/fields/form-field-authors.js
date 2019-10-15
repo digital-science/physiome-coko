@@ -9,7 +9,7 @@ import { useFormValueBindingForComplexObject } from '../../hooks/useFormValueBin
 
 import Label, { BlockLabel } from "ds-theme/components/label";
 import InlineButton from "ds-theme/components/inline-button";
-import { DisabledStaticText } from 'ds-theme/components/static-text';
+import { DisabledStaticText, NoteStaticText } from 'ds-theme/components/static-text';
 import ValidationIssueListing from 'ds-theme/components/validation-issue-listing';
 import { FaPlus } from 'react-icons/fa';
 
@@ -54,6 +54,11 @@ const AuthorEditorCardHolder = styled.div`
       box-shadow: inset 0 0 6px #d10f008c;
       border-color: #d10f00;
     }
+        
+    & > ${NoteStaticText} {
+      padding: 8px;
+      display: block;
+    }
 `;
 
 const DraggableAuthorCard = ({authorId, index, ...props}) => {
@@ -74,6 +79,7 @@ function FormFieldAuthorsEditor({ className, data, binding, description, formDef
 
     const [authors, setAuthors] = useFormValueBindingForComplexObject(data, binding);
     const [validationIssues, clearValidationIssues] = useFormValidation(description, formDefinition, formValidator);
+    const { note = null } = options;
 
 
     // Make sure all authors have a unique id associated.
@@ -143,6 +149,8 @@ function FormFieldAuthorsEditor({ className, data, binding, description, formDef
                         )}
                     </Droppable>
                 </DragDropContext>
+
+                {note && (!authors || !authors.length) ? <NoteStaticText>{note}</NoteStaticText> : null }
 
                 <div style={{"padding": "8px"}}>
                     <InlineButton icon={<FaPlus />} bordered={true} onClick={addAuthor}>Add Author</InlineButton>
