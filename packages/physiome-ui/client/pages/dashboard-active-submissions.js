@@ -6,6 +6,9 @@ import useCreateSubmissionMutation from "../mutations/createSubmission";
 
 import { Checkbox, CheckboxLabel } from "ds-theme/components/checkbox-input";
 import SubmissionsListing from '../listings/submissions-listing';
+import { PrimaryInlineButton } from "ds-theme/components/inline-button";
+
+import { FaPlus } from 'react-icons/fa';
 
 
 const AllPhases = [
@@ -17,33 +20,13 @@ const AllPhases = [
 ];
 
 const ActivePhases = [
-    "Saved",
+    //"Saved",
     "Submitted",
     "Decision",
     "Payment",
     "Paid"
 ];
 
-
-const CreateNewSubmissionButton = styled.button`
-    display: inline-block;
-    height: 30px;
-    
-    font-size: 17px;
-    line-height: 30px;
-    border: none;
-    background: none;
-    font-family: NovcentoSansWideNormal, sans-serif;
-    text-transform: uppercase;
-    
-    cursor: pointer;
-
-    > span {
-        display: inline-block;
-        font-size: 30px;
-        color: #3779a0;
-    }
-`;
 
 const SubmissionListingAdditionalSectionHolder = styled.div`
     margin-top: 10px;
@@ -94,9 +77,9 @@ const _DashboardActiveSubmissions = ({className, history, children}) => {
             <SubmissionsListing history={history} heading='Active Submissions' allFilterPhases={AllPhases} defaultActiveFilterPhases={ActivePhases}
                 showOnHoldSubmissions={showOnHoldSubmissions} renderAdditionalFilters={renderAdditionalFilters}>
 
-                <CreateNewSubmissionButton onClick={handleCreateNewSubmission}>
-                    <span>+</span>Create New Submission&hellip;
-                </CreateNewSubmissionButton>
+                <PrimaryInlineButton icon={<FaPlus />} bordered={true} onClick={handleCreateNewSubmission}>
+                    Create New Submission
+                </PrimaryInlineButton>
 
                 {children}
 

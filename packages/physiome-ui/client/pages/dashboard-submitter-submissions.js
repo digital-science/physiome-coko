@@ -9,6 +9,8 @@ import Card from "ds-theme/components/card";
 import { BlockLabel } from "ds-theme/components/label";
 import { PrimaryInlineButton } from "ds-theme/components/inline-button";
 
+import { FaPlus } from 'react-icons/fa';
+
 
 const AllPhases = [
     "Saved",
@@ -31,27 +33,6 @@ const ActivePhases = [
     "Published",
     "Reject"
 ];
-
-
-const CreateNewSubmissionButton = styled.button`
-    display: inline-block;
-    height: 30px;
-    
-    font-size: 17px;
-    line-height: 30px;
-    border: none;
-    background: none;
-    font-family: NovcentoSansWideNormal, sans-serif;
-    text-transform: uppercase;
-    
-    cursor: pointer;
-
-    > span {
-        display: inline-block;
-        font-size: 30px;
-        color: #3779a0;
-    }
-`;
 
 
 const EmptySubmissionsListHolder = styled.div`
@@ -114,9 +95,9 @@ const _DashboardSubmitterSubmissions = ({className, history, children}) => {
                 allFilterPhases={AllPhases} defaultActiveFilterPhases={ActivePhases} showFilter={false}
                 showOnHoldSubmissions={null} renderNoSubmissions={renderNoSubmissions}>
 
-                <CreateNewSubmissionButton onClick={handleCreateNewSubmission}>
-                    <span>+</span>Create New Submission&hellip;
-                </CreateNewSubmissionButton>
+                <PrimaryInlineButton icon={<FaPlus />} bordered={true} onClick={handleCreateNewSubmission}>
+                    Create New Submission
+                </PrimaryInlineButton>
 
                 {children}
 
