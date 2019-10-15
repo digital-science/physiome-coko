@@ -125,6 +125,11 @@ const PrimaryInlineButton = styled(InlineButton)`
   &.bordered:hover {
     background: #1377d5;
   }
+  
+  &.bordered > svg {
+    color: white;
+  }
+
 `;
 
 const SmallPrimaryInlineButton = styled(SmallInlineButton)`
