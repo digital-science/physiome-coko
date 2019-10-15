@@ -1,5 +1,3 @@
-import {fileCount} from "./shared/validations";
-
 module.exports = {};
 
 const { registerConditionFunction } = require('client-workflow-model/ConditionFunctions');
