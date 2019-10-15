@@ -20,6 +20,11 @@ const getDbConfig = () => {
     return {};
 };
 
+if(!process.env.PUBSWEET_SERVER_SECRET) {
+    console.error(`The environment variable "PUBSWEET_SERVER_SECRET" must be defined. This value should not be disclosed as it is used to sign JSON Web Tokens.`);
+    process.exit(1);
+}
+
 
 const values = {
 
@@ -42,7 +47,7 @@ const values = {
         port: 3000,
         logger,
         uploads: 'uploads',
-        secret: 'SECRET',
+        secret: process.env.PUBSWEET_SERVER_SECRET,
         enableExperimentalGraphql: true,
         graphiql: true
     },
