@@ -200,7 +200,7 @@ instance Submission {
         { iupsCommission => (hasValue(iupsCommission)), "A manuscript commission type is required. Please select one." }
 
 
-        { articleFiles => (length(articleFiles) > 0), "At least one manuscript file needs to be uploaded for your submission. Please upload a file." }
+        { articleFiles => (fileCount(articleFiles) > 0), "At least one manuscript file needs to be uploaded for your submission. Please upload a file." }
 
 
         { primaryPapers => (length(primaryPapers) > 0), "At least one primary paper citation is required. Please add an article citation for a primary paper." }
@@ -214,6 +214,13 @@ instance Submission {
 
 
         { priceAcknowledged => (priceAcknowledged == true), "You must acknowledge your acceptance of the associated curation fee associated with the submission." }
+
+
+        { modelFiles => (modelSource != ModelSourceType.UserUploaded || fileCount(modelFiles) > 0), "At least one model file needs to be uploaded for your submission. Please upload a file." }
+
+        { modelPmrWorkspaceUri => (modelSource != ModelSourceType.PMRWorkspace || validUri(modelPmrWorkspaceUri)), "A valid PMR workspace location must be specified. Please enter a valid URL above." }
+
+        { modelRepositoryUri => (modelSource != ModelSourceType.OtherRepository || validUri(modelRepositoryUri)), "A valid repository location must be specified. Please enter a valid URL above." }
     }
 
 
