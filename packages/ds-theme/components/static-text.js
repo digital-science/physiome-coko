@@ -25,4 +25,9 @@ const DisabledStaticText = styled(StaticText)`
     color: #b3b3b3;
 `;
 
-export { LargeStaticText, DisabledStaticText };
+const NoteStaticText = styled(StaticText)`
+  font-style: italic;
+  color: #3c3c3c;
+`;
+
+export { LargeStaticText, DisabledStaticText, NoteStaticText };
