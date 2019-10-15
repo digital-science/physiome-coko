@@ -282,9 +282,14 @@ instance Submission {
 
         { FundingListing => funding, label:"Funding Acknowledgements" }
 
-        { StaticText => modelPmrWorkspaceUri, label:"Associated PMR Workspace" }
-
         { FilesListing => articleFiles, label:"Manuscript Files" }
+
+        { StaticText => modelPmrWorkspaceUri, (modelSource == ModelSourceType.PMRWorkspace), label:"PMR Workspace URL", url:true }
+
+        { StaticText => modelRepositoryUri, (modelSource == ModelSourceType.OtherRepository), label:"Repository URL", url:true }
+
+        { FilesListing => modelFiles, (modelSource == ModelSourceType.UserUploaded), label:"Model Files" }
+
 
         { FilesListing => supplementaryFiles, label:"Supplementary Files" }
     }
