@@ -10,6 +10,7 @@ import { ConfirmationDialogContext } from './form-field-button';
 import { Select, SmallSelect } from 'ds-theme/components/select-input';
 import { BlockLabel } from 'ds-theme/components/label';
 import ValidationIssueListing from 'ds-theme/components/validation-issue-listing';
+import {NoteStaticText} from "ds-theme/components/static-text";
 
 
 function FormFieldSelect({data, binding, description, formDefinition, formValidator, context, options = {}}) {
@@ -17,6 +18,7 @@ function FormFieldSelect({data, binding, description, formDefinition, formValida
     const [value, _, handleInputChange] = useFormValueBinding(data, binding, "", (v) => v || "");
     const [validationIssues, clearValidationIssues] = useFormValidation(description, formDefinition, formValidator);
     const isInsideConfirmationDialog = context && context[0] === ConfirmationDialogContext;
+    const { message = null } = options;
 
     const handleInputChangeWithIssuesClear = (e) => {
         clearValidationIssues();
@@ -51,7 +53,7 @@ function FormFieldSelect({data, binding, description, formDefinition, formValida
         <React.Fragment>
             {options.label ? <BlockLabel className={isInsideConfirmationDialog ? 'dialog' : ''}>{options.label}</BlockLabel> : null}
             {selectInput}
-            { validationIssues ? <ValidationIssueListing issues={validationIssues} /> : null }
+            {validationIssues ? <ValidationIssueListing issues={validationIssues} /> : (message ? <NoteStaticText dangerouslySetInnerHTML={{__html: message}} /> : null)}
         </React.Fragment>
     );
 }
@@ -75,6 +77,11 @@ export default styled(withFormField(FormFieldSelect))`
        border: 1px solid #b1b1b1;
        background: white;
        margin-top: 4px;
+  }
+  
+  & > ${NoteStaticText} {
+    display: block;
+    margin-top: 4px;
   }
 
 `;
