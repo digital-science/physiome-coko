@@ -9,7 +9,7 @@ import useFormValidation from "../../hooks/useFormValidation";
 
 import Label, { BlockLabel } from "ds-theme/components/label";
 import InlineButton from "ds-theme/components/inline-button";
-import { DisabledStaticText } from 'ds-theme/components/static-text';
+import { DisabledStaticText, NoteStaticText } from 'ds-theme/components/static-text';
 import { FaPlus } from 'react-icons/fa';
 
 import ArticleCitationEditorCard, { RemoveButtonType } from '../article-citation-editor-card';
@@ -58,7 +58,11 @@ const ArticleCitationEditorCardHolder = styled.div`
       box-shadow: inset 0 0 6px #d10f008c;
       border-color: #d10f00;
     }
-
+    
+    & > ${NoteStaticText} {
+      padding: 8px;
+      display: block;
+    }
 `;
 
 const DraggableArticleCitationEditorCard = ({citationId, index, ...props}) => {
@@ -79,6 +83,7 @@ function FormFieldArticleCitationListEditor({ className, data, binding, descript
 
     const [citations, setCitations] = useFormValueBindingForComplexObject(data, binding, []);
     const [validationIssues, clearValidationIssues] = useFormValidation(description, formDefinition, formValidator);
+    const { note = null } = options;
 
     const addCitation = () => {
 
@@ -145,6 +150,8 @@ function FormFieldArticleCitationListEditor({ className, data, binding, descript
                         )}
                     </Droppable>
                 </DragDropContext>
+
+                {note && (!citations || !citations.length) ? <NoteStaticText>{note}</NoteStaticText> : null }
 
                 <div className="button-holder">
                     <InlineButton icon={<FaPlus />} bordered={true} onClick={addCitation}>Add Article Citation</InlineButton>
