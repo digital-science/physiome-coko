@@ -101,12 +101,13 @@ const SimpleFileListing = styled(({className, files, instanceId, instanceType}) 
 function FormFieldFilesListing({ data, binding, instanceId, instanceType, options = {} }) {
 
     const [fileListing] = withFormFieldData(data, binding);
+    const filteredFiles = fileListing ? fileListing.filter(f => f.removed !== true) : null;
 
     return (
         <FileListingHolder className={"form-field-files"}>
             {options.label ? <BlockLabel>{options.label}</BlockLabel> : null}
-            {fileListing && fileListing.length
-                ? <SimpleFileListing files={fileListing} instanceId={instanceId} instanceType={instanceType} />
+            {filteredFiles && filteredFiles.length
+                ? <SimpleFileListing files={filteredFiles} instanceId={instanceId} instanceType={instanceType} />
                 : <DisabledStaticText>No files uploaded.</DisabledStaticText>
             }
         </FileListingHolder>
