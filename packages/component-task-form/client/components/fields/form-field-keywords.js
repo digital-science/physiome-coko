@@ -42,7 +42,7 @@ function _FormFieldKeywordsListing({className, data, binding, options = {}}) {
                         <li key={index}>{tag}</li>
                     )}
                 </ol>
-            ) : <div className="empty">No keywords supplied</div>
+            ) : <div className="empty">No keywords specified.</div>
             }
         </div>
     );

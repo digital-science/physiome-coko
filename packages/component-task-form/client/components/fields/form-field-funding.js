@@ -235,7 +235,7 @@ function _FormFieldFundingListing({ className, data, binding, instanceId, instan
         <div className={className}>
             {options.label ? <BlockLabel>{options.label}</BlockLabel> : null}
             {(funding && funding instanceof Array && funding.length) ?
-                <FundingListing funding={funding} /> : <DisabledStaticText>No Funding Acknowledgements were specified</DisabledStaticText>
+                <FundingListing funding={funding} /> : <DisabledStaticText>No funding acknowledgements specified.</DisabledStaticText>
             }
         </div>
     );
