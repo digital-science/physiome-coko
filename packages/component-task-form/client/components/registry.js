@@ -7,6 +7,7 @@ import FormFieldButton from './fields/form-field-button';
 import FormFieldCheckbox from './fields/form-field-check-box';
 import FormFieldHeroCheckbox from './fields/form-field-hero-checkbox';
 import FormFieldSelect from './fields/form-field-select';
+import FormFieldNote from './fields/form-field-note';
 
 import FormFieldInlineTask from './fields/form-field-inline-task';
 import FormFieldViewerEditorLayout from './fields/form-field-viewer-editor-layout';
@@ -59,6 +60,7 @@ const FormFieldRegistry = {
 
     // Static details form fields
     'StaticText' : FormFieldStaticText,
+    'Note': FormFieldNote,
 
     'Group': FormFieldGroup,
     'ShadowedEditor' : FormFieldShadowedEditor,
