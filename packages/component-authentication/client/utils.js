@@ -14,3 +14,21 @@ function findEmailCodeInLocationHash(hash) {
 }
 
 export { findEmailCodeInLocationHash };
+
+
+function installUserAuthChangedNotifier(callback) {
+
+    const handleLocalStorageChanged = (e) => {
+        if(callback && e.key === "token") {
+            callback();
+        }
+    };
+
+    window.addEventListener('storage', handleLocalStorageChanged);
+
+    return () => {
+        window.removeEventListener('storage', handleLocalStorageChanged);
+    };
+}
+
+export { installUserAuthChangedNotifier };

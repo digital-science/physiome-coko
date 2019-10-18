@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useContext } from 'react';
 import gql from 'graphql-tag';
-import { useQuery } from 'react-apollo-hooks';
+import { useApolloClient, useQuery } from 'react-apollo-hooks';
+import AuthenticationTokenContext from "./AuthenticationTokenContext";
 
 const EmailValidationOutcome = {
     Successful: 'Successful',
@@ -38,7 +39,9 @@ query CurrentUser($emailValidationToken:String) {
   }
 }`;
 
+    const client = useApolloClient();
     const r = useQuery(getCurrentUser, queryOptions);
+    const authContext = useContext(AuthenticationTokenContext);
 
     useEffect(() => {
         const handleLocalStorageChanged = (e) => {
@@ -54,9 +57,22 @@ query CurrentUser($emailValidationToken:String) {
         };
     });
 
-    if(r.data && r.data.currentUser) {
-        r.currentUser = r.data.currentUser.user;
-        r.emailValidationTokenOutcome = r.data.currentUser.emailValidationTokenOutcome || null;
+    if(r.data) {
+
+        if(r.data.currentUser) {
+
+            r.currentUser = r.data.currentUser.user;
+            r.emailValidationTokenOutcome = r.data.currentUser.emailValidationTokenOutcome || null;
+
+        } else if(r.data.currentUser === null) {
+
+            // If the current user is null (after a successful request), and the local storage provided
+            // a token, and it matches the current auth context token,
+            if(authContext.token && authContext.token === localStorage.getItem('token')) {
+                console.info(`Auth token is invalid, removing local storage entry for token.`);
+                window.localStorage.removeItem("token");
+            }
+        }
     }
     return r;
 };
