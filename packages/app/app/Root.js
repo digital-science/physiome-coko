@@ -4,7 +4,7 @@
 */
 
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect, useMemo } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { ThemeProvider } from 'styled-components';
@@ -22,13 +22,18 @@ import { Normalize } from 'styled-normalize';
 import desc from './../config/description.json';
 import { WorkflowDescriptionContext, WorkflowDescription } from 'client-workflow-model';
 
+import { installUserAuthChangedNotifier } from 'component-authentication/client/utils';
+import AuthenticationTokenContext from 'component-authentication/client/AuthenticationTokenContext';
+
 const clientWorkflowDescription = new WorkflowDescription(desc);
 
 
-const makeApolloClient = (makeConfig, connectToWebSocket) => {
+const makeApolloClient = (makeConfig, connectToWebSocket, authContext) => {
     const httpLink = createHttpLink();
     const authLink = setContext((_, { headers }) => {
         const token = localStorage.getItem('token');
+        authContext.token = token;
+
         return {
             headers: {
                 ...headers,
@@ -36,7 +41,10 @@ const makeApolloClient = (makeConfig, connectToWebSocket) => {
             },
         }
     });
+
     let link = authLink.concat(httpLink);
+    let subscriptionClient = null;
+
     if (connectToWebSocket) {
 
         const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
@@ -44,7 +52,10 @@ const makeApolloClient = (makeConfig, connectToWebSocket) => {
             uri: `${wsProtocol}://${window.location.host}/subscriptions`,
             options: {
                 reconnect: true,
-                connectionParams: () => ({ authToken: localStorage.getItem('token') }),
+                lazy: true,
+                connectionParams: () => ({
+                    authToken: localStorage.getItem('token')
+                }),
             },
         });
         link = split(
@@ -54,7 +65,13 @@ const makeApolloClient = (makeConfig, connectToWebSocket) => {
             },
             wsLink,
             link,
-        )
+        );
+
+        subscriptionClient = wsLink.subscriptionClient;
+
+        if(!localStorage.getItem('token') && subscriptionClient) {
+            subscriptionClient.close(true, true);
+        }
     }
 
     const config = {
@@ -62,7 +79,7 @@ const makeApolloClient = (makeConfig, connectToWebSocket) => {
         cache: new InMemoryCache()
     };
 
-    return new ApolloClient(makeConfig ? makeConfig(config) : config)
+    return {client:new ApolloClient(makeConfig ? makeConfig(config) : config), subscriptionClient};
 };
 
 const Root = ({
@@ -73,7 +90,27 @@ const Root = ({
     connectToWebSocket = true,
 }) => {
 
-    const client = makeApolloClient(makeApolloConfig, connectToWebSocket);
+    const authContext = useMemo(() => { return {}; });
+    const {client, subscriptionClient} = makeApolloClient(makeApolloConfig, connectToWebSocket, authContext);
+
+    useEffect(() => {
+
+        return installUserAuthChangedNotifier(() => {
+
+            // When authentication status changes, we either force a connection for subscription WebSockets
+            // or force close the current WebSocket connection.
+
+            if(!subscriptionClient) {
+                return;
+            }
+
+            if(localStorage.getItem('token')) {
+                subscriptionClient.connect();
+            } else {
+                subscriptionClient.close(true, true);
+            }
+        });
+    });
 
     return (
         <Fragment>
@@ -81,11 +118,13 @@ const Root = ({
             <WorkflowDescriptionContext.Provider value={clientWorkflowDescription}>
                 <ApolloProvider client={client}>
                     <ApolloHooksProvider client={client}>
-                        <BrowserRouter>
-                            <ThemeProvider theme={theme}>
-                                {routes}
-                            </ThemeProvider>
-                        </BrowserRouter>
+                        <AuthenticationTokenContext.Provider value={authContext}>
+                            <BrowserRouter>
+                                <ThemeProvider theme={theme}>
+                                    {routes}
+                                </ThemeProvider>
+                            </BrowserRouter>
+                        </AuthenticationTokenContext.Provider>
                     </ApolloHooksProvider>
                 </ApolloProvider>
             </WorkflowDescriptionContext.Provider>
