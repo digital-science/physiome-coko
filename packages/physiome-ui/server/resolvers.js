@@ -1,59 +1,93 @@
 const WorkflowModel = require('component-workflow-model/model');
 const { Submission } = WorkflowModel.models;
 
-const logger = require('workflow-utils/logger-with-prefix')('dashboard/server');
+const { resolveUserForContext } = require('component-workflow-model/shared-helpers/access');
+const { AuthorizationError, NotFoundError } = require('@pubsweet/errors');
+
+const AclRule = require('client-workflow-model/AclRule');
+const AclActions = AclRule.Actions;
+
+const logger = require('workflow-utils/logger-with-prefix')('physiome-ui/server');
+
 
 module.exports = {
 
     Mutation: {
 
-        claimSubmission: async (instance, args, context, info) => {
+        claimSubmission: async (instance, { id:submissionId }, context, info) => {
 
-            // FIXME: apply ACL security checks onto this request to modify a submission
-
-            const userId = context.user;
-            if(!userId) {
-                return false;
-            }
-
-            const submissionId = args.id;
             if(!submissionId) {
                 return false;
             }
 
-            const submission = await Submission.find(submissionId);
+            const [submission, user] = await Promise.all([
+                Submission.find(submissionId),
+                resolveUserForContext(context)
+            ]);
+
             if(!submission) {
-                return false;
+                logger.error(`claim submission - unable to resolve submission (id = ${submissionId})`);
+                return new NotFoundError(`Unable to find submission for curator modification.`);
             }
 
-            submission.curatorId = userId;
+            if(!user) {
+                logger.error(`claim submission - unable to resolve user for grqphql context`);
+                return new Error(`Logged in user required to modify submission curator.`);
+            }
+
+            const { access, accessMatch } = submission.checkUserAccess(user, AclActions.Write);
+            if(!access || !accessMatch) {
+                logger.info(`claim submission - no access or access match for write action`);
+                return new AuthorizationError(`Modification of submission curator not allowed.`);
+            }
+
+            const { allowedFields = [] } = accessMatch;
+            if(allowedFields.indexOf('curator') === -1) {
+                logger.info(`claim submission - no access to curator field`);
+                return new AuthorizationError(`Modification of submission curator not allowed.`);
+            }
+
+            submission.curatorId = user.id;
             await submission.save();
             await submission.publishWasModified();
 
             return true;
         },
 
-        unclaimSubmission: async (instance, args, context, info) => {
+        unclaimSubmission: async (instance, { id:submissionId }, context, info) => {
 
-            // FIXME: apply ACL security checks onto this request to modify a submission
-
-            const userId = context.user;
-            if(!userId) {
-                return false;
-            }
-
-            const submissionId = args.id;
             if(!submissionId) {
                 return false;
             }
 
-            const submission = await Submission.find(submissionId);
+            const [submission, user] = await Promise.all([
+                Submission.find(submissionId),
+                resolveUserForContext(context)
+            ]);
+
             if(!submission) {
-                return false;
+                logger.error(`unclaim submission - unable to resolve submission (id = ${submissionId})`);
+                return new NotFoundError(`Unable to find submission for curator modification.`);
             }
 
-            if(submission.curatorId === userId) {
+            if(!user) {
+                logger.error(`unclaim submission - unable to resolve user for grqphql context`);
+                return new Error(`Logged in user required to modify submission curator.`);
+            }
 
+            const { access, accessMatch } = submission.checkUserAccess(user, AclActions.Write);
+            if(!access || !accessMatch) {
+                logger.info(`unclaim submission - no access or access match for write action`);
+                return new AuthorizationError(`Modification of submission curator not allowed.`);
+            }
+
+            const { allowedFields = [] } = accessMatch;
+            if(allowedFields.indexOf('curator') === -1) {
+                logger.info(`unclaim submission - no access to curator field`);
+                return new AuthorizationError(`Modification of submission curator not allowed.`);
+            }
+
+            if(submission.curatorId === user.id) {
                 submission.curatorId = null;
                 await submission.save();
                 await submission.publishWasModified();
@@ -62,23 +96,33 @@ module.exports = {
             return true;
         },
 
-        restartRejectedSubmission: async (instance, args, context, info) => {
+        restartRejectedSubmission: async (instance, { id:submissionId }, context, info) => {
 
-            // FIXME: apply ACL security checks onto this request (to modify a submission)
-
-            const userId = context.user;
-            if(!userId) {
-                return false;
-            }
-
-            const submissionId = args.id;
             if(!submissionId) {
                 return false;
             }
 
-            const submission = await Submission.find(submissionId);
+            const [submission, user] = await Promise.all([
+                Submission.find(submissionId),
+                resolveUserForContext(context)
+            ]);
+
             if(!submission) {
-                return false;
+                return new NotFoundError(`Unable to find submission for curator modification.`);
+            }
+
+            if(!user) {
+                return new Error(`Logged in user required to modify submission curator.`);
+            }
+
+            const isAdmin = (user.finalisedAccessGroups || []).indexOf('administrator') !== -1;
+            if(!isAdmin) {
+                return new AuthorizationError(`Restarting rejected submission restricted to administrators only.`);
+            }
+
+            const { access, accessMatch } = submission.checkUserAccess(user, AclActions.Task);
+            if(!access || !accessMatch) {
+                return new AuthorizationError(`Restarting rejected submission not allowed.`);
             }
 
             if(submission.phase !== "reject") {
@@ -92,23 +136,33 @@ module.exports = {
             return !!(await submission.restartWorkflow("StartEvent_ResumeRejected"));
         },
 
-        republishSubmission: async (instance, args, context, info) => {
+        republishSubmission: async (instance, { id:submissionId }, context, info) => {
 
-            // FIXME: apply ACL security checks onto this request (to modify a submission)
-
-            const userId = context.user;
-            if(!userId) {
-                return false;
-            }
-
-            const submissionId = args.id;
             if(!submissionId) {
                 return false;
             }
 
-            const submission = await Submission.find(submissionId);
+            const [submission, user] = await Promise.all([
+                Submission.find(submissionId),
+                resolveUserForContext(context)
+            ]);
+
             if(!submission) {
-                return false;
+                return new NotFoundError(`Unable to find submission for republishing.`);
+            }
+
+            if(!user) {
+                return new Error(`Logged in user required to republish submission.`);
+            }
+
+            const isAdmin = (user.finalisedAccessGroups || []).indexOf('administrator') !== -1;
+            if(!isAdmin) {
+                return new AuthorizationError(`Republishing submission restricted to administrators only.`);
+            }
+
+            const { access, accessMatch } = submission.checkUserAccess(user, AclActions.Task);
+            if(!access || !accessMatch) {
+                return new AuthorizationError(`Republishing submission not allowed.`);
             }
 
             if(submission.phase !== "published") {
