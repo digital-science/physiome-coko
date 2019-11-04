@@ -36,7 +36,7 @@ const SimpleSubmissionListingColumns = [
 
     createDateColumn("Date", 'submissionDate'),
 
-    createStatusColumn("Status", ['phase', 'hidden', 'curator.id'], SubmissionStatusPill, {}, {ignoreHidden:true}),
+    createStatusColumn("Status", ['phase', 'hidden'], SubmissionStatusPill, {}, {ignoreHidden:true}),       // Note: submitters don't see the "checking" phase
 
     createIdentityColumn("Submitter", "submitter")
 ];
