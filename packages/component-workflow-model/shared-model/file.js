@@ -4,8 +4,10 @@ const { Identity } = require('./identity');
 const AclRule = require('client-workflow-model/AclRule');
 const AclActions = AclRule.Actions;
 
-const { lookupInstanceByUrlMapping } = require('./../dsl-model/instance-registry');
+const { lookupInstanceByUrlMapping, lookupInstance } = require('./../dsl-model/instance-registry');
+const { resolveUserForContext, userIdentityIdForContext } = require('../shared-helpers/access');
 
+const { AuthorizationError, NotFoundError } = require('@pubsweet/errors');
 const jwt = require('jsonwebtoken');
 const AWS = require('aws-sdk');
 const uuid = require('uuid/v5');
@@ -47,9 +49,28 @@ class File extends BaseModel {
                 storageKey: { type: ['string', 'null'] },
                 storageType: { type: ['string', 'null'] },
 
-                confirmed: { type: ['boolean', 'null'] }
+                confirmed: { type: ['boolean', 'null'] },
+
+                uploaderId: { type:['string', 'null'], format:'uuid'} }
+        };
+    }
+
+    static get relationMappings() {
+
+        return {
+            uploader: {
+                relation: BaseModel.BelongsToOneRelation,
+                modelClass: Identity,
+                join: {
+                    from: `${this.tableName}.uploaderId`,
+                    to: `${Identity.tableName}.id`
+                }
             }
         };
+    }
+
+    static get defaultEager () {
+        return 'uploader';
     }
 
     s3Object(ownerTypeModel, ownerId, extraParams={}) {
@@ -74,34 +95,120 @@ exports.resolvers = {
 
     Mutation: {
 
-        createFileUploadSignedUrl: function(_, {input:{signature}}) {
-
-            // FIXME: based on the owner type and owner id, we need to check that the current user is allowed to access the object
-            // and also possibly the file collection this is going to be added to??
-            // or do we check that the user has access to any file collection ???
+        createFileUploadSignedUrl: async function(_, {input:{signature}}, context) {
 
             const {ownerType, ownerId, fileName, mimeType} = signature;
+            if(!ownerType || !ownerId) {
+                return new Error("Invalid file upload signature provided.");
+            }
 
-            return createSignedFileUpload(ownerType, ownerId, fileName, mimeType).then(result => {
+            const OwnerTypeModel = lookupInstance(ownerType);
+            if(!OwnerTypeModel) {
+                return new Error("Unknown model type in file signature.");
+            }
+
+            const fileRelations = _fileRelationsForOwnerModel(OwnerTypeModel);
+            if(!fileRelations || !fileRelations.length) {
+                return new Error("Object definition does not have associated files.");
+            }
+
+            const [object, user] = await Promise.all([
+                OwnerTypeModel.find(ownerId),
+                resolveUserForContext(context)
+            ]);
+
+            if(!object) {
+                return new NotFoundError("Owning object for file not found.");
+            }
+
+            if(!user) {
+                throw new AuthorizationError("Uploading files requires a valid current user.");
+            }
+
+
+            // For the model object, resolve the access the current user has for performing "writes".
+            // For the matching acl rules, we filter the file relation fields against the allowed fields.
+            // Users are only allowed to confirm a file if they can currently write to a file field.
+
+            const { access, accessMatch } = object.checkUserAccess(user, AclActions.Write);
+            if(!access) {
+                throw new AuthorizationError("User not authorised to modify the files owning object.");
+            }
+
+            const { allowedFields = [] } = accessMatch;
+            const filteredFileRelations = fileRelations.filter(r => allowedFields.indexOf(r.field) !== -1);
+
+            if(!filteredFileRelations.length) {
+                throw new AuthorizationError("No write access to file fields for specified object.");
+            }
+
+
+            return createSignedFileUpload(OwnerTypeModel, ownerId, fileName, mimeType).then(result => {
                 return {signedUrl:result.url, fileId:result.fileId, signature};
             });
         },
 
-        confirmFileUpload: async function(_, {input:{signedUrl, fileId, signature, fileByteSize}}) {
+        confirmFileUpload: async function(_, {input:{signedUrl, fileId, signature, fileByteSize}}, context) {
 
-            // FIXME: we need to double check the users access to the owning object (via signature) and then also ensure that the file is present within the S3 bucket
+            const uploaderId = userIdentityIdForContext(context);
+            const {ownerType, ownerId, fileName, mimeType} = signature;
+            if(!ownerType || !ownerId) {
+                return new Error("Invalid file upload signature provided.");
+            }
 
-            const {fileName, mimeType} = signature;
+            const OwnerTypeModel = lookupInstance(ownerType);
+            if(!OwnerTypeModel) {
+                return new Error("Unknown model type in file signature.");
+            }
+
+            const fileRelations = _fileRelationsForOwnerModel(OwnerTypeModel);
+            if(!fileRelations || !fileRelations.length) {
+                return new Error("Object definition does not have associated files.");
+            }
+
+
+            const [object, user] = await Promise.all([
+                OwnerTypeModel.find(ownerId),
+                resolveUserForContext(context)
+            ]);
+
+            if(!object) {
+                return new NotFoundError("Owning object for file not found.");
+            }
+
+            if(!user) {
+                throw new AuthorizationError("Uploading files requires a valid current user.");
+            }
+
+
+            // For the model object, resolve the access the current user has for performing "writes".
+            // For the matching acl rules, we filter the file relation fields against the allowed fields.
+            // Users are only allowed to confirm a file if they can currently write to a file field.
+
+            const { access, accessMatch } = object.checkUserAccess(user, AclActions.Write);
+            if(!access) {
+                throw new AuthorizationError("User not authorised to modify the files owning object.");
+            }
+
+            const { allowedFields = [] } = accessMatch;
+            const filteredFileRelations = fileRelations.filter(r => allowedFields.indexOf(r.field) !== -1);
+
+            if(!filteredFileRelations.length) {
+                throw new AuthorizationError("No write access to file fields for specified object.");
+            }
+
+            const currentDateTime = new Date().toISOString();
             const file = new File({
-                created: new Date().toISOString(),
-                updated: new Date().toISOString(),
+                created: currentDateTime,
+                updated: currentDateTime,
                 fileName,
                 fileDisplayName:fileName,
                 fileMimeType: mimeType,
                 fileByteSize: fileByteSize,
                 storageKey: fileId,
                 storageType: StorageTypeExternalS3,
-                confirmed: true
+                confirmed: true,
+                uploaderId: uploaderId
             });
 
             await file.save();
@@ -113,22 +220,16 @@ exports.resolvers = {
 
 
 
-function createSignedFileUpload(ownerType, ownerId, fileName, contentType) {
+function createSignedFileUpload(OwnerTypeModel, ownerId, fileName, contentType) {
 
-    const { models } = require('component-workflow-model/model');
-    const ownerTypeModel = models[ownerType];
-    if(!ownerTypeModel) {
-        return Promise.reject(new Error("Object type not defined."));
-    }
-
-    if(!ownerTypeModel.fileStorageKey) {
+    if(!OwnerTypeModel.fileStorageKey) {
         return Promise.reject(new Error("Object type does not define a file storage key."));
     }
 
     return new Promise((resolve, reject) => {
 
         const fileId =  '' + uuid(WorkflowFilesConfig.fileIdentifierDomain || 'workflow-dev.ds-innovation-experiments.com', uuid.DNS) +  '-' + fileName.replace(/[^A-Za-z0-9.]/g, "");
-        const fileKey = ownerTypeModel.fileStorageKey + '/' + ownerId + '/' + fileId;
+        const fileKey = OwnerTypeModel.fileStorageKey + '/' + ownerId + '/' + fileId;
 
         const params = {
             Bucket: WorkflowFilesConfig.bucket,
@@ -296,8 +397,16 @@ function clientDownloadFileHandler(app) {
         });
 
     });
-
 }
+
+
+function _fileRelationsForOwnerModel(ownerTypeModel) {
+
+    return (ownerTypeModel.relationFields || []).filter(f => (f.type === "File" || f.type === "ExtendedFile"));
+}
+
+
+
 
 exports.serverSetup = function serverSetup(app) {
     return clientDownloadFileHandler(app);

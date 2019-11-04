@@ -22,6 +22,7 @@ type File {
 
     order: Int
     removed: Boolean
+    uploader: Identity
 }
 
 # Note: extended file is used when a file needs to support a type or a label
@@ -42,6 +43,8 @@ type ExtendedFile {
 
     order: Int
     removed: Boolean
+    uploader: Identity
+
     type: String
     label: String
 }
