@@ -94,25 +94,19 @@ async function createCheckoutSession(submissionId, emailAddress = null) {
 
 
 
-exports.generateCheckoutSessionForSubmission = async function generateCheckoutSessionForSubmission(submissionId, identity) {
+exports.generateCheckoutSessionForSubmission = async function generateCheckoutSessionForSubmission(submission, identity) {
 
-    const submission = await Submission.find(submissionId);
     const [aclTargets, isOwner] = Submission.userToAclTargets(identity, submission);
 
-    if(!submission) {
-        logger.debug(`unable to find submission to creaye checkout session (submissionId = ${submissionId}) `);
-        throw new NotFoundError('Submission was not found');
-    }
-
-    // FIXME: this should become an ACL that controls payment in general rather than limiting to owner/admin...
+    // Note: this could become an ACL that controls payment in general rather than limiting to owner/admin...
     if(!aclTargets || (aclTargets.indexOf("owner") === -1 && aclTargets.indexOf("administrator") === -1)) {
-        logger.warn(`unable to generate checkout session as user is not owner/admin on submission (submissionId = ${submissionId}) `);
+        logger.warn(`unable to generate checkout session as user is not owner/admin on submission (submissionId = ${submission.id}) `);
         throw new AuthorizationError(`Submission is not owned by logged in user.`);
     }
 
     // If the payment has already been completed then we don't generate a new checkout submission.
     if(submission.paymentCompleted === true) {
-        logger.debug(`new checkout session requested on already paid submission (submissionId = ${submissionId}) `);
+        logger.debug(`new checkout session requested on already paid submission (submissionId = ${submission.id}) `);
         return {status:SubmissionCheckoutStatus.AlreadyPaid};
     }
 
@@ -137,9 +131,9 @@ exports.generateCheckoutSessionForSubmission = async function generateCheckoutSe
         // Otherwise, we need to create a new session. After creating the new session we need to ensure that the same payment session we started with
         // is still in place.
 
-        return createCheckoutSession(submissionId, identity ? identity.email : null).then(async session => {
+        return createCheckoutSession(submission.id, identity ? identity.email : null).then(async session => {
 
-            logger.debug(`received new checkout session via Stripe API (submissionId = ${submissionId}, sessionId = ${session.id}) `);
+            logger.debug(`received new checkout session via Stripe API (submissionId = ${submission.id}, sessionId = ${session.id}) `);
 
             submission.paymentSessionId = session.id;
 
@@ -161,7 +155,7 @@ exports.generateCheckoutSessionForSubmission = async function generateCheckoutSe
                 throw e;
             }
 
-            logger.debug(`successfully saved checkout session to submission, returning status of success to client (submissionId = ${submissionId}, sessionId = ${session.id}) `);
+            logger.debug(`successfully saved checkout session to submission, returning status of success to client (submissionId = ${submission.id}, sessionId = ${session.id}) `);
             return {status:SubmissionCheckoutStatus.Success, sessionId:session.id};
         });
 

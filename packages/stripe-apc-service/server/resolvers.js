@@ -1,10 +1,12 @@
 const { generateCheckoutSessionForSubmission } = require('./SubmissionPaymentHandling');
 const logger = require("workflow-utils/logger-with-prefix")('stripe-apc-service');
 
-const { AuthorizationError } = require('@pubsweet/errors');
+const { AuthorizationError, NotFoundError } = require('@pubsweet/errors');
 
 const { models } = require('component-workflow-model/model');
-const { Identity } = models;
+const { resolveUserForContext } = require('component-workflow-model/shared-helpers/access');
+
+const { Submission } = models;
 
 
 module.exports = () => {
@@ -12,23 +14,28 @@ module.exports = () => {
     return {
         Query: {
 
-            checkoutSessionForSubmission: (ctxt, input, context, info) => {
+            checkoutSessionForSubmission: async (ctxt, { submissionId }, context, info) => {
 
-                // FIXME: check for user auth, user should have access to the submission in question
-                const { submissionId } = input;
+                const [submission, user] = await Promise.all([
+                    Submission.find(submissionId),
+                    resolveUserForContext(context)
+                ]);
 
-                return Identity.find(context.user).then(user => {
+                if(!user) {
+                    return Promise.reject(new AuthorizationError("No current user authenticated."));
+                }
 
-                    if(!user) {
-                        return Promise.reject(new AuthorizationError("No current user authenticated."));
-                    }
+                if(!submission) {
+                    logger.debug(`unable to find submission to create checkout session (submissionId = ${submissionId}) `);
+                    throw new NotFoundError('Submission was not found');
+                }
 
-                    return generateCheckoutSessionForSubmission(submissionId, user).catch(err => {
-                        logger.error("checkoutSessionForSubmission failed due to: " + err.toString());
-                        return Promise.reject(err);
-                    });
+                // Note: generateCheckoutSessionForSubmission performs ACL checking to ensure user is allowed to generate a checkout session.
+
+                return generateCheckoutSessionForSubmission(submission, user).catch(err => {
+                    logger.error("checkoutSessionForSubmission failed due to: " + err.toString());
+                    return Promise.reject(err);
                 });
-
             }
 
         }
