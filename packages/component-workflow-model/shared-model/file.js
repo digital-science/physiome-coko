@@ -69,6 +69,26 @@ class File extends BaseModel {
         };
     }
 
+    // Required for relation resolution
+    static get relationFieldNames() {
+        return ['uploader'];
+    }
+
+    // Required for relation resolution
+    static get belongsToOneRelationFields() {
+        return [
+            {
+                field: {
+                    field: 'uploader',
+                    type: 'Identity',
+                    joinField: 'uploaderId',
+                    model: Identity
+                },
+                join: 'uploaderId'
+            }
+        ];
+    }
+
     static get defaultEager () {
         return 'uploader';
     }
