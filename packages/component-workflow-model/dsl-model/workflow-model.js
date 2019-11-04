@@ -11,6 +11,7 @@ const LoggerWithPrefix = require('workflow-utils/logger-with-prefix');
 const GraphQLHelper = require('./graphql-helper');
 const { lookupModel } = require('./model-registry');
 const { Identity } = require('../shared-model/identity');
+const { resolveUserForContext } = require('../shared-helpers/access');
 
 const _AllowedAdditionalReadFields = ['id', 'created', 'updated', 'tasks', 'restrictedFields'];
 const _Tab = GraphQLHelper.Tab;
@@ -209,6 +210,7 @@ class WorkflowModel extends BaseModel {
 
         return object.copyAllowedFieldsAsObject(aclTargets, topLevelFields);
     }
+
 
     static async listingQueryEndpoint(ctxt, input, context, info) {
 
@@ -695,19 +697,7 @@ class WorkflowModel extends BaseModel {
 
 
     static async resolveUserForContext(context) {
-
-        if(!context || !context.user) {
-            return null;
-        }
-
-        if(context.resolvedUser) {
-            return context.resolvedUser;
-        }
-
-        return Identity.find(context.user).then((user) => {
-            context.resolvedUser = user;
-            return user;
-        });
+        return resolveUserForContext(context);
     }
 
     static userToAclTargets(user, object) {
@@ -755,6 +745,22 @@ class WorkflowModel extends BaseModel {
         }
 
         return (isOwner && restrictions.indexOf("own") !== -1);
+    }
+
+    checkUserAccess(user, action) {
+
+        const Model = this.constructor;
+        const [aclTargets, isOwner] = Model.userToAclTargets(user, this);
+
+        if(Model.aclSet) {
+
+            const accessMatch = Model.aclSet.applyRules(aclTargets, action, this);
+            if(accessMatch.allow && Model.restrictionsApplyToUser(accessMatch.allowedRestrictions, isOwner)) {
+                return {aclTargets, isOwner, access:true, accessMatch};
+            }
+        }
+
+        return {aclTargets, isOwner, access:false, accessMatch:null};
     }
 
 
