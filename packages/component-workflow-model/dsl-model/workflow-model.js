@@ -59,6 +59,9 @@ class WorkflowModel extends BaseModel {
         return false;
     }
 
+    static get hasOwnership() {
+        return !!(this.modelDefinition.ownerFields().length);
+    }
 
     // Misc helpers
 
@@ -543,7 +546,10 @@ class WorkflowModel extends BaseModel {
             return null;
         }
 
-        let relation = null;
+        this.logger.debug(`relation resolve (parent=${parentInstance.constructor.name}, target=${targetModel.name}, field=${field.field}, fields=${topLevelFields.length})`);
+
+        const parentModel = parentInstance.constructor;
+        let r = null;
 
         if(!ctxt.hasOwnProperty(field.field) || ctxt[field.field] === undefined) {
 
@@ -552,24 +558,32 @@ class WorkflowModel extends BaseModel {
             const requestedRelationFields = targetRelationFieldNames.filter(f => fieldsWithoutTypeName.hasOwnProperty(f));
             const belongsToOneFields = (targetModel.belongsToOneRelationFields || []).filter(m => topLevelFields.indexOf(m.field.field) !== -1);
 
-
             if(requestedRelationFields && requestedRelationFields.length) {
 
                 const basicFields = topLevelFields.filter(f => requestedRelationFields.indexOf(f) === -1);
+                query = query.select([...basicFields, ...belongsToOneFields.map(m => m.join)].map(v => `${targetModel.tableName}.${v}`)).eager('[' + requestedRelationFields.join(', ') + ']');
 
-                query = query.select([...basicFields, ...belongsToOneFields]).eager('[' + requestedRelationFields.join(', ') + ']');
+                this.logger.debug(`relation resolve, field (${field.field}) not present in context, performing query (eager=[${requestedRelationFields.join(', ')}])`);
 
             } else {
 
-                query = query.select([...topLevelFields, ...belongsToOneFields]);
+                query = query.select([...topLevelFields, ...belongsToOneFields.map(m => m.join)].map(v => `${targetModel.tableName}.${v}`));
+
+                this.logger.debug(`relation resolve, field (${field.field}) not present in context, performing query (no eager fields)`);
             }
 
-            relation = await query;
+            r = await query;
 
         } else {
 
-            relation = ctxt[field.field];
+            r = Promise.resolve(ctxt[field.field]);
+            this.logger.debug(`relation resolve, field (${field.field}) present in context`);
         }
+
+        const [relation, user] = await Promise.all([
+            r,
+            resolveUserForContext(context)
+        ]);
 
         if(!relation) {
             return null;
@@ -577,18 +591,58 @@ class WorkflowModel extends BaseModel {
 
         this.addModelInstanceToGraphQLContext(context, relation, targetModel);
 
-        // FIXME: need to implement proper object security model at this point !!!
 
-        if(typeof relation.copyAllowedFieldsAsObject === 'function') {
+        // First we need to check that the user in question has read access to the field on the parent that holds the relation.
+        // We resolve the ACL targets for the current user against the parent instance, and then check to see if the field
+        // is within the allowed read fields.
 
-            //if(relation.copyAllowedFieldsAsObject(aclTargets, topLevelFields))
 
-        } else {
+        const [aclTargets, _] = parentModel.userToAclTargets(user, parentInstance);
+        const parentAclSet = parentModel.aclSet;
+        let aclMatch = null;
 
-            // parentInstance security model is applied here !!!
+        if(parentAclSet) {
+            aclMatch = parentAclSet.applyRules(aclTargets, AclActions.Read, parentModel, 'server');
+            if(!aclMatch.allow) {
+                this.logger.debug(`unable to resolve relation for field (${field.field}) due to no read ACL entry matching`);
+                return null;
+            }
         }
 
-        // we now need to extract the allowed fields etc from this model instance...
+        const allowedFields = parentInstance.allowedReadFieldsForReadAcl(aclMatch, true);
+        if(!allowedFields.hasOwnProperty(field.field)) {
+            this.logger.debug(`unable to resolve relation for field (${field.field}) due to field not in allowed read field set`);
+            return null;
+        }
+
+
+        const targetIsWorkflowModel = targetModel.prototype instanceof WorkflowModel;
+        const targetModelAcl = targetModel.aclSet;
+
+        if(targetIsWorkflowModel || targetModelAcl) {
+
+            const targets = relation instanceof Array ? relation : [relation];
+            const result = targets.map(r => {
+
+                const [aclTargets, isOwner] = targetModel.userToAclTargets(user, r);
+
+                if(targetModelAcl) {
+                    const accessMatch = targetModelAcl.applyRules(aclTargets, AclActions.Access, relation);
+                    if(!accessMatch.allow) {
+                        return null;
+                    }
+
+                    if(!targetModel.restrictionsApplyToUser(accessMatch.allowedRestrictions, isOwner)) {
+                        return null;
+                    }
+                }
+
+                return targetIsWorkflowModel ? r.copyAllowedFieldsAsObject(aclTargets, topLevelFields, false) : r;
+            });
+
+
+            return (relation instanceof Array) ? result : result[0];
+        }
 
         return relation;
     }
@@ -608,7 +662,7 @@ class WorkflowModel extends BaseModel {
     // Resolver Helpers
     // ---
 
-    copyAllowedFieldsAsObject(aclTargets, topLevelFields) {
+    copyAllowedFieldsAsObject(aclTargets, topLevelFields, includeRestrictedFields=true) {
 
         // Given a set of Acl targets and a set of top level fields (from a GQL query), create an object
         // containing all of the allowed fields after applying the models acl rule sets.
@@ -619,6 +673,10 @@ class WorkflowModel extends BaseModel {
         if(aclSet) {
             aclMatch = aclSet.applyRules(aclTargets, AclActions.Read, this, 'server');
             if(!aclMatch.allow) {
+                if(!includeRestrictedFields) {
+                    return {id:this.id};
+                }
+
                 return {
                     id:this.id,
                     restrictedFields: topLevelFields.filter(f => f !== 'id')
@@ -637,9 +695,11 @@ class WorkflowModel extends BaseModel {
             }
         });
 
-        r.restrictedFields = topLevelFields.filter(f => !allowedFields.hasOwnProperty(f));
-        if(!r.restrictedFields.length) {
-            delete r.restrictedFields;
+        if(includeRestrictedFields) {
+            r.restrictedFields = topLevelFields.filter(f => !allowedFields.hasOwnProperty(f));
+            if(!r.restrictedFields.length) {
+                delete r.restrictedFields;
+            }
         }
 
         return r;
@@ -1197,13 +1257,13 @@ class WorkflowModel extends BaseModel {
         return config.get("logging.debugAclRules") === true;
     }
 
-    static _debugAclMatching(user, userTargets, isOwner, action, match) {
+    static _debugAclMatching(user, userTargets, isOwner, action, match, section=null) {
 
         if(!this._debugAclRules) {
             return;
         }
 
-        let msg = `acl-match: action:(${action}) user(${user ? user.id : "anon"}) acl-targets:(${userTargets.join(", ")}) is-owner:(${isOwner ? "true" : "false"})`;
+        let msg = `acl-match${section ? " (" + section + ")" : ""}: action:(${action}) user(${user ? user.id : "anon"}) acl-targets:(${userTargets.join(", ")}) is-owner:(${isOwner ? "true" : "false"})`;
         if(match) {
 
             if(match.matchingRules) {
