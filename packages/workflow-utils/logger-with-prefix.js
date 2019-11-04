@@ -3,7 +3,7 @@ const logger = require("@pubsweet/logger");
 
 module.exports = (prefix) => {
 
-    const p = `[${prefix.trim()}] `;
+    const p = `[${prefix.trim()}]`;
 
     return {
         error: (...args) => logger.error(p, ...args),
