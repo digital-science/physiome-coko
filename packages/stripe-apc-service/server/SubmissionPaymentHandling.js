@@ -319,7 +319,7 @@ async function processSuccessfulPayment(submissionId, checkoutSessionId, session
                         await trx.commit();
                     } catch(e) {
                         logger.error(`processing successful payment, committing submission update transaction failed due to : ${e.toString()}`);
-                        return Promise.reject(err);
+                        return Promise.reject(e);
                     }
 
                     await submission.publishWasModified();
