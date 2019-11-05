@@ -4,7 +4,6 @@ const _ = require("lodash");
 
 const { AuthorizationError, NotFoundError } = require('@pubsweet/errors');
 const { UserInputError } = require('apollo-server-express');
-const { resolveUserForContext } = require('../shared-helpers/access');
 const { transaction } = require('objection');
 
 const GraphQLHelper = require('./graphql-helper');
