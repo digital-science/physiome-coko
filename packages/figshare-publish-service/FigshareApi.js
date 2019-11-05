@@ -4,6 +4,7 @@ const logger = require('@pubsweet/logger');
 const FigshareApiEndpoints = {
 
     CreateArticle: "account/articles",
+    DeleteArticle: (id) => { return `account/articles/${encodeURI(id)}` },
     GetArticle: (id) => { return `account/articles/${encodeURI(id)}` },
     UpdateArticle: (id) => { return `account/articles/${encodeURI(id)}` },
     PublishArticle: (id) => { return `account/articles/${encodeURI(id)}/publish` },
@@ -34,6 +35,11 @@ class FigshareApi {
         }).then((r) => {
             return r.id;
         });
+    }
+
+    deleteArticle(articleID) {
+
+        return this._performDeleteRequest(FigshareApiEndpoints.DeleteArticle(articleID));
     }
 
     getArticle(articleID) {
