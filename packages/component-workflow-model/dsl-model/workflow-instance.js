@@ -62,9 +62,11 @@ class WorkflowInstance extends WorkflowUpdatableModel {
     static async createMutationResolver(ctxt, input, context, info) {
 
         // Create a new instance and assign default values to it.
+        const currentDateTime = new Date().toISOString();
+
         const newInstance = new this({
-            created: new Date().toISOString(),
-            updated: new Date().toISOString(),
+            created: currentDateTime,
+            updated: currentDateTime,
         });
 
 
@@ -75,7 +77,7 @@ class WorkflowInstance extends WorkflowUpdatableModel {
             const [aclTargets, _] = this.userToAclTargets(user, newInstance);
 
             const match = this.aclSet.applyRules(aclTargets, AclActions.Create, newInstance);
-            this._debugAclMatching(user, aclTargets, null, AclActions.Create, match);
+            this._debugAclMatching(user, aclTargets, null, AclActions.Create, match, `mutation-create`);
 
             if(!match.allow) {
                 throw new AuthorizationError("You do not have rights to create a new instance.");
@@ -156,7 +158,7 @@ class WorkflowInstance extends WorkflowUpdatableModel {
             const [aclTargets, isOwner] = this.userToAclTargets(user, object);
 
             const accessMatch = this.aclSet.applyRules(aclTargets, AclActions.Access, object);
-            this._debugAclMatching(user, aclTargets, isOwner, AclActions.Access, accessMatch);
+            this._debugAclMatching(user, aclTargets, isOwner, AclActions.Access, accessMatch, `mutation-destroy`);
             if(!accessMatch.allow) {
                 throw new AuthorizationError("You do not have access to this workflow instance.");
             }
@@ -166,7 +168,7 @@ class WorkflowInstance extends WorkflowUpdatableModel {
             }
 
             const destroyAclMatch = this.aclSet.applyRules(aclTargets, AclActions.Destroy, object);
-            this._debugAclMatching(user, aclTargets, isOwner, AclActions.Destroy, destroyAclMatch);
+            this._debugAclMatching(user, aclTargets, isOwner, AclActions.Destroy, destroyAclMatch, `mutation-destroy`);
             if(!destroyAclMatch.allow) {
                 throw new AuthorizationError("You do not have the rights allowed to destroy this workflow instance.");
             }
@@ -309,7 +311,7 @@ class WorkflowInstance extends WorkflowUpdatableModel {
             const [aclTargets, isOwner] = this.userToAclTargets(user, instance);
 
             const accessMatch = this.aclSet.applyRules(aclTargets, AclActions.Access, instance);
-            this._debugAclMatching(user, aclTargets, isOwner, AclActions.Access, accessMatch);
+            this._debugAclMatching(user, aclTargets, isOwner, AclActions.Access, accessMatch, `mutation-complete-task`);
             if(!accessMatch.allow) {
                 throw new AuthorizationError("You do not have access to this object.");
             }
@@ -319,7 +321,7 @@ class WorkflowInstance extends WorkflowUpdatableModel {
             }
 
             tasksAclMatch = this.aclSet.applyRules(aclTargets, AclActions.Task, instance);
-            this._debugAclMatching(user, aclTargets, isOwner, AclActions.Task, tasksAclMatch);
+            this._debugAclMatching(user, aclTargets, isOwner, AclActions.Task, tasksAclMatch, `mutation-complete-task`);
             if(!tasksAclMatch.allow) {
                 throw new AuthorizationError("You do not have the rights allowed to destroy this object.");
             }
@@ -527,7 +529,7 @@ class WorkflowInstance extends WorkflowUpdatableModel {
             const [aclTargets, isOwner] = this.userToAclTargets(user, object);
 
             tasksAclMatch = this.aclSet.applyRules(aclTargets, AclActions.Task, object);
-            this._debugAclMatching(user, aclTargets, isOwner, AclActions.Task, tasksAclMatch);
+            this._debugAclMatching(user, aclTargets, isOwner, AclActions.Task, tasksAclMatch, `query-tasks`);
             if(!tasksAclMatch.allow) {
                 throw new AuthorizationError("You do not have the rights allowed to destroy this object.");
             }

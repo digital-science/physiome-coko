@@ -10,7 +10,6 @@ const LoggerWithPrefix = require('workflow-utils/logger-with-prefix');
 
 const GraphQLHelper = require('./graphql-helper');
 const { lookupModel } = require('./model-registry');
-const { Identity } = require('../shared-model/identity');
 const { resolveUserForContext } = require('../shared-helpers/access');
 
 const _AllowedAdditionalReadFields = ['id', 'created', 'updated', 'tasks', 'restrictedFields'];
@@ -138,7 +137,6 @@ class WorkflowModel extends BaseModel {
 
             relationFields.forEach(field => {
                 fieldResolvers[field.field] = async (ctxt, input, context, info) => {
-                    // FIXME: relation resolutions will need to have ACL applied to it as well
                     return ModelClass.relationResolverImplementation(ctxt, input, context, info, field);
                 };
             });
@@ -199,7 +197,7 @@ class WorkflowModel extends BaseModel {
         if(this.aclSet) {
 
             const accessMatch = this.aclSet.applyRules(aclTargets, AclActions.Access, object);
-            this._debugAclMatching(user, aclTargets, isOwner, AclActions.Access, accessMatch);
+            this._debugAclMatching(user, aclTargets, isOwner, AclActions.Access, accessMatch, `query-get`);
             if(!accessMatch.allow) {
                 throw new AuthorizationError("You do not have access to this object.");
             }
@@ -241,7 +239,7 @@ class WorkflowModel extends BaseModel {
             const [aclTargets, _] = this.userToAclTargets(user, null);
 
             const accessMatch = this.aclSet.applyRules(aclTargets, AclActions.Access);
-            this._debugAclMatching(user, aclTargets, null, AclActions.Access, accessMatch);
+            this._debugAclMatching(user, aclTargets, null, AclActions.Access, accessMatch, `query-listing`);
             if(!accessMatch.allow) {
                 throw new AuthorizationError("You do not have access to this object.");
             }
@@ -673,13 +671,11 @@ class WorkflowModel extends BaseModel {
         if(aclSet) {
             aclMatch = aclSet.applyRules(aclTargets, AclActions.Read, this, 'server');
             if(!aclMatch.allow) {
-                if(!includeRestrictedFields) {
-                    return {id:this.id};
-                }
-
-                return {
+                return includeRestrictedFields ?  {
                     id:this.id,
                     restrictedFields: topLevelFields.filter(f => f !== 'id')
+                } : {
+                    id:this.id
                 };
             }
         }
