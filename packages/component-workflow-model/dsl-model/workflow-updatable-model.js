@@ -2,7 +2,10 @@ const WorkflowModel = require('./workflow-model');
 const AclRule = require('client-workflow-model/AclRule');
 const _ = require("lodash");
 
-const { AuthorizationError } = require('@pubsweet/errors');
+const { AuthorizationError, NotFoundError } = require('@pubsweet/errors');
+const { UserInputError } = require('apollo-server-express');
+const { resolveUserForContext } = require('../shared-helpers/access');
+const { transaction } = require('objection');
 
 const GraphQLHelper = require('./graphql-helper');
 const _Tab = GraphQLHelper.Tab;
@@ -174,63 +177,116 @@ class WorkflowUpdatableModel extends WorkflowModel {
     }
 
 
-    static async relationAccessorSetMutationEndpoint(ctxt, input, context, info, element) {
+    static async relationAccessorSetMutationEndpoint(ctxt, { id, linked }, context, info, element) {
 
-        const {id, linked} = input;
         if(!id) {
-            return false;
+            return new UserInputError('Model identifier required to update relation');
         }
 
-        const object = await this.find(id);
+        const trx = await transaction.start(this.knex());
+        if(!trx) {
+            return new Error(`Unable to begin database transaction`);
+        }
+
+        const [object, user] = await Promise.all([
+            this.find(id, null, trx),
+            this.resolveUserForContext(context),
+        ]);
+
         if(!object) {
-            return false;
+            trx.rollback();
+            return new NotFoundError('Unable to find model instance.');
         }
 
-        // FIXME: implement ACL checking to ensure this is allowed !!!!
 
-        await object.$relatedQuery(element.field).unrelate();
+        let aclWriteMatch = null;
+        if(this.aclSet) {
 
-        if(linked && ((element.array === true && linked.length) || element.array === false)) {
+            const [aclTargets, isOwner] = this.userToAclTargets(user, object);
 
-            if(element.type === "File") {
+            const accessMatch = this.aclSet.applyRules(aclTargets, AclActions.Access, object);
+            this._debugAclMatching(user, aclTargets, isOwner, AclActions.Access, accessMatch, `mutation-set-relation`);
 
-                const linkedWithMetaDataFields = linked.map((l, index) => {
-                    const r = {id:l.id, order:index, removed:false};
+            if(!accessMatch.allow) {
+                trx.rollback();
+                return new AuthorizationError("You do not have access to this object.");
+            }
 
-                    if(l.metaData && l.metaData.removed === true) {
-                        r.removed = true;
-                    }
+            if(!this.restrictionsApplyToUser(accessMatch.allowedRestrictions, isOwner)) {
+                trx.rollback();
+                return new AuthorizationError("You do not have access to this object.");
+            }
 
-                    if (element.fileLabels === true) {
-                        if(l.metaData) {
-                            r.label = l.metaData.label || null;
-                        } else {
-                            r.label = null;
-                        }
-                    }
+            aclWriteMatch = this.aclSet.applyRules(aclTargets, AclActions.Write, object);
+            this._debugAclMatching(user, aclTargets, isOwner, AclActions.Write, aclWriteMatch, `mutation-set-relation`);
 
-                    if (element.fileTypes === true) {
-                        if(l.metaData) {
-                            r.type = l.metaData.type || null;
-                        } else {
-                            r.type = null;
-                        }
-                    }
-
-                    return r;
-                });
-
-                await object.$relatedQuery(element.field).relate(linkedWithMetaDataFields);
-
-            } else {
-
-                await object.$relatedQuery(element.field).relate(linked);
+            if(!aclWriteMatch.allow) {
+                trx.rollback();
+                return new AuthorizationError("You do not have write access to this object.");
             }
         }
 
+        const allowedFields = (aclWriteMatch && aclWriteMatch.allowedFields) ? _.pick(this.allowedInputFields, aclWriteMatch.allowedFields) : this.allowedInputFields;
+        if(!allowedFields.hasOwnProperty(element.field)) {
+            trx.rollback();
+            return new AuthorizationError(`You do not have write access to the '${element.field}' field on the specified object.`);
+        }
+
+        try {
+
+            await object.$relatedQuery(element.field, trx).unrelate();
+
+            if(linked && ((element.array === true && linked.length) || element.array === false)) {
+
+                if(element.type === "File") {
+
+                    const linkedWithMetaDataFields = linked.map((l, index) => {
+                        const r = {id:l.id, order:index, removed:false};
+
+                        if(l.metaData && l.metaData.removed === true) {
+                            r.removed = true;
+                        }
+
+                        if (element.fileLabels === true) {
+                            if(l.metaData) {
+                                r.label = l.metaData.label || null;
+                            } else {
+                                r.label = null;
+                            }
+                        }
+
+                        if (element.fileTypes === true) {
+                            if(l.metaData) {
+                                r.type = l.metaData.type || null;
+                            } else {
+                                r.type = null;
+                            }
+                        }
+
+                        return r;
+                    });
+
+                    await object.$relatedQuery(element.field, trx).relate(linkedWithMetaDataFields);
+
+                } else {
+
+                    await object.$relatedQuery(element.field, trx).relate(linked);
+                }
+            }
+
+            await trx.commit();
+
+        } catch(e) {
+
+            this.logger.error(`relation accessor set mutation: unable to set relation due to: ${e.toString()}`);
+
+            await trx.rollback();
+            return new Error(`Unable to set workflow model relation for field ${element.field}`);
+        }
+
+        await this.publishWasModified(id);
         return true;
     }
-
 
 
     // GraphQL TypeDef generation
