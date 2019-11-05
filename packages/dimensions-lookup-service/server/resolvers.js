@@ -3,7 +3,7 @@ const logger = require("@pubsweet/logger");
 const URL = require("url");
 const _ = require("lodash");
 
-const { resolveUserForContext } = require('../shared-helpers/access');
+const { resolveUserForContext } = require('component-workflow-model/shared-helpers/access');
 
 
 function GrantsForProjectNumber(dimensionsApi, projectNumber) {
