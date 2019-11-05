@@ -25,8 +25,8 @@ class WorkflowBaseModel extends DBErrors(BaseModel) {
         return null;
     }
 
-    static async find(id, eagerLoadRelations) {
-        const object = await this.query()
+    static async find(id, eagerLoadRelations, trx) {
+        const object = await this.query(trx)
             .findById(id)
             .skipUndefined()
             .eager(parseEagerRelations(eagerLoadRelations));
