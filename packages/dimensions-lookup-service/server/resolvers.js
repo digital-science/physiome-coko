@@ -1,6 +1,9 @@
+const { AuthorizationError } = require('@pubsweet/errors');
 const logger = require("@pubsweet/logger");
 const URL = require("url");
 const _ = require("lodash");
+
+const { resolveUserForContext } = require('../shared-helpers/access');
 
 
 function GrantsForProjectNumber(dimensionsApi, projectNumber) {
@@ -136,11 +139,12 @@ module.exports = (dimensionsApi) => {
     return {
         Query: {
 
-            grantsForProjectNumber: (ctxt, input, context, info) => {
+            grantsForProjectNumber: async (ctxt, { projectNumber }, context, info) => {
 
-                const { projectNumber } = input;
-
-                // FIXME: check for user auth, shouldn't be a public API endpoint
+                const user = await resolveUserForContext(context);
+                if(!user) {
+                    return new AuthorizationError(`Valid user required for lookup.`);
+                }
 
                 return GrantsForProjectNumber(dimensionsApi, projectNumber).catch(err => {
                     logger.error(`[DimenionsLookupService/GrantsForProjectNumber] lookup failed due to: ${err.toString()}`);
@@ -148,11 +152,12 @@ module.exports = (dimensionsApi) => {
                 });
             },
 
-            detailsForDOI: (ctxt, input, context, info) => {
+            detailsForDOI: async (ctxt, { doi }, context, info) => {
 
-                const { doi } = input;
-
-                // FIXME: check for user auth, shouldn't be a public API endpoint
+                const user = await resolveUserForContext(context);
+                if(!user) {
+                    return new AuthorizationError(`Valid user required for lookup.`);
+                }
 
                 return DOIInfoLookup(dimensionsApi, doi).catch(err => {
                     logger.error(`[DimenionsLookupService/DetailsForDOI] lookup failed due to: ${err.toString()}`);
