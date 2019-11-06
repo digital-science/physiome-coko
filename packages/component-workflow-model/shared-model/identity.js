@@ -4,7 +4,8 @@ const config = require('config');
 
 const GraphQLFields = require('graphql-fields');
 const logger = require('workflow-utils/logger-with-prefix')('[workflow-model/identity]');
-
+const { resolveUserForContext } = require('../shared-helpers/access');
+const { AuthorizationError } = require('@pubsweet/errors');
 
 const AdminORCIDIdentities = config.get('identity.adminIdentities');
 
@@ -57,6 +58,10 @@ class Identity extends BaseModel {
 
         return (this.identityId && AdminORCIDIdentities.indexOf(this.identityId) !== -1) ? ["administrator"] : [];
     }
+
+    get isAdmin() {
+        return this.finalisedAccessGroups.indexOf("administrator") !== -1;
+    }
 }
 
 async function asyncIteratorWasModified(user) {
@@ -70,29 +75,16 @@ async function asyncIteratorWasModified(user) {
 }
 
 
-async function resolveUserForContext(context) {
-
-    if(!context || !context.user) {
-        return null;
-    }
-
-    if(context.resolvedUser) {
-        return context.resolvedUser;
-    }
-
-    return Identity.find(context.user).then((user) => {
-        context.resolvedUser = user;
-        return user;
-    });
-}
-
-
 async function getIdentities(input, context, info) {
 
-    // FIXME: apply user restrictions to looking up users, this will change depending on what group the user belongs to (ie. certain users in a role
-    // maybe allowed to lookup a user within a specific set of roles etc)
-
     const user = await resolveUserForContext(context);
+    if(!user) {
+        return new AuthorizationError('Logged in user required.');
+    }
+
+    if(!user.isAdmin) {
+        return new AuthorizationError('Users group does not provide access to identity listings.');
+    }
 
     const fieldsWithoutTypeName = GraphQLFields(info, {}, { excludedFields: ['__typename'] });
     const topLevelFields = (fieldsWithoutTypeName && fieldsWithoutTypeName.results) ? Object.keys(fieldsWithoutTypeName.results) : [];
