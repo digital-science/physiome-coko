@@ -1,6 +1,7 @@
 const { models } = require('component-workflow-model/model');
 const { Submission } = models;
 const logger = require('workflow-utils/logger-with-prefix')('external-task/reserve-doi');
+const { transaction } = require('objection');
 
 const { FigshareApi } = require('figshare-publish-service');
 
@@ -71,9 +72,17 @@ function _reserveDoiForSubmission(submission) {
 
         submission.figshareArticleId = "" + articleId;
 
-        // FIXME: change to a transaction maybe??
+        return submission.patchFields(['figshareArticleId'], builder =>
 
-        return submission.save().then(() => {
+            builder.whereNull('figshareArticleId')
+
+        ).catch(err => {
+
+            FigshareApi.deleteArticle(articleId);
+            return Promise.reject(err);
+
+        }).then(() => {
+
             return articleId;
         });
 
