@@ -77,7 +77,17 @@ class FigshareArticlePublisher {
 
             submission.figshareArticleId = "" + articleId;
 
-            return submission.save().then(() => {
+            return submission.patchFields(['figshareArticleId'], builder =>
+
+                builder.whereNull('figshareArticleId')
+
+            ).catch(err => {
+
+                figshareApi.deleteArticle(articleId);
+                return Promise.reject(err);
+
+            }).then(() => {
+
                 return articleId;
             });
 
