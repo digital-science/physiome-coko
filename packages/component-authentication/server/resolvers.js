@@ -1,9 +1,7 @@
 const { models } = require('component-workflow-model/model');
 const { Identity } = models;
-const config = require('config');
 
 const { createEmailValidationForIdentity, TooManyValidationEmailsSentError } = require('./emailValidation');
-const AdminORCIDIdentities = config.get('identity.adminIdentities');
 
 
 async function lookupIdentity(userId) {
