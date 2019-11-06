@@ -33,6 +33,7 @@ const ThemeBaseDefaults = {
 
     // Text Color
     TextColor: "#505050",
+    PlaceholderTextColor: "#959595",
     DisabledTextColor: "#9c9c9c",
     ValidationIssueTextColor: "#a90c00",
 
@@ -96,6 +97,8 @@ const DSAwardsTheme = {
     input: {
         fontFamily: ThemeBaseDefaults.InputFontFamily,
         textColor: ThemeBaseDefaults.InputColor,
+        placeholderTextColor: ThemeBaseDefaults.PlaceholderTextColor,
+        disabledTextColor: ThemeBaseDefaults.DisabledTextColor,
         default: {
             fontSize: ThemeBaseDefaults.FontSizeDefault
         },
