@@ -14,7 +14,7 @@ const SmallBorderStyle = css`
     border: ${th('borderedElement.small.borderWidth')} ${th('borderedElement.small.borderStyle')} ${th('borderedElement.small.borderColor')};
 `;
 
-const IssueBorder = css`
+const IssueBorderStyle = css`
     border-color: #d00e00;
     box-shadow: 1px 1px 2px 2px #d00e0024;
 `;
@@ -23,17 +23,17 @@ const IssueBorder = css`
 
 const BorderedElement = (Element) => styled(({className, issue, ...rest}) => <Element className={className} {...rest} /> )`
     ${BorderStyle}
-    ${props => props.issue ? IssueBorder : ''}
+    ${props => props.issue ? IssueBorderStyle : ''}
 `;
 
 const SmallBorderedElement = (Element) => styled(({className, issue, ...rest}) => <Element className={className} {...rest} /> )`
     ${SmallBorderStyle}
-    ${props => props.issue ? IssueBorder : ''}
+    ${props => props.issue ? IssueBorderStyle : ''}
 `;
 
 
 export default BorderedElement;
-export { BorderedElement, SmallBorderedElement, BorderStyle, SmallBorderStyle };
+export { BorderedElement, SmallBorderedElement, BorderStyle, SmallBorderStyle, IssueBorderStyle };
 
 
 
