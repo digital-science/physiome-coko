@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import styled, { css } from 'styled-components';
-import { BorderStyle, SmallBorderStyle } from './bordered-element';
+import { BorderStyle, SmallBorderStyle, IssueBorderStyle } from './bordered-element';
 import { th } from '../src/index';
 
 
@@ -10,10 +10,22 @@ const ORCIDInputStyle = css`
   position: relative;
   font-family: ${th('input.fontFamily')};
   color: ${th('input.textColor')};
-  
+  cursor: text;
+  padding-left: 24px;
+
   & > input {
     box-sizing: border-box;
     border: none;
+  }
+  
+  & > img {
+    position: absolute;
+    left: 6px;
+    opacity: 0.5;
+  }
+  
+  &.valid-orcid > img {
+     opacity: 1.0;
   }
   
   & > input:focus {
@@ -27,6 +39,8 @@ const ORCIDInputStyle = css`
   
   & > span {
     color: ${th('input.placeholderTextColor')};
+    user-select: none;
+    cursor: text;
   }
   
   & > span.sep {
@@ -38,17 +52,50 @@ const ORCIDInputStyle = css`
     border-color: #2196F3;
     outline: 0;
   }
+  
+  &.issues {
+    ${IssueBorderStyle}
+  }
 `;
 
 
-function ORCIDValueToPartValues(v) {
+function ORCIDValueToPartValues(v, exactMatch=false) {
 
-    const m = v ? ("" + v).match(/^([0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9Xx])$/) : null;
-    return m ? m[1].split("-") : ["", "", "", ""];
+    if(exactMatch) {
+        const m = v ? ("" + v).toUpperCase().match(/^([0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X])$/) : null;
+        return m ? m[1].split("-") : ["", "", "", ""];
+    }
+
+    const p = [...(v || "").split("-"), "", "", "", ""];
+    return p.map((p, index) => ('' + p).toUpperCase().replace(index === 3 ? /[^0-9X]/g : /[^0-9]/g, "").substring(0,4)).slice(0, 4);
 }
 
 
-const _ORCIDInput = ({className, value, setValue, setValidationIssue}) => {
+function _createInputChangeHandler(setValue, nextInputRef, clearValidationIssues) {
+
+    return (event) => {
+        const v = event.target.value.trim().replace(/[^0-9]/g, "").substring(0,4);
+        setValue(v);
+
+        if(nextInputRef && v.length === 4 && event.target.selectionEnd === 4) {
+            const nextInput = nextInputRef.current;
+            nextInput.focus();
+            if(nextInput.value.length) {
+                nextInput.setSelectionRange(0, nextInput.value.length);
+            }
+        }
+
+        clearValidationIssues();
+    };
+}
+
+const _ORCIDInput = ({className, value, setValue, validValue = false, validationIssue, setValidationIssue}) => {
+
+    // Note: value/setValue are used when a complete ORCID identifier is detected (or all values removed from component inputs).
+    // The intermediate values updates and returns what values are currently held in each component input. The client of the component
+    // can then utilise this value to respond to validation attempts etc.
+
+    const valueParts = useMemo(() => ORCIDValueToPartValues(value) , [value]);
 
     const [isFocused, setIsFocused] = useState(false);
     const [didPaste, setDidPaste] = useState(false);
@@ -58,10 +105,10 @@ const _ORCIDInput = ({className, value, setValue, setValidationIssue}) => {
     const input4Ref = useRef(null);
     const orderedInputs = [input1Ref, input2Ref, input3Ref, input4Ref];
 
-    const [input1Value, setInput1Value] = useState(ORCIDValueToPartValues(value)[0]);
-    const [input2Value, setInput2Value] = useState(ORCIDValueToPartValues(value)[1]);
-    const [input3Value, setInput3Value] = useState(ORCIDValueToPartValues(value)[2]);
-    const [input4Value, setInput4Value] = useState(ORCIDValueToPartValues(value)[3]);
+    const [input1Value, setInput1Value] = useState(valueParts[0]);
+    const [input2Value, setInput2Value] = useState(valueParts[1]);
+    const [input3Value, setInput3Value] = useState(valueParts[2]);
+    const [input4Value, setInput4Value] = useState(valueParts[3]);
 
     const clearValidationIssues = () => {
         if(setValidationIssue) {
@@ -95,33 +142,9 @@ const _ORCIDInput = ({className, value, setValue, setValidationIssue}) => {
         }
     };
 
-    const onChangeInput1 = (event) => {
-        const v = event.target.value.trim().replace(/[^0-9]/g, "").substring(0,4);
-        setInput1Value(v);
-        if(v.length === 4) {
-            input2Ref.current.focus();
-        }
-        clearValidationIssues();
-    };
-
-    const onChangeInput2 = (event) => {
-        const v = event.target.value.trim().replace(/[^0-9]/g, "").substring(0,4);
-        setInput2Value(v);
-        if(v.length === 4) {
-            input3Ref.current.focus();
-        }
-        clearValidationIssues();
-    };
-
-    const onChangeInput3 = (event) => {
-        const v = event.target.value.trim().replace(/[^0-9]/g, "").substring(0,4);
-        setInput3Value(v);
-        if(v.length === 4) {
-            input4Ref.current.focus();
-        }
-        clearValidationIssues();
-    };
-
+    const onChangeInput1 = _createInputChangeHandler(setInput1Value, input2Ref, clearValidationIssues);
+    const onChangeInput2 = _createInputChangeHandler(setInput2Value, input3Ref, clearValidationIssues);
+    const onChangeInput3 = _createInputChangeHandler(setInput3Value, input4Ref, clearValidationIssues);
     const onChangeInput4 = (event) => {
         const v = event.target.value;
         setInput4Value(v.toUpperCase().replace(/[^0-9X]/g, "").substring(0,4));
@@ -130,16 +153,13 @@ const _ORCIDInput = ({className, value, setValue, setValidationIssue}) => {
 
     useEffect(() => {
 
-        if(input1Value && input2Value && input3Value && input4Value && input1Value.length === 4 && input2Value.length === 4
-            && input3Value.length === 4 && input4Value.length === 4) {
-
+        if(input1Value || input2Value || input3Value || input4Value) {
             const newValue = `${input1Value}-${input2Value}-${input3Value}-${input4Value}`.toUpperCase();
             if(newValue !== value) {
                 setValue(newValue);
                 clearValidationIssues();
             }
-        } else if(!input1Value && !input2Value && !input3Value && !input4Value) {
-
+        } else {
             if(value !== null) {
                 setValue(null);
                 clearValidationIssues();
@@ -150,22 +170,22 @@ const _ORCIDInput = ({className, value, setValue, setValidationIssue}) => {
 
     useEffect(() => {
 
-        const parts = ORCIDValueToPartValues(value);
+        //const parts = ORCIDValueToPartValues(value);
 
-        if(input1Value !== parts[0]) {
-            setInput1Value(parts[0]);
+        if(input1Value !== valueParts[0]) {
+            setInput1Value(valueParts[0]);
         }
 
-        if(input2Value !== parts[1]) {
-            setInput2Value(parts[1]);
+        if(input2Value !== valueParts[1]) {
+            setInput2Value(valueParts[1]);
         }
 
-        if(input3Value !== parts[2]) {
-            setInput3Value(parts[2]);
+        if(input3Value !== valueParts[2]) {
+            setInput3Value(valueParts[2]);
         }
 
-        if(input4Value !== parts[3]) {
-            setInput4Value(parts[3]);
+        if(input4Value !== valueParts[3]) {
+            setInput4Value(valueParts[3]);
         }
 
         if(didPaste) {
@@ -178,6 +198,7 @@ const _ORCIDInput = ({className, value, setValue, setValidationIssue}) => {
         }
 
     }, [value, didPaste]);
+
 
     const onInputPaste = (e) => {
 
@@ -231,7 +252,8 @@ const _ORCIDInput = ({className, value, setValue, setValidationIssue}) => {
     };
 
     return (
-        <div className={`${className} ${isFocused ? 'focused' : 'not-focused'}`} onClick={clickHandler}>
+        <div className={`${className} ${isFocused ? 'focused' : 'not-focused'} ${validValue ? 'valid-orcid' : ''} ${validationIssue ? 'issues' : ''}`} onClick={clickHandler}>
+            <img alt="ORCID logo" src="https://orcid.org/sites/default/files/images/orcid_16x16.png" width="14" height="14" />
             <span>https://orcid.org/&nbsp;</span>
             <input type="text" value={input1Value} onChange={onChangeInput1} placeholder={'XXXX'} size="4" minLength="4" maxLength="4" ref={input1Ref} onFocus={() => focusedInput(input1Ref.current)} onBlur={blurInput} onKeyDown={onKeyDown} onPaste={onInputPaste} />
             <span className="sep">-</span>
@@ -267,3 +289,38 @@ const SmallORCIDInput = styled(_ORCIDInput)`
 
 export default ORCIDInput;
 export { ORCIDInput, SmallORCIDInput };
+
+
+
+
+function isValidORCIDValue(value) {
+    return value ? !!(("" + value).toUpperCase().match(/^([0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X])$/)) : false;
+}
+
+function checkORCIDChecksum(value) {
+
+    const m = value ? ("" + value).toUpperCase().match(/^([0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X])$/) : null;
+    if(!m) {
+        return false;
+    }
+
+    const simpleValue = m[1].replace(/-/g, "");
+    if(simpleValue.length !== 16) {
+        return false;
+    }
+
+    let total = 0;
+    for(let i = 0; i < 15; i++) {
+        const c = simpleValue[i];
+        total = (total + (c - "0")) * 2;
+    }
+
+    const remainder = total % 11;
+    const result = (12 - remainder) % 11;
+    const checksum = result === 10 ? "X" : result.toString();
+
+    return simpleValue.toUpperCase()[15] === checksum;
+}
+
+
+export { isValidORCIDValue, checkORCIDChecksum };
