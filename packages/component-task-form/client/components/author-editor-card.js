@@ -5,7 +5,7 @@ import Card, { CardRemoveButton } from "ds-theme/components/card";
 import { SmallBlockLabel } from "ds-theme/components/label";
 import { SmallTextInput } from "ds-theme/components/text-input";
 import { SmallCheckBox, SmallCheckboxLabel } from "ds-theme/components/checkbox-input";
-import { SmallORCIDInput } from "ds-theme/components/orcid-input";
+import { SmallORCIDInput, isValidORCIDValue, checkORCIDChecksum } from "ds-theme/components/orcid-input";
 
 import AffiliationEditor from './affiliation-editor';
 
@@ -89,12 +89,12 @@ const AuthorSimpleFormGroup = styled(({className, label, value, onChange, issue,
 `;
 
 
-const AuthorORCIDFormGroup = styled(({className, label, value, setValue, issue, issueMessage, setValidationIssue}) => {
+const AuthorORCIDFormGroup = styled(({className, label, value, setValue, validValue, issue, issueMessage, setValidationIssue}) => {
 
     return (
         <AuthorFormGroup className={className}>
             <SmallBlockLabel>{label}</SmallBlockLabel>
-            <SmallORCIDInput value={value} setValue={setValue} issue={issue || false} setValidationIssue={setValidationIssue} />
+            <SmallORCIDInput value={value} setValue={setValue} validValue={validValue} validationIssue={issue || false} setValidationIssue={setValidationIssue} />
             {(issue && issueMessage) ? <SmallBlockLabel className="error">{issueMessage}</SmallBlockLabel> : null}
         </AuthorFormGroup>
     );
@@ -134,7 +134,9 @@ function _AuthorEditorCard({className, author, removeAuthor, formValidator, didM
 
     const doesHaveName = (name && name.trim().length);
     const doesHaveValidEmail = (email && email.trim().length && email.match(/^\S+@\S+$/));
-
+    const invalidORCIDValue = (orcid && orcid.length) ? !isValidORCIDValue(orcid) : false;
+    const checksumMismatchORCIDValue = (orcid && orcid.length && !invalidORCIDValue) ? !checkORCIDChecksum(orcid) : false;
+    const doesHaveValidORCID = orcid && orcid.length && !invalidORCIDValue && !checksumMismatchORCIDValue;
 
     const validationCallback = useMemo(() => {
 
@@ -152,10 +154,14 @@ function _AuthorEditorCard({className, author, removeAuthor, formValidator, didM
                 r = false;
             }
 
+            if(invalidORCIDValue || checksumMismatchORCIDValue) {
+                setORCIDValidationIssue(true);
+            }
+
             return r;
         };
 
-    }, [doesHaveName, doesHaveValidEmail, corresponding, setNameValidationIssue, setEmailValidationIssue]);
+    }, [doesHaveName, doesHaveValidEmail, corresponding, setNameValidationIssue, setEmailValidationIssue, invalidORCIDValue, checksumMismatchORCIDValue]);
 
     useEffect(() => {
 
@@ -193,7 +199,8 @@ function _AuthorEditorCard({className, author, removeAuthor, formValidator, didM
             <AuthorSimpleFormGroup label={"Email"} value={email} onChange={handleEmailChange} issue={emailValidationIssue}
                 issueMessage="Corresponding authors require a valid email address." />
 
-            <AuthorORCIDFormGroup label={"ORCID"} value={orcid} setValue={setOrcid} setValidationIssue={setORCIDValidationIssue} />
+            <AuthorORCIDFormGroup label={"ORCID"} value={orcid} setValue={setOrcid} issue={orcidValidationIssue} validValue={doesHaveValidORCID} setValidationIssue={setORCIDValidationIssue}
+                issueMessage={invalidORCIDValue ? "Invalid ORCID identifier supplied, all 16 digits of the identifier are required." : "Invalid ORCID identifier supplied, the identifier supplied is not a valid ORCID ID."} />
 
             <AuthorRelationshipFormGroup>
                 <SmallBlockLabel>Relationships</SmallBlockLabel>
