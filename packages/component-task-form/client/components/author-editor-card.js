@@ -5,6 +5,7 @@ import Card, { CardRemoveButton } from "ds-theme/components/card";
 import { SmallBlockLabel } from "ds-theme/components/label";
 import { SmallTextInput } from "ds-theme/components/text-input";
 import { SmallCheckBox, SmallCheckboxLabel } from "ds-theme/components/checkbox-input";
+import { SmallORCIDInput } from "ds-theme/components/orcid-input";
 
 import AffiliationEditor from './affiliation-editor';
 
@@ -28,6 +29,26 @@ function useAuthorValueField(author, field, didModifyAuthor, includeValidation) 
 
     return [value, setValue, handleChange, validationIssue, setValidationIssue];
 }
+
+function useAuthorCustomValueField(author, field, didModifyAuthor, includeValidation) {
+
+    const [value, setValue] = useState(author[field] || "");
+    const [validationIssue, setValidationIssue] = includeValidation ? useState(false) : [null, null];
+
+    const newSetValue = (v) => {
+        setValue(v);
+        author[field] = v;
+        console.log(`didModifyAuthor: ${field} = ${v}`);
+
+        didModifyAuthor(author);
+        if(setValidationIssue) {
+            setValidationIssue(false);
+        }
+    };
+
+    return [value, newSetValue, validationIssue, setValidationIssue];
+}
+
 
 function useAuthorCheckboxField(author, field, didModifyAuthor) {
 
@@ -64,9 +85,23 @@ const AuthorSimpleFormGroup = styled(({className, label, value, onChange, issue,
             {(issue && issueMessage) ? <SmallBlockLabel className="error">{issueMessage}</SmallBlockLabel> : null}
         </AuthorFormGroup>
     );
-
 })`
 `;
+
+
+const AuthorORCIDFormGroup = styled(({className, label, value, setValue, issue, issueMessage, setValidationIssue}) => {
+
+    return (
+        <AuthorFormGroup className={className}>
+            <SmallBlockLabel>{label}</SmallBlockLabel>
+            <SmallORCIDInput value={value} setValue={setValue} issue={issue || false} setValidationIssue={setValidationIssue} />
+            {(issue && issueMessage) ? <SmallBlockLabel className="error">{issueMessage}</SmallBlockLabel> : null}
+        </AuthorFormGroup>
+    );
+})`
+`;
+
+
 
 const AuthorRelationshipFormGroup = styled(AuthorFormGroup)`
   
@@ -89,7 +124,7 @@ function _AuthorEditorCard({className, author, removeAuthor, formValidator, didM
 
     const [name, setName, handleNameChange, nameValidationIssue, setNameValidationIssue] = useAuthorValueField(author, "name", didModifyAuthor, true);
     const [email, setEmail, handleEmailChange, emailValidationIssue, setEmailValidationIssue] = useAuthorValueField(author, "email", didModifyAuthor, true);
-    const [orcid, setOrcid, handleOrcidChange] = useAuthorValueField(author, "orcid", didModifyAuthor);
+    const [orcid, setOrcid, orcidValidationIssue, setORCIDValidationIssue] = useAuthorCustomValueField(author, "orcid", didModifyAuthor, true);
     const [corresponding, setCorresponding, handleCorrespondingChange] = useAuthorCheckboxField(author, "isCorresponding", didModifyAuthor);
 
     const [primaryPaperAuthor, setPrimaryPaperAuthor, handlePrimaryPaperAuthorChange] = useAuthorCheckboxField(author, "isPrimaryPaperAuthor", didModifyAuthor);
@@ -158,7 +193,7 @@ function _AuthorEditorCard({className, author, removeAuthor, formValidator, didM
             <AuthorSimpleFormGroup label={"Email"} value={email} onChange={handleEmailChange} issue={emailValidationIssue}
                 issueMessage="Corresponding authors require a valid email address." />
 
-            <AuthorSimpleFormGroup label={"ORCID"} value={orcid} onChange={handleOrcidChange} />
+            <AuthorORCIDFormGroup label={"ORCID"} value={orcid} setValue={setOrcid} setValidationIssue={setORCIDValidationIssue} />
 
             <AuthorRelationshipFormGroup>
                 <SmallBlockLabel>Relationships</SmallBlockLabel>
