@@ -33,6 +33,9 @@ const TextArea = BorderedElement(_TextArea);
 
 export default styled(TextArea)`
     width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+    
     font-family: ${th('textArea.fontFamily')};
     font-size: ${th('textArea.fontSize')};
     color: ${th('textArea.textColor')};
