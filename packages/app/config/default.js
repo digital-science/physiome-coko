@@ -25,6 +25,11 @@ if(!process.env.PUBSWEET_SERVER_SECRET) {
     process.exit(1);
 }
 
+if(process.env.PUBLISH_FIGSHARE_GROUP_ID && isNaN(parseInt(process.env.PUBLISH_FIGSHARE_GROUP_ID))) {
+    console.error(`The environment variable "PUBLISH_FIGSHARE_GROUP_ID" if defined must be a valid numeric value (PUBLISH_FIGSHARE_GROUP_ID = ${process.env.PUBLISH_FIGSHARE_GROUP_ID}).`);
+    process.exit(1);
+}
+
 
 const values = {
 
@@ -118,6 +123,13 @@ const values = {
     figshare: {
         apiBaseUrl: process.env.FIGSHARE_API_BASE,
         apiToken: process.env.FIGSHARE_API_TOKEN
+    },
+
+    figsharePublish: {
+        type: process.env.PUBLISH_FIGSHARE_TYPE || "journal contribution",
+        groupId: process.env.PUBLISH_FIGSHARE_GROUP_ID ? (parseInt(process.env.PUBLISH_FIGSHARE_GROUP_ID)) : null,
+        categories: process.env.PUBLISH_FIGSHARE_CATEGORIES || "4, 12, 135",  /* Biochemistry, Cell Biology, Computational  Biology */
+        defaultTag: process.env.PUBLISH_FIGSHARE_DEFAULT_TAG || "Physiome Journal"
     },
 
     stripe: {
