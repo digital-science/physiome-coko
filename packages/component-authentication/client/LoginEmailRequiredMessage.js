@@ -21,7 +21,9 @@ const LoginEmailRequiredMessage = styled(({className, currentUser, refetchUser})
         setConfirmError(null);
     };
 
-    const confirmEmailAddress = () => {
+    const confirmEmailAddress = (e) => {
+
+        e.preventDefault();
 
         if(!emailAddress) {
             setConfirmError("Please enter an email address to be used for submission related notifications.");
@@ -47,17 +49,19 @@ const LoginEmailRequiredMessage = styled(({className, currentUser, refetchUser})
     return (
         <EmailRequiredHolder className={className}>
             <ProvideEmailMessageHolder>
-                <h3>Email Address</h3>
-                <p>A valid email address is required for us to send you manuscript submission related notifications and updates.</p>
-                <p>Please provide a valid email address below.</p>
-                <div className="email">
-                    <BlockLabel>Your Email Address:</BlockLabel>
-                    <TextInput value={emailAddress} onChange={onChangeEmail} />
-                </div>
-                {confirmError ? <p className="error"><FaExclamationCircle/> {confirmError}</p> : null}
-                <div className="confirm">
-                    <PrimaryInlineButton bordered={true} onClick={confirmEmailAddress}>Confirm Email Address</PrimaryInlineButton>
-                </div>
+                <form onSubmit={confirmEmailAddress}>
+                    <h3>Email Address</h3>
+                    <p>A valid email address is required for us to send you manuscript submission related notifications and updates.</p>
+                    <p>Please provide a valid email address below.</p>
+                    <div className="email">
+                        <BlockLabel>Your Email Address:</BlockLabel>
+                        <TextInput value={emailAddress} onChange={onChangeEmail} />
+                    </div>
+                    {confirmError ? <p className="error"><FaExclamationCircle/> {confirmError}</p> : null}
+                    <div className="confirm">
+                        <PrimaryInlineButton submit={true} bordered={true} onClick={confirmEmailAddress}>Confirm Email Address</PrimaryInlineButton>
+                    </div>
+                </form>
             </ProvideEmailMessageHolder>
         </EmailRequiredHolder>
     );
@@ -83,16 +87,16 @@ const ProvideEmailMessageHolder = styled.div`
   
   text-align: initial;
   
-  & > h3 {
+  & > form > h3 {
     margin-top: 0;
   }
   
-  & > p {
+  & > form > p {
     margin-top: 0;
     margin-bottom: 20px;
   }
     
-  & > p.error {
+  & > form > p.error {
     position: relative;
     padding-left: 34px !important;
 
@@ -112,11 +116,11 @@ const ProvideEmailMessageHolder = styled.div`
     }
   }
 
-  & > div.email {
+  & > form > div.email {
     margin-top: 40px;
   }
   
-  & > div.confirm {
+  & > form > div.confirm {
     margin-top: 30px;
     text-align: center;
   }
