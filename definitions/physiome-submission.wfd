@@ -136,6 +136,7 @@ instance Submission {
 
         figshareArticleId: String <input:exclude>,
         figshareArticleDoi: String <input:exclude>,
+        publishingPmrDetails: JSON,
 
         paymentSessionId: String <input:exclude>,
         paymentCompleted: Boolean <input:exclude, default:false>
@@ -160,7 +161,8 @@ instance Submission {
         fields "curation" {
             hidden, unpublishedChanges, rejectionReason, rejectionOther,
     	    allFilesPresent, resultsMatch, modelAnnotated, primaryPaperExists, resultsInPapersOverlap, sameModelInPapers, manuscriptAccepted,
-    	    curator, curationNotes
+    	    curator, curationNotes,
+    	    publishingPmrDetails
         }
 
         tasks "owner-submit" {

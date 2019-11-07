@@ -46,6 +46,7 @@ CREATE TABLE "submission" (
 
     "figshare_article_id" text,
     "figshare_article_doi" text,
+    "publishing_pmr_details" JSONB,
 
     "payment_session_id" text,
     "payment_completed" boolean
