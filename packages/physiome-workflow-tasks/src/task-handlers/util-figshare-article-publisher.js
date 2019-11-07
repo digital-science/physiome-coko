@@ -1,11 +1,15 @@
 const { models } = require('component-workflow-model/model');
 const { Submission } = models;
 
-
 const { FigshareApi } = require('figshare-publish-service');
 const crypto = require('crypto');
 
+const config = require('config');
 
+const PublishFigshareOptions = config.get('figsharePublish');
+
+const ArticleCategories = PublishFigshareOptions.categories ? PublishFigshareOptions.categories.split(',').map(v => parseInt(v.trim()))  : null;
+const ArticleDefaultKeyword = PublishFigshareOptions.defaultTag;
 
 class FigshareArticlePublisher {
 
@@ -26,21 +30,31 @@ class FigshareArticlePublisher {
 
     async submissionToArticleData(submission) {
 
-        // FIXME: we currently hardcode category 2 (uncategorized)
-
         const title = submission.title;
         const articleData = {
             title: title,
-            defined_type: 'journal contribution',
-            categories: [ 2 ],
+            defined_type: (PublishFigshareOptions.type || 'journal contribution'),
+            categories: [],
             tags: [],
-            group_id: 26065,
             description: submission.abstract || "No abstract was provided at the time of submission."
         };
+
+        if(typeof PublishFigshareOptions.groupId === "number") {
+            articleData.group_id = PublishFigshareOptions.groupId;
+        }
+
+        if(ArticleCategories) {
+            articleData.categories = ArticleCategories;
+        }
 
         if(submission.keywords && submission.keywords instanceof Array && submission.keywords.length) {
             articleData.tags = submission.keywords;
         }
+
+        if(articleData.tags.indexOf(ArticleDefaultKeyword) === -1) {
+            articleData.tags.push(ArticleDefaultKeyword);
+        }
+
 
         // FIXME: if authors are greater than 10 we need to use the authors endpoint
 
@@ -48,13 +62,11 @@ class FigshareArticlePublisher {
 
             articleData.authors = submission.authors.filter(a => a.name).map(author => {
 
-                return {name: author.name};
-
-                /*const a = {name: `${awardee.firstName} ${awardee.lastName}`};
-                if(awardee.identity && awardee.identity.type === 'orcid') {
-                    a.orcid_id = awardee.identity.identityId;
+                const a = {name: author.name};
+                if(author.orcid && author.orcid.length) {
+                    a.orcid_id = author.orcid;
                 }
-                return a;*/
+                return a;
             });
         }
 
