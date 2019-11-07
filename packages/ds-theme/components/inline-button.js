@@ -2,14 +2,14 @@ import React from 'react';
 import styled from 'styled-components';
 
 
-const _InlineButton = ({className, tag, plain=false, children=null, bordered=false, selected=false, color="", icon, ...rest}) => {
+const _InlineButton = ({className, tag, plain=false, children=null, bordered=false, selected=false, color="", icon, submit=false, ...rest}) => {
 
     const combinedClassName = `${className || ""} ${children ? "" : "empty"} ${bordered ? "bordered" : "" } ${selected ? "selected" : "" } ${color}`;
 
     if(tag) {
         return <tag className={combinedClassName} {...rest}>{icon || null}{children}</tag>
     }
-    return <button className={combinedClassName} {...rest}>{icon || null}{children}</button>
+    return <button className={combinedClassName} type={submit ? "submit" : "button"} {...rest}>{icon || null}{children}</button>
 };
 
 const InlineButton = styled(_InlineButton)`
