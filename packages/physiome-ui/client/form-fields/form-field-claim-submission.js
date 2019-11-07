@@ -11,7 +11,7 @@ import { SmallInlineButton } from 'ds-theme/components/inline-button';
 import StaticText from 'ds-theme/components/static-text';
 
 
-function FormFieldClaimSubmission({data, binding, instanceId, instanceType, refetchData, options = {}}) {
+function FormFieldClaimSubmission({data, binding, instanceId, instanceType, saveData, refetchData, options = {}}) {
 
     const [identity] = useFormValueBinding(data, binding, null);
     const claimSubmission = useClaimSubmissionMutation(instanceType);
@@ -19,14 +19,19 @@ function FormFieldClaimSubmission({data, binding, instanceId, instanceType, refe
     const currentUser = useContext(AuthenticatedUserContext);
 
     const handleClaimSubmission = () => {
-        claimSubmission(instanceId).then(r => {
-            refetchData();
+        (saveData ? saveData() : Promise.resolve()).then(() => {
+            return claimSubmission(instanceId);
+        }).then(r => {
+            return refetchData();
         });
     };
 
     const handleUnclaimSubmission = () => {
-        unclaimSubmission(instanceId).then(r => {
-            refetchData();
+
+        (saveData ? saveData() : Promise.resolve()).then(() => {
+            return unclaimSubmission(instanceId);
+        }).then(r => {
+            return refetchData();
         });
     };
 
