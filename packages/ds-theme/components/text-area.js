@@ -28,10 +28,7 @@ const _TextArea = ({children=null, issue, autoSizeHeight = false, ...rest}) => {
     return <textarea{...rest}>{children}</textarea>
 };
 
-const TextArea = BorderedElement(_TextArea);
-
-
-export default styled(TextArea)`
+const TextArea = styled(BorderedElement(_TextArea))`
     width: 100%;
     min-width: 100%;
     max-width: 100%;
@@ -47,3 +44,12 @@ export default styled(TextArea)`
         outline: 0;
     }
 `;
+
+export default TextArea;
+
+
+const SmallTextArea = styled(TextArea)`
+    font-size: ${th('textArea.small.fontSize')};
+`;
+
+export { SmallTextArea };

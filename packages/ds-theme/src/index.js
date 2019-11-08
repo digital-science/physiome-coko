@@ -120,7 +120,10 @@ const DSAwardsTheme = {
     textArea: {
         fontFamily: ThemeBaseDefaults.InputFontFamily,
         fontSize: ThemeBaseDefaults.FontSizeDefault,
-        textColor: ThemeBaseDefaults.InputColor
+        textColor: ThemeBaseDefaults.InputColor,
+        small: {
+            fontSize: ThemeBaseDefaults.FontSizeSmall
+        }
     },
 
     // Bordered Element
