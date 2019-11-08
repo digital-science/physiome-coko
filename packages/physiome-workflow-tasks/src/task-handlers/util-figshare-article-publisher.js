@@ -1,8 +1,10 @@
 const { models } = require('component-workflow-model/model');
 const { Submission } = models;
+const logger = require('workflow-utils/logger-with-prefix')('PhysiomeWorkflowTasks/FigshareArticlePublisher');
+const crypto = require('crypto');
 
 const { FigshareApi } = require('figshare-publish-service');
-const crypto = require('crypto');
+const uploadPMRArchiveToFigshare = require('./util-pmr-archive-upload');
 
 const config = require('config');
 
@@ -10,6 +12,8 @@ const PublishFigshareOptions = config.get('figsharePublish');
 
 const ArticleCategories = PublishFigshareOptions.categories ? PublishFigshareOptions.categories.split(',').map(v => parseInt(v.trim()))  : null;
 const ArticleDefaultKeyword = PublishFigshareOptions.defaultTag;
+
+
 
 class FigshareArticlePublisher {
 
@@ -36,6 +40,7 @@ class FigshareArticlePublisher {
             defined_type: (PublishFigshareOptions.type || 'journal contribution'),
             categories: [],
             tags: [],
+            references: [],
             description: submission.abstract || "No abstract was provided at the time of submission."
         };
 
@@ -55,6 +60,95 @@ class FigshareArticlePublisher {
             articleData.tags.push(ArticleDefaultKeyword);
         }
 
+
+        // Append the custom meta-data field for IUPS Commission kind. The Displayed IUPS Commission kinds in the workflow
+        // description are used as the figshare values (so convert from the enum to the mapped value).
+
+        const workflowDescription = submission.constructor.workflowDescription;
+        if(workflowDescription && submission.iupsCommission) {
+
+            const commissionMapping = workflowDescription.resolveDisplayMapping('DisplayedIUPSCommissionKinds');
+            if(commissionMapping) {
+                const storedValueMapping = commissionMapping.internalValueMapping;
+                if(storedValueMapping.hasOwnProperty(submission.iupsCommission)) {
+
+                    if(!articleData.custom_fields) {
+                        articleData.custom_fields = {};
+                    }
+                    articleData.custom_fields['Commission Kind'] = ["" + storedValueMapping[submission.iupsCommission]];
+                }
+            }
+        }
+
+        if(submission.primaryPapers && submission.primaryPapers.length) {
+
+            const referenceUrls = submission.primaryPapers.map(citation => {
+                return citation.doi ? citation.doi : citation.link || null;
+            }).filter(v => !!v);
+
+            if(referenceUrls && referenceUrls.length) {
+                articleData.references = [...articleData.references, ...referenceUrls];
+            }
+        }
+
+        if(submission.publishingPmrDetails && submission.publishingPmrDetails.workspaceId) {
+            articleData.references.push(`https://models.physiomeproject.org/workspace/${encodeURI(submission.publishingPmrDetails.workspaceId)}`);
+        }
+
+        if(submission.funding && submission.funding.length) {
+
+            const funding = [];
+
+            submission.funding.forEach(f => {
+
+                if(!f.organization || !f.organization.name) {
+                    return;
+                }
+
+                if(!f.grants || !f.grants.length) {
+                    return;
+                }
+
+                f.grants.forEach(grant => {
+
+                    if(!grant.projectNumber) {
+                        return;
+                    }
+
+                    const fundingDetails = {
+                        funder_name: f.organization.name,
+                        grant_code: grant.projectNumber,
+                        is_user_defined: true
+                    };
+
+                    if(grant.entity) {
+                        if(grant.entity.title) {
+                            fundingDetails.title = grant.entity.title;
+                        }
+
+                        if(grant.entity.id) {
+                            fundingDetails.url = `https://app.dimensions.ai/details/grant/${encodeURI(grant.entity.id)}`;
+                        }
+                    }
+
+
+                    // Note: we overwrite what would be the better option above, replacing it with a more generic version
+                    // as a single "title" string.
+                    const reducedFundingDetails = {is_user_defined:true};
+
+                    reducedFundingDetails.title = `${fundingDetails.funder_name}: ${grant.projectNumber}`;
+                    if(grant.entity && grant.entity.title) {
+                        reducedFundingDetails.title = `${reducedFundingDetails.title} - ${grant.entity.title}`
+                    }
+
+                    funding.push(reducedFundingDetails)
+                });
+            });
+
+            if(funding.length) {
+                articleData.funding_list = funding;
+            }
+        }
 
         // FIXME: if authors are greater than 10 we need to use the authors endpoint
 
@@ -171,6 +265,10 @@ class FigshareArticlePublisher {
 
         }).then(() => {
 
+            return uploadPMRArchiveToFigshare(articleId, submission);
+
+        }).then(() => {
+
             return articleId;
         });
     }
@@ -203,13 +301,14 @@ class FigshareArticlePublisher {
                 return new Promise((resolve, reject) => {
 
                     partStream.on('error', (error) => {
+                        logger.warn(`S3 part stream read failed due to: ${error.toString()} (submission=${submission.id}, articleId=${articleId})`);
                         return reject(error);
                     });
 
                     const req = figshareApi.uploadFilePart(articleId, fileInfo, part);
 
                     req.on("error", (error) => {
-                        console.error("");
+                        logger.warn(`figshare part upload request failed due to: ${error.toString()} (submission=${submission.id}, articleId=${articleId})`);
                         return reject(error);
                     });
 

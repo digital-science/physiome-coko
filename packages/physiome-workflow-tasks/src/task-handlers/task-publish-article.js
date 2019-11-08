@@ -2,10 +2,7 @@ const FigshareArticlePublisher = require('./util-figshare-article-publisher');
 const { models } = require('component-workflow-model/model');
 const { Submission } = models;
 
-const { FigshareApi } = require('figshare-publish-service');
-const crypto = require('crypto');
-
-const logger = require("workflow-utils/logger-with-prefix")('external-task/publish-article');
+const logger = require("workflow-utils/logger-with-prefix")('PhysiomeWorkflowTasks/PublishArticle');
 
 
 module.exports = function _setupPublishArticleTask(client) {
@@ -34,6 +31,8 @@ module.exports = function _setupPublishArticleTask(client) {
         }
 
         return articlePublisher.publishSubmission(submission).then(() => {
+
+            // FIXME: this should be updated via patching as the publish can take a long time and the submission may get modified during this time period
 
             const currentDate = new Date();
 
