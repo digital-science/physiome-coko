@@ -354,7 +354,7 @@ instance Submission {
 
                 { StaticText => figshareArticleDoi, (hasValue(figshareArticleDoi) == true), label: "Article DOI" }
 
-                { TextArea => curationNotes, <administrator>, label:"Notes" }
+                { TextArea => curationNotes, <administrator>, label:"Notes", small:true, rows:7 }
 
                 { Checkbox => hidden, <administrator>, (phase in [SubmissionPhase.Submitted, SubmissionPhase.Decision]), label:"Place submission on-hold",
                     help: "Will hide submission from the active list. Use only if the authors cease communication for more than 4 weeks." }
@@ -384,6 +384,7 @@ instance Submission {
 
             } }
 
+
             { DetailPanel, <administrator>,
                     (phase in [SubmissionPhase.Decision, SubmissionPhase.Payment, SubmissionPhase.Paid,
                         SubmissionPhase.Publish, SubmissionPhase.Reject, SubmissionPhase.Published]),
@@ -402,6 +403,12 @@ instance Submission {
                 { Checkbox => modelAnnotated, label: "Model is fully annotated", readOnly:true }
 
                 { Checkbox => manuscriptAccepted, label: "Manuscript accepted", readOnly:true }
+            } }
+
+            { DetailPanel, <administrator>, heading:"Published PMR Workspace", children: {
+
+                { PMRWorkspaceDetails => publishingPmrDetails }
+
             } }
 
             { DetailPanel, <administrator>, (phase in [SubmissionPhase.Submitted, SubmissionPhase.Decision, SubmissionPhase.Payment,
