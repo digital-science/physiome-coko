@@ -267,7 +267,7 @@ const _ArticleCitationEditorCard = ({className, citation, didModifyCitation, rem
                         <React.Fragment>
                             <div className="doi-lookup-group">
                                 <SmallBlockLabel>DOI Lookup</SmallBlockLabel>
-                                <SmallTextInput placeholder="Article DOI e.g. 10.3389/fphys.2018.00148" value={doi} onChange={onDoiChange} disabled={isEditingManualCitation} />
+                                <SmallTextInput placeholder="Article DOI e.g. 10.1085/jgp.67.1.91" value={doi} onChange={onDoiChange} disabled={isEditingManualCitation} />
                             </div>
 
                             {isFindingDoi ? <Spinner small={true} message="Finding details for DOI"/> : null}
