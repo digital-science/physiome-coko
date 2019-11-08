@@ -82,7 +82,11 @@ const organisationEntityModifier = (entity) => {
 function organisationEntityLookup(value, maxItems=15) {
 
     if(!value || !value.length) {
-        return Promise.resolve([]);
+        return new Promise(resolve => {
+            setTimeout(() => {
+                return resolve([]);
+            }, 0);
+        });
     }
 
     const qp = {};
