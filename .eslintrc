@@ -11,7 +11,8 @@
       "CallExpression": {"arguments": "first"},
       "FunctionExpression": {"parameters": "first"},
       "ObjectExpression": "first",
-      "SwitchCase": 1
+      "SwitchCase": 1,
+      "MemberExpression" : 0
     }],
     "react/jsx-indent-props": [4, "first"],
     "consistent-return": 0,
