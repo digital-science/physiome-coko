@@ -71,17 +71,44 @@ The application itself pulls configuration from several different locations:
 Example ".env" file for local development:
 
 ```
+PUBSWEET_SERVER_SECRET=<replace with JWT secret>
+
+WORKFLOW_FILE_IDENTIFIER_DOMAIN=physiome-submission-dev.ds-innovation-experiments.com
 AWS_S3_ACCESS_KEY=<replace with S3 access key>
 AWS_S3_SECRET_KEY=<replace with S3 secret key>
 AWS_S3_REGION=<replace with S3 region>
 AWS_S3_BUCKET=<replace with S3 bucket name>
+
 ORCID_CLIENT_ID=<replace with ORCiD API client ID>
 ORCID_CLIENT_SECRET=<replace with ORCiD API client secret>
+
 AWS_SES_ACCESS_KEY=<replace with SES access key>
 AWS_SES_SECRET_KEY=<replace with SES secret key>
 AWS_SES_REGION=<replace with SES region>
-FIGSHARE_API_BASE=<replace with figshare API base URL>
+
+FIGSHARE_API_BASE=https://api.figsh.com/v2/
 FIGSHARE_API_TOKEN=<replace with figshare API token>
+
+PUBLISH_FIGSHARE_TYPE="journal contribution"
+PUBLISH_FIGSHARE_GROUP_ID=<replace with figshare group id>
+PUBLISH_FIGSHARE_CATEGORIES=4,12,135
+
+DIMENSIONS_API_BASE=https://app.dimensions.ai/api
+DIMENSIONS_API_USERNAME=<replace with dimensions API username>
+DIMENSIONS_API_PASSWORD=<replace with dimensions API password>
+
+STRIPE_IS_PRODUCTION=false
+STRIPE_SECRET_KEY=<replace with stripe secret key>
+STRIPE_PUBLISHABLE_KEY=<replace with stripe public key>
+STRIPE_WEBHOOK_SECRET_KEY=<replace with stripe web hook secret key>
+
+IDENTITY_ADMIN_USERS=<comma separated list of ORCID IDs for admin users>
+
+EMAIL_SEND_FROM=Physiome Journal <physiome-curators@physiomeproject.org>
+EMAIL_SUBJECT_PREFIX="Physiome submission system:"
+EMAIL_SIGNATURE="Kind regards,\nPhysiome curation team\nphysiome-curators@physiomeproject.org"
+EMAIL_RESTRICTED_TO=<replace with restricted email addresses for dev/test environment, empty for production>
+EMAIL_EDITORS_MAILING_LIST="physiome-editors@physiomeproject.org"
 ```
 
  * The business logic is described within <code>/definitions/physiome-submission-v2.bpmn</code>. This file
