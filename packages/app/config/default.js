@@ -88,6 +88,8 @@ const values = {
         templateDirectory: `${__dirname}/../../../definitions/email-templates`,
         signature: process.env.EMAIL_SIGNATURE,
 
+        editorsMailingListAddress: process.env.EMAIL_EDITORS_MAILING_LIST,
+
         // Note: restricted email addresses, env variable parsed as JSON array of addresses, for a regex match it should look like: "regex:^.+@digital-science\\.com$"
         restrictedEmailAddresses: process.env.EMAIL_RESTRICTED_TO ? JSON.parse(process.env.EMAIL_RESTRICTED_TO).map(v => v.indexOf("regex:") === 0 ? new RegExp(v.split(':')[1], 'i') : v) : null
     },

@@ -22,6 +22,10 @@ class TaskSendEmail {
         });
     }
 
+    skipTaskWithoutSendingEmail() {
+        return false;
+    }
+
     async resolveSubmission(submissionId) {
 
         return Submission.find(submissionId, ['submitter']);
@@ -32,11 +36,15 @@ class TaskSendEmail {
         return '-';
     }
 
+    async submissionToRecipient(submission) {
+        return submission.submitter;
+    }
+
     async submissionToEmailData(submission) {
 
         const link = `${BaseUrl}/details/${encodeURI(submission.id)}`;
         const subject = await this.formatEmailSubject(submission);
-        const recipient = submission.submitter;
+        const recipient = await this.submissionToRecipient(submission);
 
         return {
             subject,
@@ -68,8 +76,12 @@ class TaskSendEmail {
     async processTask(task, taskService) {
 
         const logger = this.logger;
-
         logger.debug(`process task is starting`);
+
+        if(this.skipTaskWithoutSendingEmail()) {
+            logger.debug(`process task has been skipped without sending email, completing external task`);
+            return taskService.complete(task);
+        }
 
         const submissionId = task.businessKey;
         if(!submissionId) {
