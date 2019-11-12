@@ -1,4 +1,4 @@
-# Phyisome Submission System
+# Physiome Submission System
 
 _Physiome_ publishes reproducible and reusable mathematical models of physiological processes where the experimental details and model validation have been published or accepted for publication in a recognised 'primary' peer-reviewed journal.
 Physiome curators will help authors ensure that models and simulation experiments are made available using appropriate community standards prior to acceptance for publication in Physiome.
