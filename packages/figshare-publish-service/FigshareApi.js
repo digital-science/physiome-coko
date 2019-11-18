@@ -29,10 +29,6 @@ class NotFoundError extends Error {
 
 class FigshareApi {
 
-    static get NotFoundError() {
-        return NotFoundError;
-    }
-
     constructor(apiBaseUrl, apiToken) {
         this.apiBaseUrl = apiBaseUrl;
         this.apiToken = apiToken;
@@ -225,4 +221,5 @@ class FigshareApi {
 }
 
 
-module.exports = FigshareApi;
+exports.FigshareApi = FigshareApi;
+exports.NotFoundError = NotFoundError;
