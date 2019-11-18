@@ -14,6 +14,11 @@ const logger = require('workflow-utils/logger-with-prefix')('PhysiomeWorkflowTas
 
 async function uploadPMRArchiveToFigshare(articleId, submission) {
 
+    if(!submission.publishingPmrDetails) {
+        logger.warn(`no PMR workspace details provided to publish model (submission=${submission.id}, articleId=${articleId})`);
+        return Promise.resolve();
+    }
+
     const { workspaceId, changeSetHash } = submission.publishingPmrDetails;
     const archiveDownloadLink = workspaceId && changeSetHash ? `https://models.physiomeproject.org/workspace/${encodeURI(workspaceId)}/@@archive/${encodeURI(changeSetHash)}/tgz` : null;
 
