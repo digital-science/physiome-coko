@@ -62,7 +62,11 @@ async function _cleanupForRejectedSubmission(submission) {
         submission.figshareArticleDoi = null;
         return submission.patchFields(['figshareArticleId', 'figshareArticleDoi'], builder => builder.where('figshareArticleId', articleId));
 
-    }).catch(NotFoundError, error => {
+    }).catch(error => {
+
+        if(!error instanceof NotFoundError) {
+            throw error;
+        }
 
         logger.debug(`figshare article not found during deletion attempt (submissionId = ${submission.id}, phase = ${submission.phase}, articleId = ${articleId})`);
 
