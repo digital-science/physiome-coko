@@ -4,6 +4,7 @@ enum SubmissionPhase {
     Submitted => "submitted",
     Decision => "decision",
     Payment => "payment",
+    SkipPayment => "skip-payment",
     Paid => "paid",
     Publish => "publish",
     Reject => "reject",
@@ -129,6 +130,7 @@ instance Submission {
         resultsInPapersOverlap: Boolean,
         sameModelInPapers: Boolean,
         manuscriptAccepted: Boolean,
+        paymentSkipped: Boolean <state, input:exclude, default:false>,
         curationNotes: String,
 
         articleFiles: [File] <set>,
@@ -386,7 +388,7 @@ instance Submission {
 
 
             { DetailPanel, <administrator>,
-                    (phase in [SubmissionPhase.Decision, SubmissionPhase.Payment, SubmissionPhase.Paid,
+                    (phase in [SubmissionPhase.Decision, SubmissionPhase.Payment, SubmissionPhase.Paid, SubmissionPhase.SkipPayment,
                         SubmissionPhase.Publish, SubmissionPhase.Reject, SubmissionPhase.Published]),
                     heading:"Curation Checks", children:{
 
@@ -412,7 +414,7 @@ instance Submission {
             } }
 
             { DetailPanel, <administrator>, (phase in [SubmissionPhase.Submitted, SubmissionPhase.Decision, SubmissionPhase.Payment,
-                                                            SubmissionPhase.Paid, SubmissionPhase.Reject]),
+                                                            SubmissionPhase.Paid, SubmissionPhase.SkipPayment, SubmissionPhase.Reject]),
                     heading:"Decisions", children:{
 
                 { InlineTaskForm, form:"decisions", tasks:[ "checks", "payment-decision", "payment", "publish-decision" ] }
@@ -536,6 +538,13 @@ instance Submission {
                 state: {
                     phase: SubmissionPhase.Submitted
                 }
+            },
+            {
+                "skip-payment" => Complete,
+                state: {
+                    phase: SubmissionPhase.SkipPayment,
+                    paymentSkipped: true
+                }
             }
         ]
 
@@ -549,7 +558,11 @@ instance Submission {
                 confirmation:"Are you sure you want to approve this submission for curation fee payment? The submitter will be emailed and asked to pay the curation processing charge.",
                 confirmationHeading:"Request Curation Fee Payment", confirmationAffirmativeLabel: "Send Payment Request", confirmationNegativeLabel: "Cancel" }
 
-            { Button, (phase == SubmissionPhase.Paid), outcome:"publish", label:"Publish Article",
+            { Button, (phase == SubmissionPhase.Decision), outcome:"skip-payment", label:"Waive Payment",
+                confirmation:"Are you sure you want to approve this submission and also waive the payment of the APC fee?",
+                confirmationHeading:"Waive APC Payment", confirmationAffirmativeLabel: "Waive APC Payment", confirmationNegativeLabel: "Cancel" }
+
+            { Button, (phase == SubmissionPhase.Paid || phase == SubmissionPhase.SkipPayment), outcome:"publish", label:"Publish Article",
                 confirmation:"Are you sure you want to publish this manuscript submission through into figshare?", confirmationHeading:"Publish Manuscript to Figshare",
                 confirmationAffirmativeLabel: "Publish Manuscript", confirmationNegativeLabel: "Cancel" }
 

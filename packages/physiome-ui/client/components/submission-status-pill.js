@@ -13,6 +13,7 @@ const SubmissionStatus = {
     Decision: 'Decision',
     Payment: 'Payment',
     Paid: 'Paid',
+    SkipPayment: 'SkipPayment',
     Publish: 'Publish',
     Reject: 'Reject',
     Published: 'Published',
@@ -51,6 +52,11 @@ SubmissionStatusMapping[SubmissionStatus.Payment] = {
 
 SubmissionStatusMapping[SubmissionStatus.Paid] = {
     text:"Paid",
+    className: "paid"
+};
+
+SubmissionStatusMapping[SubmissionStatus.SkipPayment] = {
+    text:"Payment Waived",
     className: "paid"
 };
 

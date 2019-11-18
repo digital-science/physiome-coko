@@ -43,6 +43,7 @@ CREATE TABLE "submission" (
     "results_in_papers_overlap" boolean,
     "same_model_in_papers" boolean,
     "manuscript_accepted" boolean,
+    "payment_skipped" boolean,
 
     "figshare_article_id" text,
     "figshare_article_doi" text,

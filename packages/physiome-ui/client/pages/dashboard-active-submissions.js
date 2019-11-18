@@ -16,7 +16,8 @@ const AllPhases = [
     "Submitted",
     "Decision",
     "Payment",
-    "Paid"
+    "Paid",
+    "SkipPayment"
 ];
 
 const ActivePhases = [
@@ -24,7 +25,8 @@ const ActivePhases = [
     "Submitted",
     "Decision",
     "Payment",
-    "Paid"
+    "Paid",
+    "SkipPayment"
 ];
 
 
