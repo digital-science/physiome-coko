@@ -8,6 +8,7 @@ const TaskEmailDecisionRequired = require('./task-email-decision-required');
 const TaskPublishArticle = require('./task-publish-article');
 const TaskRepublishArticle = require('./task-republish-article');
 const TaskReserveDoi = require('./task-reserve-doi');
+const TaskRejectionCleanup = require('./task-rejection-cleanup');
 
 const TaskTimeoutSubmission = require('./task-time-out-submission');
 
@@ -22,6 +23,7 @@ const AllTaskSetups = [
     TaskPublishArticle,
     TaskRepublishArticle,
     TaskReserveDoi,
+    TaskRejectionCleanup,
     TaskTimeoutSubmission
 ];
 
