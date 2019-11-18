@@ -19,7 +19,19 @@ const FigshareApiEndpoints = {
 };
 
 
+class NotFoundError extends Error {
+    constructor(...args) {
+        super(...args);
+        Error.captureStackTrace(this, NotFoundError)
+    }
+}
+
+
 class FigshareApi {
+
+    static get NotFoundError() {
+        return NotFoundError;
+    }
 
     constructor(apiBaseUrl, apiToken) {
         this.apiBaseUrl = apiBaseUrl;
@@ -170,7 +182,12 @@ class FigshareApi {
                     logger.debug(`[figshare-publish-service] FigshareAPI request returned an invalid response code ${response.statusCode} for request [${method || "GET"} -> ${endpoint}]
                         \trequest-body: ${body ? JSON.stringify(body, null, 4) : "<none>"}
                         \tresponse-body: ${responseBody ? JSON.stringify(responseBody, null, 4) : "<none>"}`);
-                    return reject(new Error(`Invalid response code (${response.statusCode}) returned from figshare API endpoint`));
+
+                    const err = response.statusCode === 404 ?
+                        new NotFoundError(`Figshare object not found`) :
+                        new Error(`Invalid response code (${response.statusCode}) returned from figshare API endpoint`);
+
+                    return reject(err);
                 }
 
                 return resolve(responseBody);

@@ -4,3 +4,4 @@ const FigshareApi = require('./FigshareApi');
 const fc = config.get('figshare');
 
 exports.FigshareApi = new FigshareApi(fc.apiBaseUrl, fc.apiToken);
+exports.NotFoundError = FigshareApi.NotFoundError;
