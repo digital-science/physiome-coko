@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { nextUniqueIdInArray, assignUniqueIdsToArrayItems } from '../utils/helpers';
 import styled from 'styled-components';
 
@@ -6,7 +6,7 @@ import Card, { CardRemoveButton } from "ds-theme/components/card";
 import { SmallBlockLabel } from "ds-theme/components/label";
 import { FaPlus, FaTrashAlt, FaTimesCircle } from 'react-icons/fa';
 
-import { SmallOrganisationAutocomplete } from './organisation-autocomplete';
+import { SmallOrganisationAutocomplete, organisationEntityLookup, organisationEntityModifier } from './organisation-autocomplete';
 import { SmallInlineButton } from "ds-theme/components/inline-button";
 import { SmallFundingAutocomplete } from './funding-autocomplete';
 
@@ -146,13 +146,13 @@ const GrantDetailsRow = styled(_GrantDetailsRow)`
   justify-content: space-between;
   
   & > div.identifier {
-    flex-basis: calc(25%);
-    min-width: 25%;
+    flex-basis: calc(33%);
+    min-width: 33%;
   }
     
   & > div.extra {
-    flex-basis: calc(75% - 10px);
-    max-width: calc(75% - 10px);
+    flex-basis: calc(66% - 10px);
+    max-width: calc(66% - 10px);
   }
 `;
 
@@ -162,6 +162,7 @@ function _FunderEditorCard({className, funder, removeFunder, didModifyFunder}) {
     const [orgValue, setOrgValue] = useState((funder && funder.organization) ? (funder.organization.name || "") : "");
     const [orgEntity, setOrgEntity] = useState((funder && funder.organization && funder.organization.id) ? funder.organization : null);
     const [grantNumbers, setGrantNumbers] = useState(assignUniqueIdsToArrayItems((funder && funder.grants) ? funder.grants : []));
+    const updateRef = useRef(null);
 
     useEffect(() => {
 
@@ -221,8 +222,60 @@ function _FunderEditorCard({className, funder, removeFunder, didModifyFunder}) {
     };
 
     const grantNumberModified = (gn) => {
+
         didModifyFunder(funder);
+
+        if(!funder.grants || funder.grants.length > 1) {
+            return;
+        }
+
+        // If the modified grant number contains a single funder along with a GRID ID, we will resolve the
+
+        if(gn && gn.entity && gn.entity.funders && gn.entity.funders instanceof Array && gn.entity.funders.length === 1 && gn.entity.funders[0].id) {
+
+            const targetFunder = gn.entity.funders[0];
+
+            if(!orgValue && !orgEntity) {
+
+                const origFunder = funder;
+                const targetGrant = gn;
+                const targetGrantEntity = gn.entity;
+
+                organisationEntityLookup(`"${targetFunder.id}"`, 1).then(items => {
+
+                    // After resolving the entity ID, we attempt to set the current organisation identifier. The above reference
+                    // to a method is updated with changes to the current state. If the state has the same grant entity resolved,
+                    // no organisation value set then we can set the organisation.
+
+                    if(items && items.length && updateRef.current) {
+                        updateRef.current(origFunder, targetGrant, targetGrantEntity, organisationEntityModifier(items[0]));
+                    }
+                });
+
+            }
+        }
     };
+
+    useEffect(() => {
+
+        updateRef.current = (origFunder, targetGrant, targetGrantEntity, resolvedOrgEntity) => {
+
+            if(!resolvedOrgEntity || !resolvedOrgEntity.name || !resolvedOrgEntity.id) {
+                return;
+            }
+
+            if(funder === origFunder && funder.grants.length === 1 && funder.grants[0].entity &&
+                funder.grants[0].entity.id === targetGrantEntity.id) {
+
+                funder.organization = resolvedOrgEntity;
+                setOrgEntity(resolvedOrgEntity);
+                setOrgValue(resolvedOrgEntity.name);
+                didModifyFunder(funder);
+            }
+        };
+
+    }, [funder, didModifyFunder, orgValue, orgEntity]);
+
 
 
     return (

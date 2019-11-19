@@ -100,7 +100,7 @@ function organisationEntityLookup(value, maxItems=15) {
     return fetch(url).then(function(response) {
         return response.json();
     }).then(function(r) {
-        return (r.items || []).slice(0, maxItems-1);
+        return (r.items || []).slice(0, maxItems);
     });
 }
 
@@ -163,3 +163,5 @@ const SmallOrganisationAutocomplete = ({autocompleteEntityComponent=SmallAutocom
 
 export default OrganisationAutocomplete;
 export { OrganisationAutocomplete, SmallOrganisationAutocomplete };
+
+export { organisationEntityLookup, organisationEntityModifier };
