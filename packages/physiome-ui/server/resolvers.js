@@ -3,6 +3,7 @@ const { Submission } = WorkflowModel.models;
 
 const { resolveUserForContext } = require('component-workflow-model/shared-helpers/access');
 const { AuthorizationError, NotFoundError } = require('@pubsweet/errors');
+const { pubsubManager } = require("pubsweet-server");
 
 const AclRule = require('client-workflow-model/AclRule');
 const AclActions = AclRule.Actions;
@@ -174,6 +175,16 @@ module.exports = {
             await submission.save();
 
             return !!(await submission.restartWorkflow("StartEvent_RepublishArticle"));
+        }
+    },
+
+    Subscription: {
+
+        publishedSubmission: {
+            subscribe: async (_, vars, context) => {
+                const pubSub = await pubsubManager.getPubsub();
+                return pubSub.asyncIterator(`Submission.published`);
+            }
         }
     }
 };

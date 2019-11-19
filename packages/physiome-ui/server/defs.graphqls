@@ -7,3 +7,8 @@ extend type Mutation {
 
     restartRejectedSubmission(id:ID) : Boolean
 }
+
+extend type Subscription {
+
+    publishedSubmission : ID!
+}
