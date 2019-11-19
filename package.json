@@ -33,12 +33,10 @@
     "prestart": "yarn migrate",
     "server": "cd packages/app && yarn server",
     "start": "cd packages/app && node app.js",
-    "-start": "docker-compose up",
-    "start:all": "concurrently \"yarn start:services\" \"yarn server\"",
-    "start:services": "cd packages/app && yarn start:services",
     "test": "lerna run test",
     "dsl-compile": "pegjs -o dsl/wfd-dsl.js dsl/wfd-dsl.pegjs",
-    "desc": "node dsl/compile.js definitions/physiome-submission.wfd packages/app/config/description.json"
+    "desc": "node dsl/compile.js definitions/physiome-submission.wfd packages/app/config/description.json",
+    "build" : "cd packages/app && NODE_ENV=production npx pubsweet build"
   },
   "engines": {
     "node": ">=8",

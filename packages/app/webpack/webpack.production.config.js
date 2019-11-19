@@ -5,7 +5,7 @@ const config = require('config');
 const path = require('path');
 const webpack = require('webpack');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
@@ -16,6 +16,9 @@ module.exports = [
     {
         name: 'app',
         target: 'web',
+        mode: 'production',
+        devtool: 'cheap-module-source-map',
+
         context: path.join(__dirname, '..', 'app'),
         entry: {
             app: ['./app'],
@@ -29,9 +32,8 @@ module.exports = [
             rules,
         },
         resolve,
-        // devtool: 'source-map',
         plugins: [
-            new CleanWebpackPlugin(['assets'], {
+            new CleanWebpackPlugin({
                 root: path.join(__dirname, '..', '_build'),
             }),
             new HtmlWebpackPlugin({
@@ -46,13 +48,13 @@ module.exports = [
             }),
             new webpack.ContextReplacementPlugin(/./, __dirname, {
             }),
-            new ExtractTextPlugin('styles/main.css'),
+            new MiniCssExtractPlugin({
+                filename: '[name].[hash].css',
+                chunkFilename: '[id].css',
+            }),
             new CopyWebpackPlugin([{ from: '../static' }]),
             new webpack.optimize.AggressiveMergingPlugin(),
-            new webpack.optimize.OccurrenceOrderPlugin(),
-            new UglifyJSPlugin({
-                // sourceMap: true
-            }),
+            new webpack.optimize.OccurrenceOrderPlugin()
         ],
         node: {
             fs: 'empty',

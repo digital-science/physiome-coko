@@ -1,4 +1,4 @@
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const include = require('./babel-includes');
 const stringReplaceRule = require('./string-replace');
 
@@ -20,32 +20,24 @@ module.exports = [
                 },
             },
 
-            // CSS Modules
             {
-                test: /\.local\.css$/,
-                include,
-                use: ExtractTextPlugin.extract({
-                    fallback: 'style-loader',
-                    use: [
-                        {
-                            loader: 'css-loader',
-                            options: {
-                                modules: true,
-                                localIdentName: '[name]_[local]-[hash:base64:8]',
-                            },
-                        },
-                    ],
-                }),
+                test: /\.mjs$/,
+                include: /node_modules/,
+                type: 'javascript/auto',
             },
 
-            // global CSS
+
+            // CSS
             {
                 test: /\.css$/,
-                use: ExtractTextPlugin.extract({
-                    fallback: 'style-loader',
-                    use: ['css-loader'],
-                }),
+                use: [
+                    {
+                        loader: MiniCssExtractPlugin.loader,
+                    },
+                    'css-loader',
+                ],
             },
+
 
             // files
             {
