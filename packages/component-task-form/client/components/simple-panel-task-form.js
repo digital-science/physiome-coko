@@ -18,7 +18,7 @@ const StyledSimplePanelLayout = styled(SimplePanelLayout)`
 `;
 
 export default function SimpleTaskForm({ className, instanceId, taskId, taskName, instanceType, formDefinition, workflowDescription,
-                                         submitDidFail, wasSubmitted, renderNoTask, autoSave=true }) {
+                                         submitDidFail, wasSubmitted, renderNoTask, dataContextRef=null, autoSave=true }) {
 
     const [showIsSaving, displayIsSavingMessage, removeIsSavingMessage] = useTimedMinimumDisplay(1500);
     const [showValidatedUserRequired, setShowValidatedUserRequired] = useState(false);
@@ -41,6 +41,9 @@ export default function SimpleTaskForm({ className, instanceId, taskId, taskName
 
     const fieldListingProps = {fieldRegistry, data:formData, refetchData:refetchFormData, formValidator, instanceId,
                                instanceType, task, taskId:resolvedTaskId, formDefinition, submitTaskOutcome};
+    if(dataContextRef) {
+        dataContextRef.current = fieldListingProps;
+    }
 
     return (
         <React.Fragment>
