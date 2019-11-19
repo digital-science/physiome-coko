@@ -824,6 +824,20 @@ class WorkflowModel extends BaseModel {
     // PubSub related
     // ---
 
+    static async asyncIteratorModelWasCreated() {
+
+        const pubSub = await pubsubManager.getPubsub();
+        return pubSub.asyncIterator(`${this.implementationName}.created`);
+    };
+
+    static async asyncIteratorModelWasModified() {
+
+        const pubSub = await pubsubManager.getPubsub();
+        return pubSub.asyncIterator(`${this.implementationName}.updated`);
+    };
+
+
+
     static async publishWasCreated(model) {
 
         const pubSub = await pubsubManager.getPubsub();
@@ -853,17 +867,19 @@ class WorkflowModel extends BaseModel {
     }
 
 
-    static async asyncIteratorModelWasCreated() {
 
+    static async publishSimpleMessage(msgName, data) {
         const pubSub = await pubsubManager.getPubsub();
-        return pubSub.asyncIterator(`${this.implementationName}.created`);
-    };
+        if(pubSub) {
+            this.logger.debug(`publish simple message: ${this.implementationName}.${msgName}`);
+            pubSub.publish(`${this.implementationName}.${msgName}`, data);
+        }
+    }
 
-    static async asyncIteratorModelWasModified() {
+    async publishSimpleMessage(msgName, data) {
+        return this.constructor.publishSimpleMessage(msgName, data);
+    }
 
-        const pubSub = await pubsubManager.getPubsub();
-        return pubSub.asyncIterator(`${this.implementationName}.updated`);
-    };
 
 
 
