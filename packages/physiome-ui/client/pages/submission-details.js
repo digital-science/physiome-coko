@@ -1,8 +1,11 @@
-import React, { useContext } from 'react';
+import React, { useContext, useRef } from 'react';
 import { WorkflowDescriptionContext } from 'client-workflow-model'
 import styled from 'styled-components';
 
 import { instanceViewTypeForViewDefinition } from 'component-task-form/client'
+import { useSubmissionPublishedSubscription } from '../subscriptions/submissionPublished';
+import debounce from "lodash/debounce";
+import {useInstanceWasCreatedSubscription} from "component-task-listing/client/subscriptions/instanceChanged";
 
 const SubmissionInstanceType = 'Submission';
 const SubmissionDetailsViewName = "details";
@@ -31,12 +34,40 @@ function SubmissionDetails({match, children}) {
 
     const instanceViewProps = {instanceId, instanceType, layoutDefinition:viewDefinition, workflowDescription};
 
+    // Subscribe to changes in the published status of an submission and refresh the data when it changes.
+    // Note: the dataContextRef is provided by the instance view type implementation and provides methods
+    // to refetch data, save data, current data etc.
+
+    const dataContextRef = useRef(null);
+    const throttledRefetch = debounce(() => {
+
+        if(dataContextRef.current) {
+            const { refetchData } = dataContextRef.current;
+            if(refetchData) {
+                refetchData();
+            }
+        }
+    }, 2000, { leading: true, trailing: true, maxWait:2000 });
+
+    useSubmissionPublishedSubscription(submissionId => {
+
+        if(!dataContextRef.current) {
+            return;
+        }
+
+        const { instanceId } = dataContextRef.current;
+        if(submissionId === instanceId) {
+            return throttledRefetch();
+        }
+    });
+
+
     return (
         <SubmissionDetailsPageHolder>
             {children ? <SubmissionDetailsPageHeader>{children}</SubmissionDetailsPageHeader> : null}
             <SubmissionDetailsHeader>Submission Details</SubmissionDetailsHeader>
             <SubmissionDetailsHolder>
-                <InstanceViewType {...instanceViewProps}  />
+                <InstanceViewType {...instanceViewProps} dataContextRef={dataContextRef} />
             </SubmissionDetailsHolder>
         </SubmissionDetailsPageHolder>
     );
