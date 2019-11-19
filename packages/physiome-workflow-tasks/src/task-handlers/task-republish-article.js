@@ -41,7 +41,7 @@ module.exports = function _setupPublishArticleTask(client) {
             submission.lastPublishDate = currentDate;
             submission.unpublishedChanges = false;
 
-            return submission.save();
+            return submission.patchFields(['phase', 'publishDate', 'lastPublishDate', 'unpublishedChanges']);
 
         }).then(() => {
 
@@ -50,7 +50,12 @@ module.exports = function _setupPublishArticleTask(client) {
 
         }).then(() => {
 
-            return submission.publishWasModified();
+            return Promise.all([
+                submission.publishWasModified(),
+                submission.publishSimpleMessage('published', {
+                    publishedSubmission: submission.id
+                })
+            ]);
 
         }).catch(err => {
 

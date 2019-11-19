@@ -32,8 +32,6 @@ module.exports = function _setupPublishArticleTask(client) {
 
         return articlePublisher.publishSubmission(submission).then(() => {
 
-            // FIXME: this should be updated via patching as the publish can take a long time and the submission may get modified during this time period
-
             const currentDate = new Date();
 
             submission.phase = 'published';
@@ -43,7 +41,7 @@ module.exports = function _setupPublishArticleTask(client) {
             submission.lastPublishDate = currentDate;
             submission.unpublishedChanges = false;
 
-            return submission.save();
+            return submission.patchFields(['phase', 'publishDate', 'lastPublishDate', 'unpublishedChanges']);
 
         }).then(() => {
 
@@ -52,7 +50,12 @@ module.exports = function _setupPublishArticleTask(client) {
 
         }).then(() => {
 
-            return submission.publishWasModified();
+            return Promise.all([
+                submission.publishWasModified(),
+                submission.publishSimpleMessage('published', {
+                    publishedSubmission: submission.id
+                })
+            ]);
 
         }).catch(err => {
 
