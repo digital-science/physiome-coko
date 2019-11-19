@@ -51,7 +51,6 @@ const values = {
         ignoreTerminatedConnectionError: true,
         port: 3000,
         logger,
-        uploads: 'uploads',
         secret: process.env.PUBSWEET_SERVER_SECRET,
         enableExperimentalGraphql: true,
         graphiql: true
