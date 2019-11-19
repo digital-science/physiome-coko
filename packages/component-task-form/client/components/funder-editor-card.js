@@ -229,7 +229,9 @@ function _FunderEditorCard({className, funder, removeFunder, didModifyFunder}) {
             return;
         }
 
-        // If the modified grant number contains a single funder along with a GRID ID, we will resolve the
+        // If the modified grant number contains a single funder along with a GRID ID, we will resolve the GRID ID
+        // using our organisation entity provider and set the currently assigned organisation to it (if no org.
+        // has already been specified by the user).
 
         if(gn && gn.entity && gn.entity.funders && gn.entity.funders instanceof Array && gn.entity.funders.length === 1 && gn.entity.funders[0].id) {
 
