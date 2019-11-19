@@ -1,6 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 
+import Spinner from 'ds-theme/components/spinner';
+
 
 const SubmissionStatusMapping = {
 };
@@ -62,7 +64,8 @@ SubmissionStatusMapping[SubmissionStatus.SkipPayment] = {
 
 SubmissionStatusMapping[SubmissionStatus.Publish] = {
     text:"Publish",
-    className: "publish"
+    className: "publish",
+    spinner: true
 };
 
 SubmissionStatusMapping[SubmissionStatus.Reject] = {
@@ -97,8 +100,18 @@ function _SubmissionStatusPill({className, phase, task, onHold=false, curator=nu
         status = SubmissionStatusMapping[SubmissionStatus.Checking];
     }
 
-    return <div className={`${className} ${status.className}`}>{status.text}</div>
+    return (
+        <React.Fragment>
+            <div className={`${className} ${status.className}`}>{status.text}</div>
+            {status.spinner === true ? <SubmissionSpinner small={true} />  : null}
+        </React.Fragment>
+    );
 }
+
+const SubmissionSpinner = styled(Spinner)`
+    margin-left: 5px;
+    margin-top: 3px;
+`;
 
 
 const SubmissionStatusPill = styled(_SubmissionStatusPill)`
