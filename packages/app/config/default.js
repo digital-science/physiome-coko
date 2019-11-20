@@ -132,7 +132,7 @@ const values = {
         categories: process.env.PUBLISH_FIGSHARE_CATEGORIES || "4, 12, 135",  /* Biochemistry, Cell Biology, Computational  Biology */
         defaultTag: process.env.PUBLISH_FIGSHARE_DEFAULT_TAG || "Physiome Journal",
         customFieldNames: {
-            CommissionKind: process.env.PUBLISH_FIGSHARE_CUSTOM_COMISSION_KIND_NAME || 'Commission Kind'
+            CommissionKind: process.env.PUBLISH_FIGSHARE_COMMISSION_KIND_NAME || 'Commission Kind'
         }
     },
 
