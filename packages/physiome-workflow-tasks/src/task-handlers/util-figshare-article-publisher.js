@@ -12,6 +12,7 @@ const PublishFigshareOptions = config.get('figsharePublish');
 
 const ArticleCategories = PublishFigshareOptions.categories ? PublishFigshareOptions.categories.split(',').map(v => parseInt(v.trim()))  : null;
 const ArticleDefaultKeyword = PublishFigshareOptions.defaultTag;
+const ArticleCustomFieldNames = PublishFigshareOptions.customFieldNames;
 
 
 
@@ -75,7 +76,10 @@ class FigshareArticlePublisher {
                     if(!articleData.custom_fields) {
                         articleData.custom_fields = {};
                     }
-                    articleData.custom_fields['Commission Kind'] = ["" + storedValueMapping[submission.iupsCommission]];
+
+                    if(ArticleCustomFieldNames.CommissionKind) {
+                        articleData.custom_fields[ArticleCustomFieldNames.CommissionKind] = ["" + storedValueMapping[submission.iupsCommission]];
+                    }
                 }
             }
         }

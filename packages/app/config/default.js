@@ -130,7 +130,10 @@ const values = {
         type: process.env.PUBLISH_FIGSHARE_TYPE || "journal contribution",
         groupId: process.env.PUBLISH_FIGSHARE_GROUP_ID ? (parseInt(process.env.PUBLISH_FIGSHARE_GROUP_ID)) : null,
         categories: process.env.PUBLISH_FIGSHARE_CATEGORIES || "4, 12, 135",  /* Biochemistry, Cell Biology, Computational  Biology */
-        defaultTag: process.env.PUBLISH_FIGSHARE_DEFAULT_TAG || "Physiome Journal"
+        defaultTag: process.env.PUBLISH_FIGSHARE_DEFAULT_TAG || "Physiome Journal",
+        customFieldNames: {
+            CommissionKind: process.env.PUBLISH_FIGSHARE_CUSTOM_COMISSION_KIND_NAME || 'Commission Kind'
+        }
     },
 
     stripe: {
