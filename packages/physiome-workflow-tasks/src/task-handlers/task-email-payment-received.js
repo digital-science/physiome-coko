@@ -1,4 +1,4 @@
-const logger = require('workflow-utils/logger-with-prefix')('external-task/email-manuscript-acceptance');
+const logger = require('workflow-utils/logger-with-prefix')('PhysiomeWorkflowTasks/Email-ManuscriptAcceptance');
 
 module.exports = function _setupEmailPaymentReceivedTask(client) {
 

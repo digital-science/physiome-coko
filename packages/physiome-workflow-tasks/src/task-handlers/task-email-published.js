@@ -1,5 +1,5 @@
 const TaskSendEmail = require('./util-task-send-email');
-const logger = require('workflow-utils/logger-with-prefix')('external-task/email-manuscript-published');
+const logger = require('workflow-utils/logger-with-prefix')('PhysiomeWorkflowTasks/Email-ManuscriptPublished');
 
 class TaskSendPublishedEmail extends TaskSendEmail {
 

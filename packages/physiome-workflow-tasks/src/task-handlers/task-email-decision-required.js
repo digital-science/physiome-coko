@@ -1,5 +1,5 @@
 const TaskSendEmail = require('./util-task-send-email');
-const logger = require('workflow-utils/logger-with-prefix')('external-task/email-initial-submission');
+const logger = require('workflow-utils/logger-with-prefix')('PhysiomeWorkflowTasks/Email-EditorManuscriptDecision');
 
 const config = require('config');
 const EditorsMailingListAddress = config.get('workflow-send-email.editorsMailingListAddress');
