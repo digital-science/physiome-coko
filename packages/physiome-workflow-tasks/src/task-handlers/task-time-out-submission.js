@@ -1,6 +1,6 @@
 const { models } = require('component-workflow-model/model');
 const { Submission } = models;
-const logger = require('workflow-utils/logger-with-prefix')('external-task/time-out-submission');
+const logger = require('workflow-utils/logger-with-prefix')('PhysiomeWorkflowTasks/TimeoutSubmission');
 
 
 module.exports = function _setupTimeoutSubmissionTask(client) {

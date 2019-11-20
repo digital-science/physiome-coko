@@ -1,6 +1,6 @@
 const { models } = require('component-workflow-model/model');
 const { Submission } = models;
-const logger = require('workflow-utils/logger-with-prefix')('ExternalTask/RejectionCleanup');
+const logger = require('workflow-utils/logger-with-prefix')('PhysiomeWorkflowTasks/RejectionCleanup');
 const { transaction } = require('objection');
 
 const { FigshareApi, NotFoundError } = require('figshare-publish-service');

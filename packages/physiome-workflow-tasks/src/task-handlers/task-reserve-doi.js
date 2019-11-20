@@ -1,6 +1,6 @@
 const { models } = require('component-workflow-model/model');
 const { Submission } = models;
-const logger = require('workflow-utils/logger-with-prefix')('external-task/reserve-doi');
+const logger = require('workflow-utils/logger-with-prefix')('PhysiomeWorkflowTasks/ReserveDOI');
 const { transaction } = require('objection');
 
 const { FigshareApi } = require('figshare-publish-service');
