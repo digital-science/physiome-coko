@@ -11,7 +11,6 @@ const request = require('request');
 const logger = require('workflow-utils/logger-with-prefix')('PhysiomeWorkflowTasks/PMRArchiveUpload');
 
 
-
 async function uploadPMRArchiveToFigshare(articleId, submission) {
 
     if(!submission.publishingPmrDetails) {
@@ -22,10 +21,11 @@ async function uploadPMRArchiveToFigshare(articleId, submission) {
     const { workspaceId, changeSetHash } = submission.publishingPmrDetails;
     const archiveDownloadLink = workspaceId && changeSetHash ? `https://models.physiomeproject.org/workspace/${encodeURI(workspaceId)}/@@archive/${encodeURI(changeSetHash)}/tgz` : null;
 
-    return _createTemporaryDirectory(submission.manuscriptId).then(tempDirectory => {
+    return _createTemporaryDirectory(submission.manuscriptId).then(async tempDirectory => {
 
         const archiveFilePath = path.join(tempDirectory, 'model-archive.tar.gz');
         const fileStream = fs.createWriteStream(archiveFilePath);
+
 
         const p = new Promise((resolve, reject) => {
 

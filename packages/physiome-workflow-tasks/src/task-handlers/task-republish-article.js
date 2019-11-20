@@ -2,10 +2,11 @@ const FigshareArticlePublisher = require('./util-figshare-article-publisher');
 const { models } = require('component-workflow-model/model');
 const { Submission } = models;
 
-const logger = require("workflow-utils/logger-with-prefix")('external-task/republish-article');
+const TaskLockExtender = require('./util-lock-extender');
+const logger = require("workflow-utils/logger-with-prefix")('PhysiomeWorkflowTasks/RepublishArticle');
 
 
-module.exports = function _setupPublishArticleTask(client) {
+module.exports = function _setupRepublishArticleTask(client) {
 
     const articlePublisher = new FigshareArticlePublisher();
 
@@ -30,6 +31,12 @@ module.exports = function _setupPublishArticleTask(client) {
             return;
         }
 
+        // Create a lock extender, which will on a regular basis
+        const lockExtender = new TaskLockExtender(taskService, task);
+        await lockExtender.extend(60);
+
+        lockExtender.start();
+
         return articlePublisher.republishSubmission(submission).then(() => {
 
             const currentDate = new Date();
@@ -43,7 +50,9 @@ module.exports = function _setupPublishArticleTask(client) {
 
             return submission.patchFields(['phase', 'publishDate', 'lastPublishDate', 'unpublishedChanges']);
 
-        }).then(() => {
+        }).then(async () => {
+
+            await lockExtender.stop();
 
             logger.debug(`republishing article to figshare has finished, completing external task`);
             return taskService.complete(task);
@@ -60,6 +69,10 @@ module.exports = function _setupPublishArticleTask(client) {
         }).catch(err => {
 
             logger.error(`unable to re-publish article into figshare due to: ` + err.toString());
+
+        }).finally(() => {
+
+            lockExtender.stop();
         });
     });
 };

@@ -2,6 +2,7 @@ const FigshareArticlePublisher = require('./util-figshare-article-publisher');
 const { models } = require('component-workflow-model/model');
 const { Submission } = models;
 
+const TaskLockExtender = require('./util-lock-extender');
 const logger = require("workflow-utils/logger-with-prefix")('PhysiomeWorkflowTasks/PublishArticle');
 
 
@@ -30,6 +31,12 @@ module.exports = function _setupPublishArticleTask(client) {
             return;
         }
 
+        // Create a lock extender, which will on a regular basis
+        const lockExtender = new TaskLockExtender(taskService, task);
+        await lockExtender.extend(60);
+
+        lockExtender.start();
+
         return articlePublisher.publishSubmission(submission).then(() => {
 
             const currentDate = new Date();
@@ -43,7 +50,9 @@ module.exports = function _setupPublishArticleTask(client) {
 
             return submission.patchFields(['phase', 'publishDate', 'lastPublishDate', 'unpublishedChanges']);
 
-        }).then(() => {
+        }).then(async () => {
+
+            await lockExtender.stop();
 
             logger.debug(`publishing article to figshare has finished, completing external task`);
             return taskService.complete(task);
@@ -68,6 +77,9 @@ module.exports = function _setupPublishArticleTask(client) {
                 retryTimeout: 5000
             });*/
 
+        }).finally(() => {
+
+            lockExtender.stop();
         });
 
     });

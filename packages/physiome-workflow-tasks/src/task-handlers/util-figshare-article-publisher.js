@@ -202,7 +202,7 @@ class FigshareArticlePublisher {
             return submission.figshareArticleId;
         });
 
-        return createArticleIdPromise.then(articleId => {
+        return createArticleIdPromise.then(async articleId => {
 
             return this._publishFilesToArticleId(articleId, submission);
 
@@ -228,19 +228,16 @@ class FigshareArticlePublisher {
 
         const figshareApi = this.figshareApi;
 
-        return figshareApi.getArticleFileListing(articleId).then((currentFiles) => {
-
-            const p = [];
+        return figshareApi.getArticleFileListing(articleId).then(async (currentFiles) => {
 
             if(currentFiles && currentFiles.length) {
-                currentFiles.forEach(file => {
-                    p.push(figshareApi.deleteFile(articleId, file));
-                });
+
+                for(let i = 0; i < currentFiles.length; i++) {
+                    await figshareApi.deleteFile(articleId, currentFiles[i]);
+                }
             }
 
-            return Promise.all(p);
-
-        }).then(() => {
+        }).then(async () => {
 
             // Iterate all of the submission files and upload each to the article within figshare.
             // Files must be both confirmed and not marked as being removed.
@@ -249,21 +246,13 @@ class FigshareArticlePublisher {
             const supplementaryFiles = (submission.supplementaryFiles || []).slice(0).filter(f => f.confirmed && f.removed !== true);
             const files = [...manuscriptFiles, ...supplementaryFiles];
 
-            const __processNextFile = () => {
-                if(!files.length) {
-                    return Promise.resolve({articleId});
-                }
+            for(let  i = 0; i < files.length; i++) {
+                await this._uploadFileForArticle(articleId, submission, files[i]);
+            }
 
-                const file = files.shift();
+            return Promise.resolve({articleId});
 
-                return this._uploadFileForArticle(articleId, submission, file).then(function() {
-                    return __processNextFile();
-                });
-            };
-
-            return __processNextFile();
-
-        }).then(() => {
+        }).then(async () => {
 
             return uploadPMRArchiveToFigshare(articleId, submission);
 
