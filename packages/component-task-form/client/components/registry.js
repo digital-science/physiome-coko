@@ -8,6 +8,7 @@ import FormFieldCheckbox from './fields/form-field-check-box';
 import FormFieldHeroCheckbox from './fields/form-field-hero-checkbox';
 import FormFieldSelect from './fields/form-field-select';
 import FormFieldNote from './fields/form-field-note';
+import FormFieldORCID from './fields/form-field-orcid';
 
 import FormFieldInlineTask from './fields/form-field-inline-task';
 import FormFieldViewerEditorLayout from './fields/form-field-viewer-editor-layout';
@@ -33,6 +34,7 @@ const FormFieldRegistry = {
     'Date' : FormFieldDate,
     'TextArea' : FormFieldTextArea,
     'Text' : FormFieldText,
+    'ORCID' : FormFieldORCID,
     'BannerMessage' : FormFieldBannerMessage,
     'Button' : FormFieldButton,
     'Checkbox' : FormFieldCheckbox,
