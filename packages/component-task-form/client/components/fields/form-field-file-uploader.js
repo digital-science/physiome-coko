@@ -84,7 +84,7 @@ function FormFieldFileUploader({ className, data, binding, instanceId, instanceT
 
     }, [data, binding, setFileListing, setFilesModified]);
 
-    const { fileLabels, fileTypes, help } = options;
+    const { fileLabels, fileTypes, help, accept = null } = options;
     const fileTypeOptions = useMemo(() => {
 
         if(!fileTypes) {
@@ -225,6 +225,10 @@ function FormFieldFileUploader({ className, data, binding, instanceId, instanceT
         uploadRequestHeaders:{}
     };
 
+    if(accept) {
+        upload.accept = accept;
+    }
+
     const filteredFileListing = (fileListing && fileListing.length) ? fileListing.filter(f => !f.removed) : null;
     //const hasRemovedFiles = filteredFileListing && filteredFileListing.length !== fileListing.length;
 
@@ -239,6 +243,7 @@ function FormFieldFileUploader({ className, data, binding, instanceId, instanceT
                     upload={upload}
                     onFinish={finishedFileUpload}
                     message={options.message}
+                    accept={accept}
                 >
                 </FileUploader>
 
