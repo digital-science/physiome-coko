@@ -5,7 +5,7 @@ import styled from 'styled-components';
 
 import withFormField from "./withFormField";
 import { useFormValueBindingForComplexObject } from '../../hooks/useFormValueBinding';
-import useFormValidation from "../../hooks/useFormValidation";
+import useFormValidation, { formFieldClassNameWithValidations } from "../../hooks/useFormValidation";
 
 import Label, { BlockLabel } from "ds-theme/components/label";
 import InlineButton from "ds-theme/components/inline-button";
@@ -130,7 +130,7 @@ function FormFieldArticleCitationListEditor({ className, data, binding, descript
     }
 
     return (
-        <ArticleCitationListEditorHolder className={className} >
+        <ArticleCitationListEditorHolder className={formFieldClassNameWithValidations(className, validationIssues)} >
             {options.label ? <Label>{options.label}</Label> : null}
 
             <ArticleCitationEditorCardHolder className={validationIssues && validationIssues.length ? 'issues' : ''}>

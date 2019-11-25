@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import useCreateFileUploadSignedUrlMutation from './../../mutations/createFileUploadSignedUrl';
 import useConfirmUploadedFileMutation from './../../mutations/confirmUploadedFile';
 import useSetInstanceAssociatedFilesMutation from './../../mutations/setInstanceAssociatedFiles';
-import useFormValidation from "../../hooks/useFormValidation";
+import useFormValidation, {formFieldClassNameWithValidations} from "../../hooks/useFormValidation";
 import withFormField, { fetchFields } from './withFormField';
 
 import FileUploader from 'ds-theme/components/file-uploader';
@@ -223,7 +223,7 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, descri
     //const hasRemovedFiles = filteredFileListing && filteredFileListing.length !== fileListing.length;
 
     return (
-        <FileUploaderHolder className={"form-field-files"}>
+        <FileUploaderHolder className={formFieldClassNameWithValidations(className, validationIssues, "form-field-files")}>
             {options.label ? <Label>{options.label}</Label> : null}
 
             <div className={`inner-holder ${validationIssues && validationIssues.length ? 'issues' : ''}`}>

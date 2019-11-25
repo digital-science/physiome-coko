@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { th } from 'ds-theme';
 
 import useFormValueBinding from './../../hooks/useFormValueBinding';
-import useFormValidation from "../../hooks/useFormValidation";
+import useFormValidation, {formFieldClassNameWithValidations} from "../../hooks/useFormValidation";
 import withFormField from './withFormField'
 
 import Checkbox, { CheckboxLabel } from 'ds-theme/components/checkbox-input';
@@ -46,7 +46,7 @@ const HelpContent = styled.span`
     
 `;
 
-function FormFieldCheckbox({data, binding, description, formDefinition, formValidator, options = {}}) {
+function FormFieldCheckbox({className, data, binding, description, formDefinition, formValidator, options = {}}) {
 
     const [value, _, handleInputChange] = useFormValueBinding(data, binding, "", (v) => v || "");
     const [validationIssues, clearValidationIssues] = useFormValidation(description, formDefinition, formValidator);
@@ -79,14 +79,14 @@ function FormFieldCheckbox({data, binding, description, formDefinition, formVali
     const input = <FormStyledCheckbox checked={value || false} disabled={options.readOnly || false} onChange={handleCheckedChange} />;
 
     return (
-        <React.Fragment>
+        <div className={formFieldClassNameWithValidations(className, validationIssues)}>
             { options.label ?
                 (<FormStyledLabel>{input}<span>{options.label}{help}</span></FormStyledLabel>)
                 :
                 <React.Fragment>{input}{help}</React.Fragment>
             }
             { validationIssues ? <ValidationIssueListing issues={validationIssues} /> : null }
-        </React.Fragment>
+        </div>
     );
 }
 

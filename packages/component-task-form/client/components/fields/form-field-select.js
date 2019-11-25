@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import useFormValueBinding from './../../hooks/useFormValueBinding';
-import useFormValidation from "../../hooks/useFormValidation";
+import useFormValidation, {formFieldClassNameWithValidations} from "../../hooks/useFormValidation";
 import withFormField from './withFormField'
 
 import { ConfirmationDialogContext } from './form-field-button';
@@ -45,7 +45,8 @@ function FormFieldSelect({data, binding, description, formDefinition, formValida
     const SelectInputType = isInsideConfirmationDialog ? SmallSelect : Select;
 
     const selectInput = (
-        <SelectInputType value={value || ""} placeholder={options.placeholder} issue={validationIssues && validationIssues.length}
+        <SelectInputType className={formFieldClassNameWithValidations(null, validationIssues)} value={value || ""}
+            placeholder={options.placeholder} issue={validationIssues && validationIssues.length}
             onChange={handleInputChangeWithIssuesClear} options={optValues} />
     );
 

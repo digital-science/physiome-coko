@@ -1,7 +1,7 @@
 import React from 'react';
 
 import useFormValueBinding from './../../hooks/useFormValueBinding';
-import useFormValidation from "../../hooks/useFormValidation";
+import useFormValidation, {formFieldClassNameWithValidations} from "../../hooks/useFormValidation";
 import withFormField from './withFormField'
 
 import TextInput from 'ds-theme/components/text-input';
@@ -19,7 +19,8 @@ function FormFieldText({data, binding, description, formDefinition, formValidato
     };
 
     const textInput = (
-        <TextInput type="text" value={value || ""} onChange={handleInputChangeWithWarningsClear}
+        <TextInput className={formFieldClassNameWithValidations(null, validationIssues)}
+            type="text" value={value || ""} onChange={handleInputChangeWithWarningsClear}
             issue={validationIssues && validationIssues.length} />
     );
 

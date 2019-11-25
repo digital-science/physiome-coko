@@ -51,3 +51,11 @@ function useFormValidation(description, formDefinition, formValidator) {
 
 
 export default useFormValidation;
+
+
+function formFieldClassNameWithValidations(className, validationIssues, ...rest) {
+
+    return `${className || ''} ${validationIssues && validationIssues.length ? 'target-form-field-has-issues' : ''}` + (rest ? " " + rest.join(" ") : "");
+}
+
+export { formFieldClassNameWithValidations };

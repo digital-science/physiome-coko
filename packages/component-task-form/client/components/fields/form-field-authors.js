@@ -15,7 +15,7 @@ import { FaPlus } from 'react-icons/fa';
 
 
 import AuthorEditorCard from "../author-editor-card";
-import useFormValidation from "../../hooks/useFormValidation";
+import useFormValidation, {formFieldClassNameWithValidations} from "../../hooks/useFormValidation";
 
 
 
@@ -127,7 +127,7 @@ function FormFieldAuthorsEditor({ className, data, binding, description, formDef
 
 
     return (
-        <AuthorsEditorHolder className={className}>
+        <AuthorsEditorHolder className={formFieldClassNameWithValidations(className, validationIssues)}>
             {options.label ? <Label>{options.label}</Label> : null}
 
             <AuthorEditorCardHolder className={validationIssues && validationIssues.length ? 'issues' : ''}>

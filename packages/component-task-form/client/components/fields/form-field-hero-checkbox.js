@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import useFormValueBinding from './../../hooks/useFormValueBinding';
-import useFormValidation from './../../hooks/useFormValidation';
+import useFormValidation, {formFieldClassNameWithValidations} from './../../hooks/useFormValidation';
 import withFormField from './withFormField'
 
 import Checkbox, { CheckboxLabel } from 'ds-theme/components/checkbox-input';
@@ -31,7 +31,7 @@ const HeroCheckboxLabel = styled(CheckboxLabel)`
 
 
 
-function FormFieldCheckbox({data, binding, description, formDefinition, formValidator, options = {}}) {
+function FormFieldCheckbox({className, data, binding, description, formDefinition, formValidator, options = {}}) {
 
     const [value, _, handleInputChange] = useFormValueBinding(data, binding, "", (v) => v || "");
     const [validationIssues, clearValidationIssues] = useFormValidation(description, formDefinition, formValidator);
@@ -43,7 +43,7 @@ function FormFieldCheckbox({data, binding, description, formDefinition, formVali
     const input = <HeroCheckbox checked={value || false} disabled={options.readOnly || false} onChange={handleCheckedChange} />;
 
     return (
-        <HeroCheckboxHolder>
+        <HeroCheckboxHolder className={formFieldClassNameWithValidations(className, validationIssues)}>
             {options.heading ? <BlockLabel>{options.heading}</BlockLabel> : null}
             {options.label ? (
                 <HeroCheckboxLabel issues={validationIssues && validationIssues.length}>{input} <span>{options.label}</span></HeroCheckboxLabel>) : input

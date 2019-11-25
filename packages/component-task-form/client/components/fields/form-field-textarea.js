@@ -5,7 +5,7 @@ import { FormFieldInlineTaskHolder } from './form-field-inline-task';
 import { ConfirmationDialogContext } from './form-field-button';
 
 import useFormValueBinding from './../../hooks/useFormValueBinding';
-import useFormValidation from './../../hooks/useFormValidation';
+import useFormValidation, {formFieldClassNameWithValidations} from './../../hooks/useFormValidation';
 import withFormField from './withFormField'
 
 import { BlockLabel } from 'ds-theme/components/label';
@@ -46,8 +46,9 @@ function FormFieldTextArea({data, binding, description, formDefinition, formVali
     };
 
     const textInput = (
-        <TextAreaType className={isInsideConfirmationDialog ? 'in-dialog' : ''} value={value || ""} onChange={handleInputChangeWithWarningsClear}
-            autoSizeHeight={autoSizeHeight} rows={options.rows || 2} issue={validationIssues && validationIssues.length}  />
+        <TextAreaType className={formFieldClassNameWithValidations(isInsideConfirmationDialog ? 'in-dialog' : '', validationIssues)}
+            value={value || ""} onChange={handleInputChangeWithWarningsClear} autoSizeHeight={autoSizeHeight} rows={options.rows || 2}
+            issue={validationIssues && validationIssues.length}  />
     );
 
     return (
