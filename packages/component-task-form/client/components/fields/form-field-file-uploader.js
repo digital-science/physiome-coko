@@ -12,6 +12,7 @@ import FileListing from 'ds-theme/components/file-listing';
 import Label from 'ds-theme/components/label';
 import ValidationIssueListing from 'ds-theme/components/validation-issue-listing';
 import config from 'config';
+import {NoteStaticText} from "ds-theme/components/static-text";
 
 
 const BaseUrl = config['pubsweet-client'] ? (config['pubsweet-client'].baseUrl || "/") : "/";
@@ -36,10 +37,15 @@ const FileUploaderHolder = styled.div`
       background: linear-gradient(180deg,rgba(255,255,255,1) 0%,#d10f002e 100%);
       border-color: #d10f004a !important;
     }
+    
+    & ${NoteStaticText} {
+      display: block;
+      margin-top: 10px;
+    }
 `;
 
 
-function FormFieldFileUploader({ data, binding, instanceId, instanceType, description, formDefinition, formValidator, options = {} }) {
+function FormFieldFileUploader({ className, data, binding, instanceId, instanceType, description, formDefinition, formValidator, options = {} }) {
 
     const setInstanceAssociatedFiles = useSetInstanceAssociatedFilesMutation(instanceType, binding);
     const createFileUploadSignedUrl = useCreateFileUploadSignedUrlMutation();
@@ -78,7 +84,7 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, descri
 
     }, [data, binding, setFileListing, setFilesModified]);
 
-    const { fileLabels, fileTypes } = options;
+    const { fileLabels, fileTypes, help } = options;
     const fileTypeOptions = useMemo(() => {
 
         if(!fileTypes) {
@@ -243,7 +249,7 @@ function FormFieldFileUploader({ data, binding, instanceId, instanceType, descri
                         fileLabels={fileLabels} fileTypeOptions={fileTypeOptions} /> : null}
             </div>
 
-            { validationIssues ? <ValidationIssueListing issues={validationIssues} /> : null }
+            { validationIssues ? <ValidationIssueListing issues={validationIssues} /> : (help ? <NoteStaticText dangerouslySetInnerHTML={{__html: help}} /> : null) }
 
         </FileUploaderHolder>
     );
