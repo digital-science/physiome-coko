@@ -205,9 +205,9 @@ instance Submission {
         { articleFiles => (fileCount(articleFiles) > 0), "At least one manuscript file needs to be uploaded for your submission. Please upload a file." }
 
 
-        { primaryPapers => (length(primaryPapers) > 0), "At least one primary paper citation is required. Please add an article citation for a primary paper." }
+        { primaryPapers => (kind == SubmissionKind.Review || length(primaryPapers) > 0), "At least one primary paper citation is required. Please add an article citation for a primary paper." }
 
-        { primaryPapers => (length(primaryPapers) == 0 || validCitations(primaryPapers) > 0), "At minimum one valid primary paper article citation is required." }
+        { primaryPapers => (kind == SubmissionKind.Review || length(primaryPapers) == 0 || validCitations(primaryPapers) > 0), "At minimum one valid primary paper article citation is required." }
 
 
         { authors => (length(authors) > 0), "At least one author is required. Please add an author." }
@@ -228,13 +228,14 @@ instance Submission {
 
     layout "submission-editor" {
 
-        { SelectValue => kind, label:"Manuscript Type", options:mapping("DisplayedSubmissionKind"), placeholder:"Please select a Manuscript type" }
+        { SelectValue => kind, label:"Manuscript Type", options:mapping("DisplayedSubmissionKind"), placeholder:"Please select a Manuscript type",
+            message:"Read more about of types of articles <a target='_blank' rel='noopener noreferrer' href='https://journal.physiomeproject.org/instructions-to-authors.html'>here</a>."}
 
         { TextArea => title, label:"Title", rows:2 }
 
         { TextArea => abstract, label:"Abstract", rows:6 }
 
-        { ArticleCitationListEditor => primaryPapers, label:"Primary Papers", note:"The primary publication is an experimental/modelling paper with model validation that has been accepted to a peer-reviewed physiology, bioengineering or biophysics journal. Every Physiome paper needs to be associated with at least one primary paper." }
+        { ArticleCitationListEditor => primaryPapers, (kind != SubmissionKind.Review), label:"Primary Papers", note:"The primary publication is an experimental/modelling paper with model validation that has been accepted to a peer-reviewed physiology, bioengineering or biophysics journal. Every Physiome paper needs to be associated with at least one primary paper." }
 
         { AuthorsEditor => authors, label:"Authors", note:"Decide the order of the authors by dragging and dropping the corresponding author box. There can only be one corresponding author per submission." }
 
@@ -246,7 +247,7 @@ instance Submission {
 
         { FundingEditor => funding, label:"Funding Acknowledgements" }
 
-        { FileUploader => articleFiles, label:"Manuscript" }
+        { FileUploader => articleFiles, label:"Manuscript", help:"Please submit the PDF manuscript in this section, even if it is included in your workspace. A template for Physiome manuscripts can be found <a target='_blank' rel='noopener noreferrer' href='https://www.overleaf.com/5969134891vcddxjnnfzfh'>here</a>." }
 
         { Group, heading:"Model Files", children: {
 
@@ -276,7 +277,7 @@ instance Submission {
 
         { AuthorsListing => authors, label:"Authors" }
 
-        { ArticleCitationListing => primaryPapers, label:"Primary Papers" }
+        { ArticleCitationListing => primaryPapers, (kind != SubmissionKind.Review), label:"Primary Papers" }
 
         { StaticText => iupsCommission, label:"Commission Type", mapping:mapping("DisplayedIUPSCommissionKinds") }
 
@@ -367,7 +368,7 @@ instance Submission {
                 { Checkbox => primaryPaperExists, label: "Primary paper exists" }
 
                 { Checkbox => sameModelInPapers, label: "Same model in manuscript and primary paper",
-                    help:"The same constituents equations are the same and the experimental design is the same in both papers. Additional modifications are allowed in the Physiome paper." }
+                    help:"The constituents equations are the same and the experimental design is the same in both papers. Additional modifications are allowed in the Physiome paper." }
 
                 { Checkbox => resultsMatch, label: "Results of the model match the results present in primary article",
                     help:"The results presented in the Physiome paper are reproducible from the primary paper, using the submitted files." }
