@@ -109,6 +109,8 @@ const _ORCIDInput = ({className, value, setValue, validValue = false, validation
     const [input2Value, setInput2Value] = useState(valueParts[1]);
     const [input3Value, setInput3Value] = useState(valueParts[2]);
     const [input4Value, setInput4Value] = useState(valueParts[3]);
+    const orderedInputValues = [input1Value, input2Value, input3Value, input4Value];
+    const orderedSetInputValues = [setInput1Value, setInput2Value, setInput3Value, setInput4Value];
 
     const clearValidationIssues = () => {
         if(setValidationIssue) {
@@ -226,13 +228,32 @@ const _ORCIDInput = ({className, value, setValue, validValue = false, validation
 
         const input = e.target;
 
-        if(e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        if(e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Backspace') {
 
             const currentIndex = orderedInputs.map(v => v.current).indexOf(input);
             const prevInput = currentIndex > 0 ? orderedInputs[currentIndex - 1].current : null;
             const nextInput = currentIndex < (orderedInputs.length -1) ? orderedInputs[currentIndex + 1].current : null;
 
-            if(e.key === 'ArrowLeft') {
+            if(e.key === 'Backspace') {
+
+                if(prevInput && input.selectionStart === input.selectionEnd && input.selectionStart === 0) {
+
+                    const prevInputValue = orderedInputValues[currentIndex - 1];
+                    const prevInputSetValue = orderedSetInputValues[currentIndex - 1];
+
+
+                    let newPrevInputValue = (prevInputValue || "");
+                    if(newPrevInputValue.length) {
+                        newPrevInputValue = newPrevInputValue.substr(0,newPrevInputValue.length - 1);
+                    }
+                    prevInputSetValue(newPrevInputValue);
+
+                    prevInput.focus();
+                    prevInput.setSelectionRange(newPrevInputValue.length, newPrevInputValue.length);
+                    e.preventDefault();
+                }
+
+            } else if(e.key === 'ArrowLeft') {
 
                 if(prevInput && input.selectionStart === input.selectionEnd && input.selectionStart === 0) {
                     prevInput.focus();
