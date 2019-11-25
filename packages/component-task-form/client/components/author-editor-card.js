@@ -202,7 +202,7 @@ function _AuthorEditorCard({className, author, removeAuthor, formValidator, didM
                 issueMessage={invalidORCIDValue ? "Invalid ORCID identifier supplied, all 16 digits of the identifier are required." : "Invalid ORCID identifier supplied, the identifier supplied is not a valid ORCID ID."} />
 
             <AuthorRelationshipFormGroup>
-                <SmallBlockLabel>Relationships</SmallBlockLabel>
+                <SmallBlockLabel>Roles</SmallBlockLabel>
                 <div className="holder">
                     <SmallCheckboxLabel><SmallCheckBox checked={corresponding} onChange={handleCorrespondingChange} />Corresponding Author</SmallCheckboxLabel>
                     <SmallCheckboxLabel><SmallCheckBox checked={primaryPaperAuthor} onChange={handlePrimaryPaperAuthorChange} />Author on Primary Paper</SmallCheckboxLabel>
