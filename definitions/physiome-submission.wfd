@@ -347,6 +347,8 @@ instance Submission {
 
                 { BannerMessage, <administrator>, (phase == SubmissionPhase.Published && unpublishedChanges == true), message:"Unpublished Changes" }
 
+                { StaticText => manuscriptId }
+
                 { SubmissionStatusPill => phase, label:"Submission Status" }
 
                 { ClaimSubmission => curator, <administrator>, label:"Assigned Curator" }
