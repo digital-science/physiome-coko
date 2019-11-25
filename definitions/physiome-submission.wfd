@@ -214,6 +214,8 @@ instance Submission {
 
         { authors => (length(authors) == 0 || correspondingAuthors(authors) > 0), "At least one corresponding author is required. Please mark an existing author as being a corresponding author or add an additional author who is marked as a corresponding author." }
 
+        { authors => (length(authors) == 0 || correspondingAuthors(authors) == 0 || singleCorrespondingAuthor(authors)), "Only one author can be a corresponding author. Please mark only a single author as being a corresponding author." }
+
 
         { priceAcknowledged => (priceAcknowledged == true), "You must acknowledge your acceptance of the associated curation fee associated with the submission." }
 
