@@ -249,7 +249,7 @@ instance Submission {
 
         { FundingEditor => funding, label:"Funding Acknowledgements" }
 
-        { FileUploader => articleFiles, label:"Manuscript", help:"Please submit the PDF manuscript in this section, even if it is included in your workspace. A template for Physiome manuscripts can be found <a target='_blank' rel='noopener noreferrer' href='https://www.overleaf.com/5969134891vcddxjnnfzfh'>here</a>." }
+        { FileUploader => articleFiles, label:"Manuscript", accept:"application/pdf, x-pdf", help:"Please submit the PDF manuscript in this section, even if it is included in your workspace. A template for Physiome manuscripts can be found <a target='_blank' rel='noopener noreferrer' href='https://www.overleaf.com/5969134891vcddxjnnfzfh'>here</a>." }
 
         { Group, heading:"Model Files", children: {
 
