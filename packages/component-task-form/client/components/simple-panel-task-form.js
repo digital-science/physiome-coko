@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useLayoutEffect } from 'react';
 import styled from 'styled-components';
 
 import { BasicMessage, BasicMessageButton } from 'component-overlay';
@@ -22,6 +22,7 @@ export default function SimpleTaskForm({ className, instanceId, taskId, taskName
 
     const [showIsSaving, displayIsSavingMessage, removeIsSavingMessage] = useTimedMinimumDisplay(1500);
     const [showValidatedUserRequired, setShowValidatedUserRequired] = useState(false);
+    const [lastSubmitFailed, setLastSubmitFailed] = useState(false);
 
     const onSubmitFail = (reason) => {
         if(submitDidFail) {
@@ -30,6 +31,8 @@ export default function SimpleTaskForm({ className, instanceId, taskId, taskName
 
         if(reason === SubmitTaskFailureReason.RequiresValidatedSubmitter) {
             setShowValidatedUserRequired(true);
+        } else if(reason === SubmitTaskFailureReason.FormValidationFailed) {
+            setLastSubmitFailed(true);
         }
         return Promise.resolve(reason);
     };
@@ -44,6 +47,25 @@ export default function SimpleTaskForm({ className, instanceId, taskId, taskName
     if(dataContextRef) {
         dataContextRef.current = fieldListingProps;
     }
+
+    useLayoutEffect(() => {
+
+        if(lastSubmitFailed) {
+
+            const formFieldsWithIssues = document.getElementsByClassName('target-form-field-has-issues');
+            if(formFieldsWithIssues && formFieldsWithIssues.length) {
+
+                const target = formFieldsWithIssues[0].classList.contains("") ? formFieldsWithIssues[0] : formFieldsWithIssues[0].closest(".form-field");
+
+                if(target && typeof target.scrollIntoView !== "undefined") {
+                    target.scrollIntoView();
+                }
+            }
+
+            setLastSubmitFailed(false);
+        }
+
+    }, [lastSubmitFailed]);
 
     return (
         <React.Fragment>
