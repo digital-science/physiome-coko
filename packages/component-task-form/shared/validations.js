@@ -21,6 +21,17 @@ function correspondingAuthors(v) {
 exports.correspondingAuthors = correspondingAuthors;
 
 
+function singleCorrespondingAuthor(v) {
+
+    if(!v || !v.length) {
+        return false;
+    }
+    return v.filter(a => a.isCorresponding === true).length === 1;
+}
+
+exports.singleCorrespondingAuthor = singleCorrespondingAuthor;
+
+
 
 function validIdentity(identity) {
     return (identity && !!identity.id);

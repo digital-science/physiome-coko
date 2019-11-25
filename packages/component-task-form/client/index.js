@@ -57,9 +57,10 @@ export { WorkflowTaskForm }
 
 
 import { registerConditionFunction } from 'client-workflow-model';
-import { correspondingAuthors, validCitations, validIdentity, validUri, fileCount } from '../shared/validations';
+import { correspondingAuthors, singleCorrespondingAuthor, validCitations, validIdentity, validUri, fileCount } from '../shared/validations';
 
 registerConditionFunction('correspondingAuthors', correspondingAuthors);
+registerConditionFunction('singleCorrespondingAuthor', singleCorrespondingAuthor);
 registerConditionFunction('validCitations', validCitations);
 registerConditionFunction('validIdentity', validIdentity);
 registerConditionFunction('validUri', validUri);
