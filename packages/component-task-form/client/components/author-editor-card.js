@@ -38,7 +38,6 @@ function useAuthorCustomValueField(author, field, didModifyAuthor, includeValida
     const newSetValue = (v) => {
         setValue(v);
         author[field] = v;
-        console.log(`didModifyAuthor: ${field} = ${v}`);
 
         didModifyAuthor(author);
         if(setValidationIssue) {

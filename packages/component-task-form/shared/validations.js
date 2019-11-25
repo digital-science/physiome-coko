@@ -48,8 +48,6 @@ exports.validUri = validUri;
 
 function fileCount(files) {
 
-    console.dir(files);
-
     if(!files || !files.length) {
         return 0;
     }
