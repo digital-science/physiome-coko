@@ -8,20 +8,21 @@ const SubmitTaskSuccessReason = 'Success';
 
 const SubmitTaskFailureReason = {
     RequiresValidatedSubmitter: 'RequiresValidatedSubmitter',
-    FormValidationFailed: 'FormValidationFailed'
+    FormValidationFailed: 'FormValidationFailed',
+    FormBlockingProcesses: 'FormBlockingProcesses'
 };
 
 
 
-export default  function useSubmitTaskOutcome(instanceId, formDefinition, instanceType, saveInstanceData, validateForm, submitDidFail, wasSubmitted) {
+export default  function useSubmitTaskOutcome(instanceId, formDefinition, instanceType, saveInstanceData, validateForm, submitDidFail, wasSubmitted, getBlockingProcesses) {
 
     const completeInstanceTask = useCompleteInstanceTask(instanceType);
     const destroyInstance = useDestroyInstance(instanceType);
     const currentUser = useContext(AuthenticatedUserContext);
 
-    const _submitDidFail = (reason) => {
+    const _submitDidFail = (reason, data) => {
         return (submitDidFail ?
-            submitDidFail(reason).then(() => {
+            submitDidFail(reason, data).then(() => {
                 return reason;
             })
             :
@@ -51,6 +52,11 @@ export default  function useSubmitTaskOutcome(instanceId, formDefinition, instan
 
             if(outcome.skipValidations !== true && validateForm && !validateForm()) {
                 return _submitDidFail(SubmitTaskFailureReason.FormValidationFailed);
+            }
+
+            const blockingProcesses = getBlockingProcesses ? getBlockingProcesses() : null;
+            if(blockingProcesses && blockingProcesses.length) {
+                return _submitDidFail(SubmitTaskFailureReason.FormBlockingProcesses, blockingProcesses.slice(0));
             }
 
 

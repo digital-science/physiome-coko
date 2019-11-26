@@ -2,6 +2,7 @@ class FormValidator {
 
     constructor() {
         this.interests = [];
+        this._blockingProcesses = [];
     }
 
     registerInterest(listener) {
@@ -37,6 +38,33 @@ class FormValidator {
             }
         });
         return result;
+    }
+
+
+    // Blocking process - something that is ongoing within a form that should prevent submission of the form.
+    // For example, a file upload is underway and submission should not be allowed until that has completed.
+
+    createBlockingProcess(message) {
+        return {message};
+    }
+
+    registerBlockingProcess(process) {
+        if(this._blockingProcesses.indexOf(process) === -1) {
+            console.log(`registerBlockingProcess: ${JSON.stringify(process)}`);
+            this._blockingProcesses.push(process);
+        }
+    }
+
+    unregisterBlockingProcess(process) {
+        const index = this._blockingProcesses.indexOf(process);
+        if (index > -1) {
+            console.log(`unregisterBlockingProcess: ${JSON.stringify(process)}`);
+            this._blockingProcesses.splice(index, 1);
+        }
+    }
+
+    get blockingProcesses() {
+        return this._blockingProcesses;
     }
 
 }

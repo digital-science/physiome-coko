@@ -47,6 +47,10 @@ export default function useFormInstanceData({instanceId, taskId, taskName, insta
     function _validateForm() {
         return formData ? formValidator.validate(formData) : true;
     }
+    
+    function _getBlockingProcesses() {
+        return formData ? formValidator.blockingProcesses : null;
+    }
 
     function _updateInstanceFromFormData() {
 
@@ -80,7 +84,8 @@ export default function useFormInstanceData({instanceId, taskId, taskName, insta
         ]);
     }
 
-    const submitTaskOutcome = useSubmitTaskOutcome(instanceId, formDefinition, instanceType, _updateInstanceFromFormData, _validateForm, submitDidFail, wasSubmitted);
+    const submitTaskOutcome = useSubmitTaskOutcome(instanceId, formDefinition, instanceType, _updateInstanceFromFormData, 
+                                                   _validateForm, submitDidFail, wasSubmitted, _getBlockingProcesses);
 
     const refetchFormData = () => {
         return refetch();
