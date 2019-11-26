@@ -64,14 +64,14 @@ const BasicMessageButton = ({bordered=true, children, ...rest}) => {
 };
 
 
-const _BasicMessageOverlay = ({className, heading, message, errorMessage, children, buttons, isOpen, closeOverlay, changedEmailAddress}) => {
+const _BasicMessageOverlay = ({className, heading, message, rawMessage, errorMessage, children, buttons, isOpen, closeOverlay, changedEmailAddress}) => {
 
     return (
         <BasicOverlay isOpen={isOpen} onRequestClose={closeOverlay}>
             <div className={className}>
                 <BasicMessageContent>
                     {heading ? <BasicMessageHeading>{heading}</BasicMessageHeading> : null}
-                    {message ? <BasicMessageText>{message}</BasicMessageText> : null}
+                    {rawMessage ? <BasicMessageText dangerouslySetInnerHTML={{__html:rawMessage}} /> : (message ? <BasicMessageText>{message}</BasicMessageText> : null)}
                     {children}
                     {errorMessage ? <BasicMessageErrorHolder><FaExclamationCircle/> {errorMessage}</BasicMessageErrorHolder> : null}
                     {buttons ? <BasicMessageButtonSet>{buttons}</BasicMessageButtonSet> : null}
