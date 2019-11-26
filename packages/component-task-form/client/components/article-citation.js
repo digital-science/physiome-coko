@@ -48,7 +48,7 @@ const _ArticleCitation = ({className, citation, children, maximumAuthors=10}) =>
             {volume ? <span className="vol">{volume}</span> : null}
             {issue ? <span className="issue">{issue}</span> : null}
             {pages ? <span className="pages">pg. {pages}</span> : null}
-            .
+            {(issue || pages) ? "." : null}
             {doi ? <span className="doi">DOI: <span>{doi}</span></span> : null}
             {displayedAuthors}
         </div>
