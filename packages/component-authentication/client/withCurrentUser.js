@@ -1,6 +1,6 @@
 import { useEffect, useContext } from 'react';
 import gql from 'graphql-tag';
-import { useApolloClient, useQuery } from 'react-apollo-hooks';
+import { useQuery } from 'react-apollo-hooks';
 import AuthenticationTokenContext from "./AuthenticationTokenContext";
 
 const EmailValidationOutcome = {
@@ -39,7 +39,6 @@ query CurrentUser($emailValidationToken:String) {
   }
 }`;
 
-    const client = useApolloClient();
     const r = useQuery(getCurrentUser, queryOptions);
     const authContext = useContext(AuthenticationTokenContext);
 
@@ -59,7 +58,7 @@ query CurrentUser($emailValidationToken:String) {
 
     if(r.data) {
 
-        if(r.data.currentUser) {
+        if(r.data.currentUser && localStorage.getItem('token')) {
 
             r.currentUser = r.data.currentUser.user;
             r.emailValidationTokenOutcome = r.data.currentUser.emailValidationTokenOutcome || null;
@@ -74,6 +73,8 @@ query CurrentUser($emailValidationToken:String) {
             }
         }
     }
+
+
     return r;
 };
 
