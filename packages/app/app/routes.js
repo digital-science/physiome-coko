@@ -2,6 +2,7 @@ import React from 'react';
 import { Route, Switch } from 'react-router';
 
 import SubmissionApp from './SubmissionApp';
+import LogoutRoute from "./Logout";
 
 import LoginRequiredRoute from 'component-authentication/client/LoginRequiredRoute';
 
@@ -61,6 +62,10 @@ const Routes = () => (
                     <PageDashboardRejectedSubmissions history={props.history} />
                 </LoginRequiredRoute>
             );
+        }} />
+
+        <Route path="/logout" render={props => {
+            return <LogoutRoute history={props.history} />
         }} />
 
         <Route path="/" render={props => {

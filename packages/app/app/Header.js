@@ -1,4 +1,5 @@
 import React, { useContext } from 'react';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 import PersonIcon from 'ds-theme/static/person.svg';
@@ -52,7 +53,7 @@ const Person = styled.div`
 const BaseHeader = ({children}) => {
     return (
         <Header>
-            <a href="/">Physiome Submission Portal</a>
+            <Link to="/">Physiome Submission Portal</Link>
             {children}
         </Header>
     );
@@ -83,10 +84,12 @@ export default ({hideUser=false}) => {
     return (
         <BaseHeader>
             {currentUser ? (
-                <Person onClick={logoutUser}>
-                    <img alt="person" src={PersonIcon} />
-                    <span>{currentUser.username}</span>
-                </Person>)
+                <Link to={'/logout'}>
+                    <Person>
+                        <img alt="person" src={PersonIcon} />
+                        <span>{currentUser.username}</span>
+                    </Person>
+                </Link>)
                 : null}
         </BaseHeader>
     );
