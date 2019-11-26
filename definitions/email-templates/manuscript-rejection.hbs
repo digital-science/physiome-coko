@@ -1,9 +1,9 @@
-Dear {{user.displayName}},
+Dear {{{user.displayName}}},
 
 We regret to inform you that your submission to Physiome has been rejected for the following reason:
 
-{{#ifEquals submission.rejectionReason 'out-of-scope'}}Out of scope{{else}}{{submission.rejectionOther}}{{/ifEquals}}
+{{#ifEquals submission.rejectionReason 'out-of-scope'}}Out of scope{{else}}{{{submission.rejectionOther}}}{{/ifEquals}}
 
-Your submission identification number is: {{submission.manuscriptId}}
+Your submission identification number is: {{{submission.manuscriptId}}}
 
 {{{signature}}}
