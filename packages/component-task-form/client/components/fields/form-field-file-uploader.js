@@ -5,6 +5,7 @@ import useCreateFileUploadSignedUrlMutation from './../../mutations/createFileUp
 import useConfirmUploadedFileMutation from './../../mutations/confirmUploadedFile';
 import useSetInstanceAssociatedFilesMutation from './../../mutations/setInstanceAssociatedFiles';
 import useFormValidation, {formFieldClassNameWithValidations} from "../../hooks/useFormValidation";
+import useFormBlockingProcess from '../../hooks/useFormBlockingProcess';
 import withFormField, { fetchFields } from './withFormField';
 
 import FileUploader from 'ds-theme/components/file-uploader';
@@ -53,12 +54,7 @@ function FormFieldFileUploader({ className, data, binding, instanceId, instanceT
     const [fileListing, setFileListing] = useState([]);
     const [filesModified, setFilesModified] = useState(false);
     const [validationIssues, clearValidationIssues] = useFormValidation(description, formDefinition, formValidator);
-
-
-    const setFieldListingUpdatingFormData = (files) => {
-        data.setFieldValueForComplexObject(binding, files);
-        setFileListing(files);
-    };
+    const [_, incrementBlockingProcesses, decrementBlockingProcesses] = useFormBlockingProcess(formValidator, 'A file is currently in the process of being uploaded to the submission system.');
 
     useEffect(() => {
 
@@ -100,42 +96,7 @@ function FormFieldFileUploader({ className, data, binding, instanceId, instanceT
     }, [fileTypes]);
 
 
-    useEffect(() => {
-
-        if(!data || filesModified !== true) {
-            return;
-        }
-
-        const regId = data.registerRelationshipModifier(function(instanceId, instanceType, formData) {
-            return updateAssociatedFilesWithInstance(instanceId, fileListing);
-        });
-
-        return () => {
-            data.unregisterRelationshipModifier(regId);
-        };
-
-    }, [data, filesModified, fileListing]);
-
-
-    function getSignedUrl(file, callback) {
-
-        const signature = {
-            ownerType: instanceType.name,
-            ownerId: instanceId,
-            fileName: file.name,
-            mimeType: file.type
-        };
-
-        const createFileUploadInput = {signature};
-        const fileSize = file.size;
-
-        return createFileUploadSignedUrl(createFileUploadInput).then(result => {
-
-            return callback({signedUrl:result.signedUrl, fileId:result.fileId, signature, fileSize});
-        });
-    }
-
-    function updateAssociatedFilesWithInstance(instanceId, files) {
+    const updateAssociatedFilesWithInstance = useCallback((instanceId, files) => {
 
         const associatedFiles = files.map(file => {
 
@@ -152,9 +113,60 @@ function FormFieldFileUploader({ className, data, binding, instanceId, instanceT
         });
 
         return setInstanceAssociatedFiles(instanceId, associatedFiles);
-    }
 
-    function finishedFileUpload(result) {
+    }, [setInstanceAssociatedFiles]);
+
+    useEffect(() => {
+
+        if(!data || filesModified !== true) {
+            return;
+        }
+
+        const regId = data.registerRelationshipModifier(function(instanceId, instanceType, formData) {
+            return updateAssociatedFilesWithInstance(instanceId, fileListing);
+        });
+
+        return () => {
+            data.unregisterRelationshipModifier(regId);
+        };
+
+    }, [data, filesModified, fileListing, updateAssociatedFilesWithInstance]);
+
+
+    const getSignedUrl = useCallback((file, callback) => {
+
+        const signature = {
+            ownerType: instanceType.name,
+            ownerId: instanceId,
+            fileName: file.name,
+            mimeType: file.type
+        };
+
+        const createFileUploadInput = {signature};
+        const fileSize = file.size;
+
+        return createFileUploadSignedUrl(createFileUploadInput).then(result => {
+
+            return callback({signedUrl:result.signedUrl, fileId:result.fileId, signature, fileSize});
+        });
+    }, [createFileUploadSignedUrl]);
+
+    const setFieldListingUpdatingFormData = useCallback((files) => {
+        data.setFieldValueForComplexObject(binding, files);
+        setFileListing(files);
+    }, [data, binding, setFileListing]);
+
+
+    const onFilePreprocess = useCallback((file, next) => {
+        incrementBlockingProcesses();
+        return next(file);
+    }, [incrementBlockingProcesses]);
+
+    const onFileUploadError = useCallback((err, file) => {
+        decrementBlockingProcesses();
+    }, [decrementBlockingProcesses]);
+
+    const finishedFileUpload = useCallback((result) => {
 
         const confirmFileUploadInput = {
             fileId: result.fileId,
@@ -164,6 +176,8 @@ function FormFieldFileUploader({ className, data, binding, instanceId, instanceT
         };
 
         return confirmFileUpload(confirmFileUploadInput).then(result => {
+
+            decrementBlockingProcesses();
 
             if(!result) {
                 return;
@@ -178,33 +192,36 @@ function FormFieldFileUploader({ className, data, binding, instanceId, instanceT
             data.relationshipWasModified(binding);
             clearValidationIssues();
         });
-    }
+
+    }, [confirmFileUpload, fileListing, setFilesModified, setFieldListingUpdatingFormData,
+        data, binding, clearValidationIssues, decrementBlockingProcesses
+    ]);
 
 
-    function fileWasModified(file) {
+    const fileWasModified = useCallback((file) => {
         setFilesModified(true);
         clearValidationIssues();
         data.relationshipWasModified(binding);
-    }
+    }, [setFilesModified, clearValidationIssues, data, binding]);
 
-    function removeFile(file) {
+    const removeFile = useCallback((file) => {
         file.removed = true;
         fileWasModified(file);
-    }
+    }, [fileWasModified]);
 
-    function changeFileType(file, newType) {
+    const changeFileType = useCallback((file, newType) => {
         file.type = newType;
         fileWasModified(file);
         return newType;
-    }
+    }, [fileWasModified]);
 
-    function changeFileLabel(file, newLabel) {
+    const changeFileLabel = useCallback((file, newLabel) => {
         file.label = newLabel;
         fileWasModified(file);
         return newLabel;
-    }
+    }, [fileWasModified]);
 
-    function reorderFile(file, newIndex, oldIndex) {
+    const reorderFile = useCallback((file, newIndex, oldIndex) => {
 
         const newFileListing = [...fileListing.filter(f => !f.removed), ...fileListing.filter(f => f.removed)];
         const [movedFile] = newFileListing.splice(oldIndex, 1);
@@ -214,23 +231,28 @@ function FormFieldFileUploader({ className, data, binding, instanceId, instanceT
 
         setFieldListingUpdatingFormData(newFileListing);
         fileWasModified(movedFile);
-    }
+
+    }, [fileListing, fileWasModified, setFieldListingUpdatingFormData]);
 
     const linkForFile = useCallback((file) => {
         return `${BaseUrl}/files/download/${instanceType.urlName}/${encodeURI(instanceId)}/${encodeURI(file.id)}/${encodeURI(file.fileName)}`;
     }, [instanceId, instanceType]);
 
-    const upload = {
-        getSignedUrl: getSignedUrl,
-        uploadRequestHeaders:{}
-    };
 
-    if(accept) {
-        upload.accept = accept;
-    }
+    const upload = useMemo(() => {
+        const u = {
+            preprocess: onFilePreprocess,
+            getSignedUrl: getSignedUrl,
+            uploadRequestHeaders:{}
+        };
+        if(accept) {
+            u.accept = accept;
+        }
+        return u;
+    }, [getSignedUrl, onFilePreprocess, accept]);
+
 
     const filteredFileListing = (fileListing && fileListing.length) ? fileListing.filter(f => !f.removed) : null;
-    //const hasRemovedFiles = filteredFileListing && filteredFileListing.length !== fileListing.length;
 
     return (
         <FileUploaderHolder className={formFieldClassNameWithValidations(className, validationIssues, "form-field-files")}>
@@ -241,6 +263,7 @@ function FormFieldFileUploader({ className, data, binding, instanceId, instanceT
                     s3Url={''}
                     isImage={filename => { return false; }}
                     upload={upload}
+                    onError={onFileUploadError}
                     onFinish={finishedFileUpload}
                     message={options.message}
                     accept={accept}

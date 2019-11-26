@@ -224,7 +224,7 @@ const defaultRemoveFileWarningMessage = (file) => {
 };
 
 
-function _FileUploadFileListing({ className, files, reorderFile, changeFileType, changeFileLabel,
+function _FileUploadFileListing({ className, files, startedReorder, reorderFile, changeFileType, changeFileLabel,
                                   fileLabels, fileTypeOptions, linkForFile, fileDownloadLinkComponent,
                                   removeFile, warnOnFileRemove=false, removeFileWarningMessage=defaultRemoveFileWarningMessage }) {
 
@@ -254,6 +254,12 @@ function _FileUploadFileListing({ className, files, reorderFile, changeFileType,
         );
     });
 
+    const onDragStart = function() {
+        if(startedReorder) {
+            startedReorder();
+        }
+    };
+
     const onDragEnd = function({source, destination}) {
 
         if (!destination || !reorderFile) {
@@ -269,7 +275,7 @@ function _FileUploadFileListing({ className, files, reorderFile, changeFileType,
 
     return (
         <div className={`${className || ''} ${listing ? 'has-listing' : ''}`}>
-            <DragDropContext onDragEnd={onDragEnd}>
+            <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
                 <Droppable droppableId="file-listing">
                     {(provided, snapshot) => (
                         <ol style={{listStyle:"none", padding:0}} ref={provided.innerRef}>
