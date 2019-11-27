@@ -56,7 +56,16 @@ function FormFieldFileUploader({ className, data, binding, instanceId, instanceT
     const [validationIssues, clearValidationIssues] = useFormValidation(description, formDefinition, formValidator);
     const [_, incrementBlockingProcesses, decrementBlockingProcesses] = useFormBlockingProcess(formValidator, 'A file is currently in the process of being uploaded to the submission system.');
 
+    const pendingCompletedUploads = useRef({counter:0, files:[]});
+    const [completedUploadsCounter, setCompletedUploadsCounter] = useState(0);
+
+
     useEffect(() => {
+
+        pendingCompletedUploads.current = {
+            counter: 0,
+            files: []
+        };
 
         if(!data || !binding) {
             return;
@@ -78,7 +87,7 @@ function FormFieldFileUploader({ className, data, binding, instanceId, instanceT
             data.off(`field.${binding}`, formDataWasChanged);
         };
 
-    }, [data, binding, setFileListing, setFilesModified]);
+    }, [data, binding, setFileListing, setFilesModified, pendingCompletedUploads]);
 
     const { fileLabels, fileTypes, help, accept = null } = options;
     const fileTypeOptions = useMemo(() => {
@@ -95,6 +104,9 @@ function FormFieldFileUploader({ className, data, binding, instanceId, instanceT
 
     }, [fileTypes]);
 
+
+    // A listing of files associated with an instance is managed by registering as a interested party on the "data"
+    // object. When requested to we can save the associated files back to the instance.
 
     const updateAssociatedFilesWithInstance = useCallback((instanceId, files) => {
 
@@ -133,6 +145,7 @@ function FormFieldFileUploader({ className, data, binding, instanceId, instanceT
     }, [data, filesModified, fileListing, updateAssociatedFilesWithInstance]);
 
 
+
     const getSignedUrl = useCallback((file, callback) => {
 
         const signature = {
@@ -156,6 +169,16 @@ function FormFieldFileUploader({ className, data, binding, instanceId, instanceT
         setFileListing(files);
     }, [data, binding, setFileListing]);
 
+    const filesWereModified = useCallback(() => {
+        setFilesModified(true);
+        clearValidationIssues();
+        data.relationshipWasModified(binding);
+    }, [setFilesModified, clearValidationIssues, data, binding]);
+
+
+    // File uploading process, when starting a new file upload, increment the number of form blocking processes.
+    // If the file upload fails, or when the file has been successfully added to the file listing then
+    // we perform a balanced decrement on the blocking processes.
 
     const onFilePreprocess = useCallback((file, next) => {
         incrementBlockingProcesses();
@@ -177,24 +200,54 @@ function FormFieldFileUploader({ className, data, binding, instanceId, instanceT
 
         return confirmFileUpload(confirmFileUploadInput).then(result => {
 
-            decrementBlockingProcesses();
-
             if(!result) {
                 return;
             }
 
-            const newFiles = fileListing ? fileListing.slice(0) : [];
-            result.order = newFiles.length;
-            newFiles.push(result);
+            // Append the completed upload onto the "completed pending uploads" queue.
+            // This is done because multiple uploads can start at the same time and hold
+            // an old reference to the "fileListing" state value.
 
-            setFilesModified(true);
-            setFieldListingUpdatingFormData(newFiles);
-            data.relationshipWasModified(binding);
-            clearValidationIssues();
+            pendingCompletedUploads.current.files.push(result);
+            pendingCompletedUploads.current.counter++;
+            setCompletedUploadsCounter(pendingCompletedUploads.current.counter);
+
+        }).catch(err => {
+
+            decrementBlockingProcesses();
+            console.error(`Unable to confirm file upload due to: ${err.toString()}`);
         });
 
-    }, [confirmFileUpload, fileListing, setFilesModified, setFieldListingUpdatingFormData,
-        data, binding, clearValidationIssues, decrementBlockingProcesses
+    }, [
+        confirmFileUpload, pendingCompletedUploads, setCompletedUploadsCounter, decrementBlockingProcesses
+    ]);
+
+
+
+    useEffect(() => {
+
+        // The change in "completedUploadsCounter" forces this effect to kick-off, which will then drain
+        // the pending completed uploads queue. Each pending uploaded added decrements the blocking processes,
+        // adds the new file into final file listing and then markes
+
+        if(pendingCompletedUploads.current.files && pendingCompletedUploads.current.files.length) {
+
+            const newFiles = fileListing ? fileListing.slice(0) : [];
+
+            pendingCompletedUploads.current.files.forEach(file => {
+
+                decrementBlockingProcesses();
+                file.order = newFiles.length;
+                newFiles.push(file);
+            });
+            pendingCompletedUploads.current.files = [];
+
+            setFieldListingUpdatingFormData(newFiles);
+            filesWereModified();
+        }
+
+    }, [
+        completedUploadsCounter, pendingCompletedUploads, fileListing, filesWereModified, setFieldListingUpdatingFormData
     ]);
 
 
@@ -221,6 +274,7 @@ function FormFieldFileUploader({ className, data, binding, instanceId, instanceT
         fileWasModified(file);
         return newLabel;
     }, [fileWasModified]);
+
 
     const reorderFile = useCallback((file, newIndex, oldIndex) => {
 
@@ -251,6 +305,7 @@ function FormFieldFileUploader({ className, data, binding, instanceId, instanceT
         }
         return u;
     }, [getSignedUrl, onFilePreprocess, accept]);
+
 
 
     const filteredFileListing = (fileListing && fileListing.length) ? fileListing.filter(f => !f.removed) : null;
