@@ -11,9 +11,9 @@ const SubmissionDefaultType = 'submission';
 const SubmissionDefaultTaskName = 'submission';
 
 
-function PageSubmissionForm({ match, history, children }) {
+function PageSubmissionForm({ match, history, children, submissionTaskName = SubmissionDefaultTaskName }) {
 
-    const { instanceId, taskId, taskName = SubmissionDefaultTaskName, type = SubmissionDefaultType } = match.params;
+    const { instanceId, taskId, taskName = submissionTaskName, type = SubmissionDefaultType } = match.params;
     const workflowDescription = useContext(WorkflowDescriptionContext);
 
     const [didSubmit, setDidSubmit] = useState(false);
@@ -42,9 +42,6 @@ function PageSubmissionForm({ match, history, children }) {
             return true;
         }
 
-        console.log(`did block`);
-        console.dir(nextLocation);
-
         setPreviousLocation(nextLocation);
         setShowUnsubmittedSubmissionMessage(true);
         return false;
@@ -72,6 +69,7 @@ function PageSubmissionForm({ match, history, children }) {
 
     return (
         <SubmissionFormHolder>
+
             <Prompt when={!didSubmit} message={blockNavigation} />
             <BasicMessage isOpen={showUnsubmittedSubmissionMessage} closeOverlay={hideUnsubmittedSubmissionMessage} heading="In-progress Submission"
                 rawMessage={'Your in-progress submission has not been saved or submitted. Please click \'Continue\' to make further changes to your submission, submit or save the submission. Clicking \'Leave\' will navigate away from the submission discarding it.<br /><br />If you want to come back to this submission at a later date, click \'Continue\' and then select the \'Save for Later\' option at the bottom of the page.'}
@@ -95,6 +93,7 @@ function PageSubmissionForm({ match, history, children }) {
                 formDefinition={formDefinition} workflowDescription={workflowDescription}
                 wasSubmitted={wasSubmitted}>
             </TaskFormType>
+
         </SubmissionFormHolder>
     );
 }

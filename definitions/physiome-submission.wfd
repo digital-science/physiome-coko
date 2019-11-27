@@ -1,6 +1,7 @@
 enum SubmissionPhase {
     Pending => "pending",
     Saved => "saved",
+    Revision => "revision",
     Submitted => "submitted",
     Decision => "decision",
     Payment => "payment",
@@ -107,6 +108,7 @@ instance Submission {
         hidden: Boolean <listing-filter, default:false>,
         rejectionReason: RejectionReason,
         rejectionOther: String,
+        revisionsNote: String,
 
         kind: SubmissionKind <default:SubmissionKind.Original>,
         iupsCommission: IUPSCommissionKind,
@@ -157,11 +159,11 @@ instance Submission {
 
         fields "read-only" {
             phase, manuscriptId, submitter, submissionDate, figshareArticleDoi,
-            publishDate, figshareArticleId
+            publishDate, figshareArticleId, revisionsNote
         }
 
         fields "curation" {
-            hidden, unpublishedChanges, rejectionReason, rejectionOther,
+            hidden, unpublishedChanges, rejectionReason, rejectionOther, revisionsNote,
     	    allFilesPresent, resultsMatch, modelAnnotated, primaryPaperExists, resultsInPapersOverlap, sameModelInPapers, manuscriptAccepted,
     	    curator, curationNotes,
     	    publishingPmrDetails
@@ -169,7 +171,8 @@ instance Submission {
 
         tasks "owner-submit" {
     	    "Task_DetailsSubmission",
-    	    "Task_SavedForLater"
+    	    "Task_SavedForLater",
+    	    "Task_RevisionNeeded"
         }
 
         allow <user> [create]
@@ -179,7 +182,7 @@ instance Submission {
 
         allow <owner> [read] on "submit"
         allow <owner> [read] on "read-only"
-        allow <owner> [write] on "submit" where (phase == SubmissionPhase.Pending || phase == SubmissionPhase.Saved)
+        allow <owner> [write] on "submit" where (phase == SubmissionPhase.Pending || phase == SubmissionPhase.Saved || phase == SubmissionPhase.Revision)
         allow <owner> [task] on "owner-submit"
         allow <owner> [destroy] where (phase == SubmissionPhase.Pending || phase == SubmissionPhase.Saved)
 
@@ -418,11 +421,11 @@ instance Submission {
 
             } }
 
-            { DetailPanel, <administrator>, (phase in [SubmissionPhase.Submitted, SubmissionPhase.Decision, SubmissionPhase.Payment,
+            { DetailPanel, <administrator>, (phase in [SubmissionPhase.Submitted, SubmissionPhase.Revision, SubmissionPhase.Decision, SubmissionPhase.Payment,
                                                             SubmissionPhase.Paid, SubmissionPhase.SkipPayment, SubmissionPhase.Reject]),
                     heading:"Decisions", children:{
 
-                { InlineTaskForm, form:"decisions", tasks:[ "checks", "payment-decision", "payment", "publish-decision" ] }
+                { InlineTaskForm, form:"decisions", tasks:[ "checks", "revisions", "payment-decision", "payment", "publish-decision" ] }
 
                 { ResumeRejectedSubmission, (phase == SubmissionPhase.Reject) }
 
@@ -502,12 +505,63 @@ instance Submission {
         }
     }
 
+    form "revisions" extend "SimplePanels" {
+
+        validation: [ "initial-submission" ]
+
+        outcomes: [
+            {
+                "complete" => Complete,
+                state: {
+                    phase: SubmissionPhase.Submitted
+                },
+                requiresValidatedSubmitter: true
+            },
+
+            {
+                "save-for-later" => Save,
+                 skipValidations: true
+            }
+        ]
+
+        options: {
+           heading: "Manuscript Revision"
+        }
+
+        elements: {
+
+            { Panel, children:{
+
+                { StaticText => revisionsNote, label:"Revision Notes" }
+
+                { Layout, layout:"submission-editor" }
+
+                { HeroCheckbox => priceAcknowledged, heading:"Conditions of Submission",
+                    label: "I understand that there is a curation processing fee of $300 USD associated with the successful acceptance of this manuscript." }
+
+            } }
+
+            { DecisionPanel, children:{
+
+                { Button, outcome:"save-for-later", label:"Save for Later" }
+
+                { Button, default:true, outcome:"complete", label:"Submit Revisions" }
+
+            } }
+        }
+    }
+
 
     validations "rejection-reason" {
 
         { rejectionReason => (hasValue(rejectionReason) == true), "The kind of rejection being used must be specified. Choose 'Other' to write-in a reason not listed." }
 
         { rejectionOther => (rejectionReason != RejectionReason.Other || length(rejectionOther) > 0), "A rejection reason is required if you choose 'Other' as the rejection reason." }
+    }
+
+    validations "revision-note" {
+
+        { revisionsNote => (length(revisionsNote) > 0), "A message to the submitter is required detailing what revisions are required." }
     }
 
 
@@ -524,6 +578,12 @@ instance Submission {
                 "publish" => Complete,
                 state: {
                     phase: SubmissionPhase.Publish
+                }
+            },
+            {
+                "revision" => Complete,
+                state: {
+                    phase: SubmissionPhase.Revision
                 }
             },
             {
@@ -557,7 +617,15 @@ instance Submission {
 
             { Button, (phase == SubmissionPhase.Submitted), outcome:"checked", label:"Checks Completed" }
 
-            { Button, (phase == SubmissionPhase.Decision), outcome:"resume-checks", label:"Resume Quality Checks" }
+            { Button, (phase == SubmissionPhase.Submitted), outcome:"revision", label:"Revisions Required",
+                confirmation:"Are you sure you want to return this submission to the submitter requesting revisions?", confirmationHeading:"Manuscript Revisions Required",
+                confirmationAffirmativeLabel: "Revise Manuscript", confirmationNegativeLabel: "Cancel", confirmationValidation:["revision-note"], children:{
+
+                { TextArea => revisionsNote, placeholder:"Revision notes (sent to manuscript submitter)." }
+            } }
+
+
+            { Button, (phase == SubmissionPhase.Decision || phase == SubmissionPhase.Revision), outcome:"resume-checks", label:"Resume Quality Checks" }
 
             { Button, (phase == SubmissionPhase.Decision), outcome:"payment", label:"Approve for Payment",
                 confirmation:"Are you sure you want to approve this submission for curation fee payment? The submitter will be emailed and asked to pay the curation processing charge.",
@@ -567,9 +635,11 @@ instance Submission {
                 confirmation:"Are you sure you want to approve this submission and also waive the payment of the APC fee?",
                 confirmationHeading:"Waive APC Payment", confirmationAffirmativeLabel: "Waive APC Payment", confirmationNegativeLabel: "Cancel" }
 
+
             { Button, (phase == SubmissionPhase.Paid || phase == SubmissionPhase.SkipPayment), outcome:"publish", label:"Publish Article",
                 confirmation:"Are you sure you want to publish this manuscript submission through into figshare?", confirmationHeading:"Publish Manuscript to Figshare",
                 confirmationAffirmativeLabel: "Publish Manuscript", confirmationNegativeLabel: "Cancel" }
+
 
             { Button, (phase != SubmissionPhase.Reject), outcome:"reject", label:"Reject Article",
                 confirmation:"Are you sure you want to reject this manuscript submission?", confirmationHeading:"Reject Manuscript Submission",
@@ -578,8 +648,8 @@ instance Submission {
                 { SelectValue => rejectionReason, label:"Reason for Rejection", options:mapping("DisplayedRejectionReason"), placeholder:"Please select the rejection reason kind" }
 
                 { TextArea => rejectionOther, (rejectionReason == RejectionReason.Other), placeholder:"Further details for rejection (sent to manuscript submitter)." }
-
             } }
+
         }
     }
 

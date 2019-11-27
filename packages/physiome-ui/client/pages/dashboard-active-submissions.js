@@ -13,6 +13,7 @@ import { FaPlus } from 'react-icons/fa';
 
 const AllPhases = [
     "Saved",
+    "Revision",
     "Submitted",
     "Decision",
     "Payment",
@@ -22,6 +23,7 @@ const AllPhases = [
 
 const ActivePhases = [
     //"Saved",
+    //"Revision",
     "Submitted",
     "Decision",
     "Payment",

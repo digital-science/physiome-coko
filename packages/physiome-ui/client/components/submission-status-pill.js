@@ -11,6 +11,7 @@ const SubmissionStatus = {
     Pending: 'Pending',
     Saved: 'Saved',
     Submitted: 'Submitted',
+    Revision: 'Revision',
     Checking: 'Checking',
     Decision: 'Decision',
     Payment: 'Payment',
@@ -35,6 +36,11 @@ SubmissionStatusMapping[SubmissionStatus.Saved] = {
 SubmissionStatusMapping[SubmissionStatus.Submitted] = {
     text:"Submitted",
     className: "submitted"
+};
+
+SubmissionStatusMapping[SubmissionStatus.Revision] = {
+    text:"Revisions Needed",
+    className: "revision"
 };
 
 SubmissionStatusMapping[SubmissionStatus.Checking] = {
@@ -137,6 +143,10 @@ const SubmissionStatusPill = styled(_SubmissionStatusPill)`
     
     &.submitted {
         background-color: #FFC107;
+    }
+    
+    &.revision {
+        background-color: #009eff;
     }
     
     &.checking {

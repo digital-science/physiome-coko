@@ -72,10 +72,20 @@ const linkSubmissionElement = (submission, el) => {
         ? <Link to={`/submission/${submission.id}`}>{el}</Link> : <Link to={`/details/${submission.id}`}>{el}</Link>;
 };
 
-export { linkSubmissionElement };
+const linkSubmissionElementForSubmitter = (submission, el) => {
+
+    if(submission.phase === 'Revision') {
+        return <Link to={`/revisions/${submission.id}`}>{el}</Link>;
+    }
+    return linkSubmissionElement(submission, el);
+};
 
 
-function createSubmissionTitleColumn(heading, opts={}, titleField='title', phaseField='phase', authorsField='authors') {
+export { linkSubmissionElement, linkSubmissionElementForSubmitter };
+
+
+
+function createSubmissionTitleColumn(heading, linkifyElement = linkSubmissionElement, opts={}, titleField='title', phaseField='phase', authorsField='authors') {
 
     const { className = "" } = opts;
 
@@ -87,7 +97,7 @@ function createSubmissionTitleColumn(heading, opts={}, titleField='title', phase
 
         return (
             <React.Fragment>
-                {linkSubmissionElement(task, formattedTitle)}
+                {linkifyElement(task, formattedTitle)}
                 {authors && authors instanceof Array && authors.length ?
                     <AuthorListing>
                         {(authors.map((a, i) => <li key={i}>{a.name}</li>))}

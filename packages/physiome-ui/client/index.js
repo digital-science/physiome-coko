@@ -18,9 +18,10 @@ registerFormFieldType('PMRWorkspaceDetails', FormFieldPMRWorkspaceDetails);
 import PageDashboardActiveSubmissions from './pages/dashboard-active-submissions';
 import PageDashboardPublishedSubmissions from './pages/dashboard-published-submissions';
 import PageDashboardRejectedSubmissions from './pages/dashboard-rejected-submissions';
-import PageDashboardSubmitterSubmissions from './pages/dashboard-submitter-submissions'
+import PageDashboardSubmitterSubmissions from './pages/dashboard-submitter-submissions';
 
 import PageSubmissionForm from './pages/submission-form';
+import PageSubmissionRevisionForm from "./pages/submission-revision-form";
 import PageSubmissionDetails from './pages/submission-details';
 
 export {
@@ -30,5 +31,6 @@ export {
     PageDashboardSubmitterSubmissions,
 
     PageSubmissionForm,
+    PageSubmissionRevisionForm,
     PageSubmissionDetails
 };

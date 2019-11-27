@@ -3,6 +3,7 @@ const TaskEmailManuscriptInitialSubmission = require('./task-email-initial-submi
 const TaskEmailManuscriptPaymentReceived = require('./task-email-payment-received');
 const TaskEmailManuscriptPublished = require('./task-email-published');
 const TaskEmailManuscriptRejection = require('./task-email-rejection');
+const TaskEmailManuscriptRevisionsNeeded = require('./task-email-revisions-needed');
 const TaskEmailDecisionRequired = require('./task-email-decision-required');
 
 const TaskPublishArticle = require('./task-publish-article');
@@ -19,6 +20,7 @@ const AllTaskSetups = [
     TaskEmailManuscriptPaymentReceived,
     TaskEmailManuscriptPublished,
     TaskEmailManuscriptRejection,
+    TaskEmailManuscriptRevisionsNeeded,
     TaskEmailDecisionRequired,
     TaskPublishArticle,
     TaskRepublishArticle,

@@ -5,7 +5,7 @@ import { WorkflowDescriptionContext } from 'client-workflow-model';
 
 import { TaskListing, TaskListingHeader } from 'component-task-listing/client';
 import { createDateColumn, createIdentifierColumn, createIdentityColumn, createStatusColumn } from 'component-task-listing/client';
-import { createSubmissionTitleColumn, createCuratorClaimableIdentityColumn, linkSubmissionElement } from './column-types';
+import { createSubmissionTitleColumn, createCuratorClaimableIdentityColumn, linkSubmissionElement, linkSubmissionElementForSubmitter } from './column-types';
 
 import { HeaderHolder } from 'component-task-listing/client/components/task-listing-header';
 
@@ -30,9 +30,9 @@ const SubmissionListingColumns = [
 
 const SimpleSubmissionListingColumns = [
 
-    createIdentifierColumn("ID", 'manuscriptId', linkSubmissionElement, ["manuscriptId", "id", "phase"]),
+    createIdentifierColumn("ID", 'manuscriptId', linkSubmissionElementForSubmitter, ["manuscriptId", "id", "phase"]),
 
-    createSubmissionTitleColumn('Manuscript Title'),
+    createSubmissionTitleColumn('Manuscript Title', linkSubmissionElementForSubmitter, ),
 
     createDateColumn("Date", 'submissionDate'),
 
@@ -82,6 +82,7 @@ const _SubmissionsListing = ({className, history, heading, allFilterPhases=[], d
     useEffect(() => {
         setAdditionalQueryValues({searchText:(searchText && searchText.length ? searchText : null)});
     }, [searchText]);
+
 
     const renderHeading = ({header}) => {
         return (

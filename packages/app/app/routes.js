@@ -12,6 +12,7 @@ import {
     PageDashboardRejectedSubmissions,
     PageDashboardSubmitterSubmissions,
     PageSubmissionForm,
+    PageSubmissionRevisionForm,
     PageSubmissionDetails
 } from 'physiome-ui/client';
 
@@ -41,6 +42,13 @@ const Routes = () => (
             );
         }} />
 
+        <Route path="/revisions/:instanceId" render={props=> {
+            return (
+                <LoginRequiredRoute message="You must login before being able to submit revisions to your in-progress submission. Login using your ORCID credentials."
+                    renderApplication={renderAppHideSidebar} renderContent={children => <PageSubmissionRevisionForm children={children} {...props} />} />
+            );
+        }} />
+        
         <Route path="/details/:instanceId" render={props=> {
             return (
                 <LoginRequiredRoute message="You must login to be able to view details of the requested submission. Login using your ORCID credentials." renderApplication={renderAppDefault}
