@@ -1,5 +1,6 @@
 const request = require("request");
 
+const DimensionsMaximumAPITokenCacheTime = 2 * 60 * 60 * 1000; // 2 hours
 
 function DimensionsApi(baseUrl, username, password) {
 
@@ -46,7 +47,18 @@ DimensionsApi.prototype._resolveAuthToken = function() {
                 return reject(new Error("Dimensions request auth token failed with status code: " + response.statusCode));
             }
 
-            this._cachedAuthToken = body.token;
+            const newAuthToken = body.token;
+            this._cachedAuthToken = newAuthToken;
+
+            if(this._tokenTimer) {
+                clearTimeout(this._tokenTimer);
+            }
+            this._tokenTimer = setTimeout(() => {
+                if(this._cachedAuthToken === newAuthToken) {
+                    this._cachedAuthToken = null;
+                }
+            }, DimensionsMaximumAPITokenCacheTime);
+
             return resolve(body.token);
         });
     });
@@ -80,6 +92,10 @@ DimensionsApi.prototype.query = function(query) {
                         const e = new Error("Dimensions request, not authorised.");
                         e.unauthorisedError = true;
                         return reject(e);
+                    } else if(response.statusCode === 403) {
+                        const e = new Error("Dimensions request, request forbidden.");
+                        e.forbiddenError = true;
+                        return reject(e);
                     }
 
                     return reject(new Error("Dimensions query request failed with status code: " + response.statusCode));
@@ -103,8 +119,12 @@ DimensionsApi.prototype.query = function(query) {
 
     }).catch((err) => {
 
-        if(err.unauthorisedError) {
+        if(err.unauthorisedError || err.forbiddenError) {
             this._cachedAuthToken = null;
+            if(this._tokenTimer) {
+                clearTimeout(this._tokenTimer);
+                delete this._tokenTimer;
+            }
 
             return this._resolveAuthToken().then(token => {
                 return perform(token);
