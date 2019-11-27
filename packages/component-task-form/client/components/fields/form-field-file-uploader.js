@@ -207,6 +207,7 @@ function FormFieldFileUploader({ className, data, binding, instanceId, instanceT
     const removeFile = useCallback((file) => {
         file.removed = true;
         fileWasModified(file);
+        return Promise.resolve();
     }, [fileWasModified]);
 
     const changeFileType = useCallback((file, newType) => {
