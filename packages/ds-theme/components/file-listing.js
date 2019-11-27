@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import styled from 'styled-components';
 
@@ -9,6 +9,7 @@ import { SmallTextInput } from './text-input';
 import PopoverTrigger from "./popover";
 import { SmallBlockLabel } from "./label";
 import { SmallInlineButton } from "./inline-button";
+import Spinner from './spinner';
 
 import { FaTimes } from 'react-icons/fa';
 import humanFormatByteCount from "../helpers/humanFormatByteCount";
@@ -43,6 +44,20 @@ const RemoveFileMessageHolder = styled.div`
       margin-left: 5px;
     }
   }
+      
+  & div.removing {
+    display: flex;
+    justify-content: flex-end;
+    
+    ${Spinner} {
+      margin-right: 3px;
+    }
+  }
+  
+  & div.hidden {
+    display: none;
+  }
+
 `;
 
 
@@ -54,6 +69,7 @@ function _FileListingRow({className, file, ref, fileLabels, fileTypeOptions, lin
     const [label, setLabel] = useState(file.label || "");
     const [type, setType] = useState(file.type || "");
     const DownloadLink = fileDownloadLinkComponent;
+    const [isRemovingFile, setIsRemovingFile] = useState(false);
 
     const handleFileTypeChanged = (file, event) => {
         if(changeFileType) {
@@ -73,6 +89,19 @@ function _FileListingRow({className, file, ref, fileLabels, fileTypeOptions, lin
     const onRemoveTooltipVisibilityChange = useCallback((vis) => {
         setRemoveTooltipShown(vis);
     }, [setRemoveTooltipShown]);
+
+    const clickRemoveFile = useCallback((e, dismissTooltipRef) => {
+        setIsRemovingFile(true);
+        removeFile(file).finally(() => {
+            if(dismissTooltipRef.current) {
+                dismissTooltipRef.current();
+            }
+        });
+
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }, [file, removeFile, setIsRemovingFile]);
 
     return (
         <Card className={className} interest={removeTooltipShown} reorderingGrabber={true} >
@@ -100,12 +129,30 @@ function _FileListingRow({className, file, ref, fileLabels, fileTypeOptions, lin
                 <div className="file-remove">
                     {warnOnFileRemove ?
                         <PopoverTrigger onVisibilityChange={onRemoveTooltipVisibilityChange} renderContent={({dismissTooltip}) => {
+
+                            // Because the tooltip may go away before the "removeFile" Promise is fully resolved, we use
+                            // a reference to store the dismiss tooltip method along with a cleanup effect that
+                            // nulls it out when the component un-mounts.
+
+                            const dismissTooltipRef = useRef(dismissTooltip);
+                            useEffect(() => {
+                                dismissTooltipRef.current = dismissTooltip;
+                                return () => {
+                                    dismissTooltipRef.current = null;
+                                };
+                            }, [dismissTooltip]);
+
                             return (
                                 <RemoveFileMessageHolder>
                                     <SmallBlockLabel>{(typeof removeFileWarningMessage === 'function') ? removeFileWarningMessage(file) : removeFileWarningMessage}</SmallBlockLabel>
-                                    <div className={"buttons"}>
+
+                                    <div className={`removing ${!isRemovingFile ? 'hidden' : ''}`}>
+                                        <SmallBlockLabel><Spinner small={true} /> Removing file…</SmallBlockLabel>
+                                    </div>
+
+                                    <div className={`buttons ${isRemovingFile ? 'hidden' : ''}`}>
                                         <SmallInlineButton bordered={true} onClick={() => dismissTooltip()}>Cancel</SmallInlineButton>
-                                        <SmallInlineButton bordered={true} onClick={() => removeFile(file)}>Remove File</SmallInlineButton>
+                                        <SmallInlineButton bordered={true} onClick={(e) => clickRemoveFile(e, dismissTooltipRef)}>Remove File</SmallInlineButton>
                                     </div>
                                 </RemoveFileMessageHolder>
                             );
