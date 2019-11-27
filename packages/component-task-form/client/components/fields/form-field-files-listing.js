@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import withFormField, { fetchFields } from './withFormField';
@@ -29,7 +29,6 @@ const SimpleFileListing = styled(({className, files, instanceId, instanceType}) 
     if(!files || !files.length) {
         return null;
     }
-
 
     return (
         <ol className={className}>
@@ -115,13 +114,19 @@ const SimpleFileListing = styled(({className, files, instanceId, instanceType}) 
 function FormFieldFilesListing({ data, binding, instanceId, instanceType, options = {} }) {
 
     const [fileListing] = withFormFieldData(data, binding);
-    const filteredFiles = fileListing ? fileListing.filter(f => f.removed !== true) : null;
+    const sortedFilteredFiles = useMemo(() => {
+        const filteredFiles = fileListing ? fileListing.filter(f => f.removed !== true) : null;
+        if(filteredFiles) {
+            filteredFiles.sort((a, b) => a.order - b.order);
+        }
+        return filteredFiles;
+    }, [fileListing]);
 
     return (
         <FileListingHolder className={"form-field-files"}>
             {options.label ? <BlockLabel>{options.label}</BlockLabel> : null}
-            {filteredFiles && filteredFiles.length
-                ? <SimpleFileListing files={filteredFiles} instanceId={instanceId} instanceType={instanceType} />
+            {sortedFilteredFiles && sortedFilteredFiles.length
+                ? <SimpleFileListing files={sortedFilteredFiles} instanceId={instanceId} instanceType={instanceType} />
                 : <DisabledStaticText>No files uploaded.</DisabledStaticText>
             }
         </FileListingHolder>
