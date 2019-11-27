@@ -50,7 +50,6 @@ class FormValidator {
 
     registerBlockingProcess(process) {
         if(this._blockingProcesses.indexOf(process) === -1) {
-            console.log(`registerBlockingProcess: ${JSON.stringify(process)}`);
             this._blockingProcesses.push(process);
         }
     }
@@ -58,7 +57,6 @@ class FormValidator {
     unregisterBlockingProcess(process) {
         const index = this._blockingProcesses.indexOf(process);
         if (index > -1) {
-            console.log(`unregisterBlockingProcess: ${JSON.stringify(process)}`);
             this._blockingProcesses.splice(index, 1);
         }
     }
