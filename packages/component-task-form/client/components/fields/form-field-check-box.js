@@ -10,7 +10,7 @@ import Checkbox, { CheckboxLabel } from 'ds-theme/components/checkbox-input';
 import ValidationIssueListing from 'ds-theme/components/validation-issue-listing';
 import PopoverTrigger from 'ds-theme/components/popover';
 
-import { FaQuestionCircle } from 'react-icons/fa';
+import { FaQuestionCircle, FaStarOfLife } from 'react-icons/fa';
 
 
 const FormStyledCheckbox = styled(Checkbox)`
@@ -33,6 +33,18 @@ const FormStyledHelp = styled.span`
       color: #505050;
     }
     
+    &:before {
+      content: " "
+    }
+`;
+
+const FormStyledRequiredIcon = styled.span`
+    color: #e8aeae;
+    & svg {
+      font-size: 80%;
+      /*vertical-align: middle;*/
+      cursor: pointer;
+    }    
     &:before {
       content: " "
     }
@@ -77,13 +89,14 @@ function FormFieldCheckbox({className, data, binding, description, formDefinitio
     };
 
     const input = <FormStyledCheckbox checked={value || false} disabled={options.readOnly || false} onChange={handleCheckedChange} />;
+    const misc = options.showAsRequired ? <FormStyledRequiredIcon><FaStarOfLife /></FormStyledRequiredIcon> : null;
 
     return (
         <div className={formFieldClassNameWithValidations(className, validationIssues)}>
             { options.label ?
-                (<FormStyledLabel>{input}<span>{options.label}{help}</span></FormStyledLabel>)
+                (<FormStyledLabel>{input}<span>{options.label}{help}{misc}</span></FormStyledLabel>)
                 :
-                <React.Fragment>{input}{help}</React.Fragment>
+                <React.Fragment>{input}{help}{misc}</React.Fragment>
             }
             { validationIssues ? <ValidationIssueListing issues={validationIssues} /> : null }
         </div>
