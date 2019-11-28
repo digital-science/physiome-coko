@@ -4,7 +4,10 @@ import styled from 'styled-components';
 import useFormValueBinding from './../../hooks/useFormValueBinding';
 import withFormField from './withFormField'
 
-import {BlockLabel} from 'ds-theme/components/label';
+import { BlockLabel } from 'ds-theme/components/label';
+
+import config from 'config';
+const WidgetsHostname = config['figshare-widgets-hostname'] || 'widgets.figshare.com';
 
 
 function FormFieldFigshareEmbed({data, binding, options = {}}) {
@@ -16,7 +19,7 @@ function FormFieldFigshareEmbed({data, binding, options = {}}) {
         if(!articleId) {
             return null;
         }
-        return `https://widgets.figsh.com/articles/${encodeURI(articleId)}/embed?show_title=1`;
+        return `https://${WidgetsHostname}/articles/${encodeURI(articleId)}/embed?show_title=1`;
 
     }, [articleId]);
 

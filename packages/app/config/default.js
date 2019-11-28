@@ -34,7 +34,7 @@ if(process.env.PUBLISH_FIGSHARE_GROUP_ID && isNaN(parseInt(process.env.PUBLISH_F
 const values = {
 
     // Public keys are copied into webpack build (i.e. go client-side)
-    publicKeys: ['pubsweet-client', 'authsome', 'validations', 'orcid-paths', 'stripe-publishable-key'],
+    publicKeys: ['pubsweet-client', 'validations', 'orcid-paths', 'stripe-publishable-key', 'figshare-widgets-hostname'],
 
     authsome: {
         mode: path.resolve(__dirname, 'authsome-mode.js')
@@ -135,6 +135,8 @@ const values = {
             CommissionKind: process.env.PUBLISH_FIGSHARE_COMMISSION_KIND_NAME || 'Commission Kind'
         }
     },
+
+    'figshare-widgets-hostname': process.env.FIGSHARE_WIDGETS_HOSTNAME || "widgets.figsh.com",
 
     stripe: {
         testing: (process.env.STRIPE_IS_PRODUCTION && process.env.STRIPE_IS_PRODUCTION.toString() !== "false"),
