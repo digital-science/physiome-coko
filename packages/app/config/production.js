@@ -7,6 +7,7 @@ module.exports = {
     orcid: {
         orcidUrl: 'orcid.org',
         orcidDisplayUrl: 'orcid.org',
+        publicApiEndpoint: 'https://pub.orcid.org',
     },
 
     'figshare-widgets-hostname': process.env.FIGSHARE_WIDGETS_HOSTNAME || "widgets.figshare.com",

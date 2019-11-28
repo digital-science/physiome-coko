@@ -112,7 +112,9 @@ const values = {
         associatePath: '/orcid/link',
         associateCallbackPath: '/orcid/associate',
 
-        successPath: '/'
+        successPath: '/',
+
+        publicApiEndpoint: 'https://pub.orcid.org',
     },
 
     dimensions: {

@@ -1,0 +1,10 @@
+type ORCIDPersonDetails {
+    orcidId: ID!
+    givenNames: String
+    familyNames: String
+}
+
+extend type Query {
+
+    resolveORCIDPersonDetails(ids:[ID!]!) : [ORCIDPersonDetails!]
+}
