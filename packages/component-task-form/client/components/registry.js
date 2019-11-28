@@ -19,7 +19,8 @@ import FormFieldFilesListing from './fields/form-field-files-listing';
 import FormFieldGroup from './fields/form-field-group';
 import FormFieldShadowedEditor from './fields/form-field-shadowed-editor';
 
-import FormFieldAuthorsEditor, { FormFieldAuthorsListing } from './fields/form-field-authors';
+import FormFieldAuthorsEditor from './fields/form-field-authors';
+import FormFieldAuthorsListing from './fields/form-field-authors-listing';
 import FormFieldFundingEditor, { FormFieldFundingListing } from './fields/form-field-funding';
 import FormFieldArticleCitationListEditor, { FormFieldArticleCitationListing } from './fields/form-field-article-citation-list';
 import FormFieldArticleCitation from './fields/form-field-article-citation';
