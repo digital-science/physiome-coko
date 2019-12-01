@@ -135,7 +135,9 @@ const values = {
         defaultTag: process.env.PUBLISH_FIGSHARE_DEFAULT_TAG || "Physiome Journal",
         customFieldNames: {
             CommissionKind: process.env.PUBLISH_FIGSHARE_COMMISSION_KIND_NAME || 'Commission Kind'
-        }
+        },
+
+        skipPublishingStage: (process.env.PUBLISH_FIGSHARE_SKIP_STAGE && (process.env.PUBLISH_FIGSHARE_SKIP_STAGE === "true" || process.env.PUBLISH_FIGSHARE_SKIP_STAGE === true))
     },
 
     'figshare-widgets-hostname': process.env.FIGSHARE_WIDGETS_HOSTNAME || "widgets.figsh.com",

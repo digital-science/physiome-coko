@@ -14,6 +14,8 @@ const ArticleCategories = PublishFigshareOptions.categories ? PublishFigshareOpt
 const ArticleDefaultKeyword = PublishFigshareOptions.defaultTag;
 const ArticleCustomFieldNames = PublishFigshareOptions.customFieldNames;
 
+const ArticlePublishSkipPublishing = (PublishFigshareOptions.skipPublishingStage === true);
+
 
 
 class FigshareArticlePublisher {
@@ -211,6 +213,13 @@ class FigshareArticlePublisher {
             return this._publishFilesToArticleId(articleId, submission);
 
         }).then((articleId) => {
+
+            // If the config option is set to skip publishing, then just return the final article ID here now and
+            // don't perform the final publish stage.
+            
+            if(ArticlePublishSkipPublishing) {
+                return articleId;
+            }
 
             return figshareApi.publishArticle(articleId).then(() => {
 
