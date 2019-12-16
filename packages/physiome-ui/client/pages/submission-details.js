@@ -1,11 +1,12 @@
-import React, { useContext, useRef } from 'react';
+import React, { useContext, useRef, useCallback } from 'react';
 import { WorkflowDescriptionContext } from 'client-workflow-model'
 import styled from 'styled-components';
+
+import { Redirect } from 'react-router';
 
 import { instanceViewTypeForViewDefinition } from 'component-task-form/client'
 import { useSubmissionPublishedSubscription } from '../subscriptions/submissionPublished';
 import debounce from "lodash/debounce";
-import {useInstanceWasCreatedSubscription} from "component-task-listing/client/subscriptions/instanceChanged";
 
 const SubmissionInstanceType = 'Submission';
 const SubmissionDetailsViewName = "details";
@@ -61,13 +62,25 @@ function SubmissionDetails({match, children}) {
         }
     });
 
+    const renderPageAdditionsWithData = useCallback((instance, data, currentUser) => {
+
+        // If the current phase is revision, we have a valid current user and that user is not an administrator, then we can
+        // redirect the user to the revisions version of the page.
+
+        if(data && data.getFieldValue("phase") === "Revision" && currentUser && (!currentUser.groups || currentUser.groups.indexOf("administrator") === -1)) {
+            return <Redirect to={`/revisions/${encodeURI(instanceId)}`} />
+        }
+        return null;
+
+    }, []);
+
 
     return (
         <SubmissionDetailsPageHolder>
             {children ? <SubmissionDetailsPageHeader>{children}</SubmissionDetailsPageHeader> : null}
             <SubmissionDetailsHeader>Submission Details</SubmissionDetailsHeader>
             <SubmissionDetailsHolder>
-                <InstanceViewType {...instanceViewProps} dataContextRef={dataContextRef} />
+                <InstanceViewType {...instanceViewProps} renderPageAdditionsWithData={renderPageAdditionsWithData} dataContextRef={dataContextRef} />
             </SubmissionDetailsHolder>
         </SubmissionDetailsPageHolder>
     );
