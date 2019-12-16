@@ -32,7 +32,7 @@ const BlockingProcessList = styled.ol`
 `;
 
 export default function SimpleTaskForm({ className, instanceId, taskId, taskName, instanceType, formDefinition, workflowDescription,
-                                         submitDidFail, wasSubmitted, renderNoTask, dataContextRef=null, autoSave=true }) {
+                                         submitDidFail, wasSubmitted, renderNoTask, renderPageAdditionsWithData=null, dataContextRef=null, autoSave=true }) {
 
     const [showIsSaving, displayIsSavingMessage, removeIsSavingMessage] = useTimedMinimumDisplay(1500);
     const [showValidatedUserRequired, setShowValidatedUserRequired] = useState(false);
@@ -92,6 +92,8 @@ export default function SimpleTaskForm({ className, instanceId, taskId, taskName
         <React.Fragment>
             <StyledSimplePanelLayout className={className} elements={formDefinition.elements} data={formData} loading={loading} error={error}
                 instance={instance} fieldListingProps={fieldListingProps} showIsSaving={showIsSaving} renderNoTask={renderNoTask} />
+
+            {renderPageAdditionsWithData && data && !loading ? renderPageAdditionsWithData(instance, formData) : null}
 
             <BasicMessage isOpen={showValidatedUserRequired} closeOverlay={() => setShowValidatedUserRequired(false)} heading="Email Verification Required"
                 message="Before you can submit your manuscript, the email address associated with your account must be verified. Please check your registered email address for a verification link that has been sent."

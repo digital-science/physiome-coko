@@ -6,7 +6,8 @@ import useEditorInstanceData from './../hooks/useEditorInstanceData';
 import MasterDetailLayout from './master-detail-layout';
 
 
-export default function MasterDetailEditor({ instanceId, instanceType, layoutDefinition, workflowDescription, wasSubmitted, dataContextRef=null, autoSave=true }) {
+export default function MasterDetailEditor({ instanceId, instanceType, layoutDefinition, workflowDescription, wasSubmitted,
+                                             renderPageAdditionsWithData=null, dataContextRef=null, autoSave=true }) {
 
     // Editors: support changing data, but does not have an associated task which has defined outcomes.
 
@@ -25,6 +26,6 @@ export default function MasterDetailEditor({ instanceId, instanceType, layoutDef
 
     return (
         <MasterDetailLayout elements={layoutDefinition.elements} data={formData} loading={loading} error={error}
-            instance={instance} fieldListingProps={fieldListingProps} />
+            instance={instance} fieldListingProps={fieldListingProps} renderPageAdditionsWithData={renderPageAdditionsWithData} />
     );
 };

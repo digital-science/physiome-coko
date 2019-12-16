@@ -11,7 +11,7 @@ import Spinner from 'ds-theme/components/spinner';
 import { InlineButton, SmallInlineButton } from 'ds-theme/components/inline-button';
 
 
-export default function MasterDetailLayout({ className, elements, data, loading, error, instance, fieldListingProps }) {
+export default function MasterDetailLayout({ className, elements, data, loading, error, instance, fieldListingProps, renderPageAdditionsWithData = null }) {
 
     const currentUser = useContext(AuthenticatedUserContext);
 
@@ -56,6 +56,8 @@ export default function MasterDetailLayout({ className, elements, data, loading,
     return (data && !loading) ? (
 
         <MasterDetailHolder className={className}>
+
+            {renderPageAdditionsWithData ? renderPageAdditionsWithData(instance, data, currentUser) : null}
 
             <HeaderHolder>
                 {headerPanels.map((panel, index) => {
