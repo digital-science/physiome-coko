@@ -85,7 +85,7 @@ const values = {
         from: process.env.EMAIL_SEND_FROM,
         prefix: process.env.EMAIL_SUBJECT_PREFIX,
         templateDirectory: `${__dirname}/../../../definitions/email-templates`,
-        signature: process.env.EMAIL_SIGNATURE,
+        signature: process.env.EMAIL_SIGNATURE ? process.env.EMAIL_SIGNATURE.replace(/\\n/g, "\n") : "",
 
         editorsMailingListAddress: process.env.EMAIL_EDITORS_MAILING_LIST,
 
