@@ -18,6 +18,7 @@ const ArticleCustomFieldNames = PublishFigshareOptions.customFieldNames;
 
 const ArticlePublishSkipPublishing = (PublishFigshareOptions.skipPublishingStage === true);
 
+const ArticlePublishedDirectory = config.get('workflow-publish-output.directory');
 
 
 
@@ -410,6 +411,47 @@ class FigshareArticlePublisher {
         }).then(({fileInfo}) => {
 
             return figshareApi.completeFileUpload(articleId, fileInfo);
+        });
+    }
+
+    async publishToLocalFile(submission) {
+
+        if(!ArticlePublishedDirectory) {
+            return Promise.resolve(null);
+        }
+
+        const jsonObject = submission.toJSON();
+
+        const submitter = jsonObject.submitter;
+        if(submitter) {
+            delete submitter.tokens;
+            delete submitter.groups;
+
+            delete submitter.emailValidationToken;
+            delete submitter.emailValidationTokenExpire;
+            delete submitter.emailValidationEmailSendTimes;
+        }
+
+        const jsonData = JSON.stringify(jsonObject, null, 4);
+
+        return new Promise((resolve, reject) => {
+
+            fs.mkdir(ArticlePublishedDirectory, { recursive: true }, (err, resultingPath) => {
+
+                if(err && err.code !== 'EEXIST') {
+                    logger.error(`creating local published directory failed due to: ${err.toString()}`);
+                    return reject(err);
+                }
+
+                let filePath = path.join((resultingPath || ArticlePublishedDirectory), `${submission.manuscriptId}.json`);
+                fs.writeFile(filePath, jsonData, {encoding:'utf8', flag:"w"}, (error) => {
+                    if(err) {
+                        logger.error(`creating local published directory failed due to: ${err.toString()}`);
+                        return reject(err);
+                    }
+                    return resolve(filePath);
+                });
+            });
         });
     }
 }

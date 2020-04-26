@@ -59,6 +59,9 @@ module.exports = function _setupRepublishArticleTask(client) {
 
             return submission.patchFields(fieldsList);
 
+        }).then(async () => {
+
+            return articlePublisher.publishToLocalFile(submission);
 
         }).then(async () => {
 

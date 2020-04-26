@@ -61,6 +61,8 @@ module.exports = function _setupPublishArticleTask(client) {
 
         }).then(async () => {
 
+            return articlePublisher.publishToLocalFile(submission);
+
         }).then(async () => {
 
             await lockExtender.stop();

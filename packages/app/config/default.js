@@ -93,6 +93,10 @@ const values = {
         restrictedEmailAddresses: process.env.EMAIL_RESTRICTED_TO ? JSON.parse(process.env.EMAIL_RESTRICTED_TO).map(v => v.indexOf("regex:") === 0 ? new RegExp(v.split(':')[1], 'i') : v) : null
     },
 
+    'workflow-publish-output' : {
+        directory: `${__dirname}/../../../published`,
+    },
+
     identity: {
         validationTokenExpireDays: 15,
         maximumEmailValidationsPerDay: 5,

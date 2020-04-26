@@ -2,8 +2,13 @@ const { models } = require('component-workflow-model/model');
 const { Submission } = models;
 const logger = require('workflow-utils/logger-with-prefix')('PhysiomeWorkflowTasks/RejectionCleanup');
 const { transaction } = require('objection');
+const fs = require('fs');
+const path = require('path');
 
 const { FigshareApi, NotFoundError } = require('figshare-publish-service');
+
+const config = require('config');
+const ArticlePublishedDirectory = config.get('workflow-publish-output.directory');
 
 
 module.exports = function _setupRejectionCleanupTask(client) {
@@ -37,8 +42,26 @@ module.exports = function _setupRejectionCleanupTask(client) {
     });
 };
 
+function removeLocalPublishedVersion(submission) {
+
+    if(ArticlePublishedDirectory && submission.manuscriptId) {
+
+        const finalFilePath = path.join(ArticlePublishedDirectory, `${submission.manuscriptId}.json`);
+
+        return new Promise((resolve, reject) => {
+            fs.unlink(finalFilePath, () => {
+                return resolve(true);
+            });
+        });
+    }
+
+    return Promise.resolve(false);
+}
+
 
 async function _cleanupForRejectedSubmission(submission) {
+
+    await removeLocalPublishedVersion(submission);
 
     if(!submission.figshareArticleId) {
         logger.debug(`no figshare article to cleanup (submissionId = ${submission.id}, phase = ${submission.phase})`);
