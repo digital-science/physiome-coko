@@ -37,7 +37,7 @@ module.exports = function _setupPublishArticleTask(client) {
 
         lockExtender.start();
 
-        return articlePublisher.publishSubmission(submission).then(() => {
+        return articlePublisher.publishSubmission(submission).then(({fieldsModified}) => {
 
             const currentDate = new Date();
 
@@ -48,7 +48,18 @@ module.exports = function _setupPublishArticleTask(client) {
             submission.lastPublishDate = currentDate;
             submission.unpublishedChanges = false;
 
-            return submission.patchFields(['phase', 'publishDate', 'lastPublishDate', 'unpublishedChanges']);
+            let fieldsList = ['phase', 'publishDate', 'lastPublishDate', 'unpublishedChanges'];
+            if(fieldsModified) {
+                fieldsModified.forEach(field => {
+                    if(fieldsList.indexOf(field) === -1) {
+                        fieldsList.push(field);
+                    }
+                });
+            }
+
+            return submission.patchFields(fieldsList);
+
+        }).then(async () => {
 
         }).then(async () => {
 
@@ -79,7 +90,9 @@ module.exports = function _setupPublishArticleTask(client) {
 
         }).finally(() => {
 
-            lockExtender.stop();
+            lockExtender.stop().catch(err => {
+                logger.error(`lock extender stopping failed due to: ` + err.toString());
+            });
         });
 
     });

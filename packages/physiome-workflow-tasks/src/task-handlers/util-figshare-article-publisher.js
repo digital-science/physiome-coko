@@ -2,6 +2,8 @@ const { models } = require('component-workflow-model/model');
 const { Submission } = models;
 const logger = require('workflow-utils/logger-with-prefix')('PhysiomeWorkflowTasks/FigshareArticlePublisher');
 const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 
 const { FigshareApi } = require('figshare-publish-service');
 const uploadPMRArchiveToFigshare = require('./util-pmr-archive-upload');
@@ -16,6 +18,23 @@ const ArticleCustomFieldNames = PublishFigshareOptions.customFieldNames;
 
 const ArticlePublishSkipPublishing = (PublishFigshareOptions.skipPublishingStage === true);
 
+
+
+
+function _submissionAuthorsToArticleAuthors(authors) {
+
+    return authors.filter(a => a.name).map(author => {
+
+        const a = {name: author.name};
+        if(author.orcid && author.orcid.length) {
+            a.orcid_id = author.orcid;
+        }
+        if(author.figshareUserId) {
+            a.id = parseInt(author.figshareUserId);
+        }
+        return a;
+    });
+}
 
 
 class FigshareArticlePublisher {
@@ -159,15 +178,7 @@ class FigshareArticlePublisher {
         // FIXME: if authors are greater than 10 we need to use the authors endpoint
 
         if(submission.authors && submission.authors instanceof Array && submission.authors.length) {
-
-            articleData.authors = submission.authors.filter(a => a.name).map(author => {
-
-                const a = {name: author.name};
-                if(author.orcid && author.orcid.length) {
-                    a.orcid_id = author.orcid;
-                }
-                return a;
-            });
+            articleData.authors = _submissionAuthorsToArticleAuthors(submission.authors);
         }
 
         return articleData;
@@ -180,12 +191,11 @@ class FigshareArticlePublisher {
     //    on the new submission.
     // 3. Upload all associated files with the submission (first deleting any existing files associated with it).
 
-    async publishSubmission(submission) {
+    async _createOrUpdateSubmission(submission, articleData, authorFixCount) {
 
-        const articleData = await this.submissionToArticleData(submission);
         const figshareApi = this.figshareApi;
 
-        const createArticleIdPromise = !submission.figshareArticleId ? figshareApi.createNewArticle(articleData).then(articleId => {
+        const submissionFuture = !submission.figshareArticleId ? figshareApi.createNewArticle(articleData).then(articleId => {
 
             submission.figshareArticleId = "" + articleId;
 
@@ -200,16 +210,90 @@ class FigshareArticlePublisher {
 
             }).then(() => {
 
-                return articleId;
+                return {articleId:articleId, didFixAuthors: (authorFixCount > 0)};
             });
 
         }) : figshareApi.updateArticle(submission.figshareArticleId, articleData).then(r => {
 
-            return submission.figshareArticleId;
+            return {articleId: submission.figshareArticleId, didFixAuthors: (authorFixCount > 0)};
         });
 
-        return createArticleIdPromise.then(async articleId => {
+        return submissionFuture.catch(async error => {
 
+            // Catch any situations where one of the authors has a figshare account with an associated
+            // ORCID identifier. Use the supplied author ID to perform a lookup of the author and associate the
+            // authors figshare user ID back to the author in our data model.
+
+            // Author "fixes" are limited to 5 users.
+
+            if(!(submission.authors && submission.authors instanceof Array && submission.authors.length)) {
+                return Promise.reject(error);
+            }
+
+            if(error.hasOwnProperty('responseBody') && error.hasOwnProperty('responseStatusCode')
+                && error.responseStatusCode === 422 && authorFixCount < 5) {
+
+                const responseBody = error.responseBody;
+                if(responseBody.hasOwnProperty('code') && responseBody.hasOwnProperty('message')) {
+
+                    const errorCode = responseBody.code;
+                    const errorMessage = responseBody.message;
+
+                    logger.info(`attempting to fix author with already used ORCID ID on figshare (message=${errorMessage})`);
+
+                    if(errorCode && errorMessage && errorCode.toString() === "UnprocessableEntity") {
+
+                        const matches = errorMessage.match(/Similar\s+user_id:\s+(\d+)/i);
+                        if(matches && matches[1]) {
+
+                            const figshareUserId = parseInt(matches[1]);
+                            return figshareApi.getAuthor(figshareUserId).then(async authorDetails => {
+
+                                if(authorDetails && authorDetails.orcid_id) {
+
+                                    // Search through the submission for the matching author and record the figshare author ID
+                                    // that should now be associated with the user.
+
+                                    logger.debug(`did find matching user from figshare API (details=${JSON.stringify(authorDetails, null, 4)})`);
+
+                                    const matchingAuthor = submission.authors.find(a => a.orcid && a.orcid.toLowerCase() === authorDetails.orcid_id.toLowerCase());
+                                    if(!matchingAuthor) {
+                                        return Promise.reject(new Error("unable to retrieve author details to fix author with ORCID ID already present"));
+                                    }
+
+                                    matchingAuthor.figshareUserId = figshareUserId;
+
+                                    // Recreate the author details for the article data using the newly assigned figshare user ID associated with
+                                    // the offending user.
+
+                                    articleData.authors = _submissionAuthorsToArticleAuthors(submission.authors);
+
+                                    return this._createOrUpdateSubmission(submission, articleData, authorFixCount + 1);
+                                }
+
+                                return Promise.reject(new Error("unable to retrieve author details to fix author with ORCID ID already present"));
+                            });
+                        }
+                    }
+                }
+            }
+
+            // All other errors are handled as per normal.
+            return Promise.reject(error);
+        });
+    }
+
+    async publishSubmission(submission) {
+
+        const articleData = await this.submissionToArticleData(submission);
+        const figshareApi = this.figshareApi;
+        let fieldsModified = null;
+
+        return this._createOrUpdateSubmission(submission, articleData, 0).then(async ({articleId, didFixAuthors}) => {
+
+            if(didFixAuthors) {
+                fieldsModified = ['authors'];
+            }
             return this._publishFilesToArticleId(articleId, submission);
 
         }).then((articleId) => {
@@ -218,12 +302,11 @@ class FigshareArticlePublisher {
             // don't perform the final publish stage.
             
             if(ArticlePublishSkipPublishing) {
-                return articleId;
+                return {articleId, fieldsModified};
             }
 
             return figshareApi.publishArticle(articleId).then(() => {
-
-                return articleId;
+                return {articleId, fieldsModified};
             });
         });
     }

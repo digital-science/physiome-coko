@@ -37,7 +37,7 @@ module.exports = function _setupRepublishArticleTask(client) {
 
         lockExtender.start();
 
-        return articlePublisher.republishSubmission(submission).then(() => {
+        return articlePublisher.republishSubmission(submission).then(({fieldsModified}) => {
 
             const currentDate = new Date();
 
@@ -48,7 +48,17 @@ module.exports = function _setupRepublishArticleTask(client) {
             submission.lastPublishDate = currentDate;
             submission.unpublishedChanges = false;
 
-            return submission.patchFields(['phase', 'publishDate', 'lastPublishDate', 'unpublishedChanges']);
+            let fieldsList = ['phase', 'publishDate', 'lastPublishDate', 'unpublishedChanges'];
+            if(fieldsModified) {
+                fieldsModified.forEach(field => {
+                    if(fieldsList.indexOf(field) === -1) {
+                        fieldsList.push(field);
+                    }
+                });
+            }
+
+            return submission.patchFields(fieldsList);
+
 
         }).then(async () => {
 
