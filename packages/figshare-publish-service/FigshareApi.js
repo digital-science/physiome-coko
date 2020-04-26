@@ -15,7 +15,9 @@ const FigshareApiEndpoints = {
     ArticleFilesListing: (id) => { return `account/articles/${encodeURI(id)}/files` },
     DeleteFile: (id, fileInfo) => { return `account/articles/${encodeURI(id)}/files/${encodeURI(fileInfo.id)}`; },
 
-    UploadFilePart: (fileInfo, partNo) => { return `${fileInfo.upload_url}/${partNo}` }
+    UploadFilePart: (fileInfo, partNo) => { return `${fileInfo.upload_url}/${partNo}` },
+
+    GetAuthor: (id) => { return `account/authors/${encodeURI(id)}` }
 };
 
 
@@ -121,6 +123,11 @@ class FigshareApi {
     }
 
 
+    getAuthor(authorID) {
+        return this._performGetRequest(FigshareApiEndpoints.GetAuthor(authorID));
+    }
+
+
 
     _performGetRequest() {
         return this._performRequest("GET", ...arguments);
@@ -171,6 +178,8 @@ class FigshareApi {
 
             Request(options, function(err, response, responseBody) {
                 if(err) {
+                    err.responseBody = null;
+                    err.responseStatusCode = null;
                     return reject(err);
                 }
 
@@ -183,6 +192,8 @@ class FigshareApi {
                         new NotFoundError(`Figshare object not found`) :
                         new Error(`Invalid response code (${response.statusCode}) returned from figshare API endpoint`);
 
+                    err.responseBody = responseBody;
+                    err.responseStatusCode = response.statusCode;
                     return reject(err);
                 }
 
