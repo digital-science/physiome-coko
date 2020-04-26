@@ -107,6 +107,10 @@ function FormFieldAuthorsEditor({ className, data, binding, description, formDef
     };
 
     const didModifyAuthor = (author) => {
+        // Any modification to a user needs to reset any "cached" figshare user ID.
+        if(author) {
+            delete author.figshareUserId;
+        }
         clearValidationIssues();
         setAuthors(authors);
     };

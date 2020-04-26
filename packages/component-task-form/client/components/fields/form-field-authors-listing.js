@@ -69,7 +69,7 @@ const AuthorListing = styled( ({className, authors}) => {
 
     const resolvedOrcids = useGetResolvedOrcidIds(orcidIsToResolve);
 
-    console.dir(resolvedOrcids);
+    //console.dir(resolvedOrcids);
     //
 
     return (
